@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">FormSystem</string>
+    <string name="welcome_worker">Welcome Worker</string>
+    <string name="login">Login</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="enter_your_email_and_password_to_login">Enter your email and password to login</string>
+    <string name="logingin">Login...</string>
 </resources>
