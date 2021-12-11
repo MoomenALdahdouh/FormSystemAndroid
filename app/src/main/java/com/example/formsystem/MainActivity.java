@@ -8,8 +8,13 @@ import androidx.lifecycle.ViewModelProviders;
 import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.Toast;
 
 import com.example.formsystem.model.Form;
+import com.example.formsystem.model.Login;
+import com.example.formsystem.model.Token;
+import com.example.formsystem.utils.PreferenceUtils;
 import com.example.formsystem.viewmodel.FormSystemViewModel;
 
 public class MainActivity extends AppCompatActivity {
@@ -23,13 +28,27 @@ public class MainActivity extends AppCompatActivity {
 
         //formSystemViewModel = ViewModelProviders.of(this).get(FormSystemViewModel.class);
         formSystemViewModel = new ViewModelProvider(this).get(FormSystemViewModel.class);
+        login();
+    }
 
+    private void login() {
+        String email = "moomenaldahdouh@gmail.com";
+        String password = "123456789";
+        Login login = new Login(email, password);
+        formSystemViewModel.login(login);
+        formSystemViewModel.tokenMutableLiveData.observe(this, new Observer<Token>() {
+            @Override
+            public void onChanged(Token token) {
+                Toast.makeText(getApplicationContext(), token.getToken(), Toast.LENGTH_SHORT).show();
+                PreferenceUtils.saveToken(token.getToken(), getApplicationContext());
+            }
+        });
     }
 
 
     //Get details for this movie
-    private void getForm(String id) {
-        formSystemViewModel.getForms(id);
+    private void getForm(String authToken, String id) {
+        formSystemViewModel.getForms(authToken, id);
         formSystemViewModel.formsMutableLiveData.observe(this, new Observer<Form>() {
             @SuppressLint("SetTextI18n")
             @Override
@@ -41,5 +60,10 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    public void buttonClick(View view) {
+        Toast.makeText(getApplicationContext(), "TOKEN IS:" + PreferenceUtils.getToken(getApplicationContext()), Toast.LENGTH_SHORT).show();
+
     }
 }

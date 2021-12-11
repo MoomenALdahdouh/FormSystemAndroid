@@ -1,7 +1,5 @@
 package com.example.formsystem.viewmodel;
 
-import android.util.Log;
-
 import androidx.annotation.NonNull;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -15,9 +13,8 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class FormSystemViewModel extends ViewModel {
+public class UserViewModel extends ViewModel {
     public MutableLiveData<Token> tokenMutableLiveData = new MutableLiveData<>();
-    public MutableLiveData<Form> formsMutableLiveData = new MutableLiveData<>();
 
     public void login(Login login) {
         FormSystemClient.getINSTANCE().login(login).enqueue(new Callback<Token>() {
@@ -29,22 +26,6 @@ public class FormSystemViewModel extends ViewModel {
 
             @Override
             public void onFailure(@NonNull Call<Token> call, @NonNull Throwable t) {
-                t.printStackTrace();
-                //Log.d("onFailure", t.getMessage());
-            }
-        });
-    }
-
-    public void getForms(String authToken, String id) {
-        FormSystemClient.getINSTANCE().getAllForms(authToken, id).enqueue(new Callback<Form>() {
-            @Override
-            public void onResponse(@NonNull Call<Form> call, @NonNull Response<Form> response) {
-                // Log.d("onResponse", response.toString());
-                formsMutableLiveData.setValue(response.body());
-            }
-
-            @Override
-            public void onFailure(@NonNull Call<Form> call, @NonNull Throwable t) {
                 t.printStackTrace();
                 //Log.d("onFailure", t.getMessage());
             }
