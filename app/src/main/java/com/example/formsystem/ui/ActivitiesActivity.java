@@ -3,6 +3,7 @@ package com.example.formsystem.ui;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.annotation.SuppressLint;
@@ -41,17 +42,25 @@ public class ActivitiesActivity extends AppCompatActivity {
         recyclerView = binding.recyclerView;
         activitiesAdapter = new ActivitiesAdapter(ActivitiesActivity.this);
         activityArrayList = new ArrayList<>();
-        fetchActivities();
+        recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
+        activitiesAdapter.setList(activityArrayList);
+        recyclerView.setAdapter(activitiesAdapter);
+        recyclerView.setHasFixedSize(true);
+
+        getActivities();
 
     }
 
-    private void fetchActivities() {
+    private void getActivities() {
         activitiesSystemViewModel.getAllActivities(token,userId);
         activitiesSystemViewModel.activitiesMutableLiveData.observe(this, new Observer<ActivityResults>() {
+            @SuppressLint("NotifyDataSetChanged")
             @Override
             public void onChanged(ActivityResults activityResults) {
                 activityArrayList = activityResults.getResults();
-                binding.textView5.setText(activityArrayList.get(0).getName());
+                //binding.textView5.setText(activityArrayList.get(0).getName());
+                activitiesAdapter.setList(activityArrayList);
+                activitiesAdapter.notifyDataSetChanged();
             }
         });
     }

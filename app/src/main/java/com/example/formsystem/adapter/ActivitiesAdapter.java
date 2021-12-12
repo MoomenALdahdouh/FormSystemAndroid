@@ -25,7 +25,7 @@ public class ActivitiesAdapter extends RecyclerView.Adapter<ActivitiesAdapter.Vi
         this.context = context;
     }
 
-    public void setActivityArrayList(ArrayList<Activity> activityArrayList) {
+    public void setList(ArrayList<Activity> activityArrayList) {
         this.activityArrayList = activityArrayList;
     }
 
@@ -40,7 +40,7 @@ public class ActivitiesAdapter extends RecyclerView.Adapter<ActivitiesAdapter.Vi
     @Override
     public void onBindViewHolder(@NonNull ActivitiesAdapter.ViewHolder holder, int position) {
         Activity activity = activityArrayList.get(position);
-
+        holder.textViewActivityName.setText(activity.getName());
     }
 
     @Override
