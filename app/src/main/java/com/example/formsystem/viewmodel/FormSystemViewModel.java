@@ -38,8 +38,8 @@ public class FormSystemViewModel extends ViewModel {
         });
     }
 
-    public void getAllActivities(String authToken) {
-        FormSystemClient.getINSTANCE().getAllActivities(authToken).enqueue(new Callback<ActivityResults>() {
+    public void getAllActivities(String authToken, String id) {
+        FormSystemClient.getINSTANCE().getAllActivities(authToken,id).enqueue(new Callback<ActivityResults>() {
             @Override
             public void onResponse(@NonNull Call<ActivityResults> call, @NonNull Response<ActivityResults> response) {
                 Log.d("onResponse", response.toString());

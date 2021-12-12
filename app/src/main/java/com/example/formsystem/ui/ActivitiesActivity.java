@@ -28,6 +28,7 @@ public class ActivitiesActivity extends AppCompatActivity {
     private ActivitiesAdapter activitiesAdapter;
     private ArrayList<Activity> activityArrayList;
     private String token;
+    private String userId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,6 +36,7 @@ public class ActivitiesActivity extends AppCompatActivity {
         binding = ActivityActivitiesBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         token = PreferenceUtils.getToken(ActivitiesActivity.this);
+        userId = PreferenceUtils.getUserId(ActivitiesActivity.this);
         activitiesSystemViewModel = new ViewModelProvider(this).get(FormSystemViewModel.class);
         recyclerView = binding.recyclerView;
         activitiesAdapter = new ActivitiesAdapter(ActivitiesActivity.this);
@@ -44,7 +46,7 @@ public class ActivitiesActivity extends AppCompatActivity {
     }
 
     private void fetchActivities() {
-        activitiesSystemViewModel.getAllActivities(token);
+        activitiesSystemViewModel.getAllActivities(token,userId);
         activitiesSystemViewModel.activitiesMutableLiveData.observe(this, new Observer<ActivityResults>() {
             @Override
             public void onChanged(ActivityResults activityResults) {

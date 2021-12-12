@@ -24,8 +24,8 @@ public interface FormSystemInterface {
             "Content-Type: application/json",
             "Accept: application/json"
     })
-    @GET("activities")
-    Call<ActivityResults> getAllActivities(@Header("authorization") String authToken);
+    @GET("activities/{id}")
+    Call<ActivityResults> getAllActivities(@Header("authorization") String authToken, @Path("id") String id);
 
     //@Headers("Content-Type: application/json")
     @GET("forms/{id}")
