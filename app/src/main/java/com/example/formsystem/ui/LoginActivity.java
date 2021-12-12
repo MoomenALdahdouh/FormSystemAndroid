@@ -13,6 +13,7 @@ import com.example.formsystem.MainActivity;
 import com.example.formsystem.databinding.ActivityLoginBinding;
 import com.example.formsystem.model.Login;
 import com.example.formsystem.model.Token;
+import com.example.formsystem.model.User;
 import com.example.formsystem.utils.PreferenceUtils;
 import com.example.formsystem.viewmodel.FormSystemViewModel;
 
@@ -43,9 +44,11 @@ public class LoginActivity extends AppCompatActivity {
                     @Override
                     public void onChanged(Token token) {
                         String tokenResponse = token.getToken();
+                        User user = token.getUser();
                         binding.linearProgressLogin.setVisibility(View.GONE);
                         if (tokenResponse != null) {
                             PreferenceUtils.saveToken(tokenResponse, getApplicationContext());
+                            PreferenceUtils.saveUserId(user.getId(), getApplicationContext());
                             Toast.makeText(getApplicationContext(), "Successfully login", Toast.LENGTH_SHORT).show();
                             startActivity(new Intent(LoginActivity.this, MainActivity.class));
                             finish();

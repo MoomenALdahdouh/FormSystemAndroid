@@ -6,4 +6,6 @@
     <string name="password">Password</string>
     <string name="enter_your_email_and_password_to_login">Enter your email and password to login</string>
     <string name="logingin">Login...</string>
+    <string name="dircams">DIRCAMS</string>
+    <string name="follow_up_workers_activities_and_submit_forms">Follow up workers activities and submit forms</string>
 </resources>

@@ -16,7 +16,20 @@ public class PreferenceUtils {
 
     public static String getToken(Context context) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-        return preferences.getString(Constants.KEY_TOKEN, null);
+        return preferences.getString(Constants.KEY_TOKEN, "");
+    }
+
+    public static boolean saveUserId(String user_id, Context context) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putString(Constants.KEY_USER_ID, user_id);
+        editor.apply();
+        return true;
+    }
+
+    public static String getUserId(Context context) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        return preferences.getString(Constants.KEY_USER_ID, "");
     }
 
     public static boolean savePhone(String phone, Context context) {

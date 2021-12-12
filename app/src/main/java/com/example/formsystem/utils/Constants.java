@@ -2,6 +2,7 @@ package com.example.formsystem.utils;
 
 public class Constants {
     public static final String KEY_TOKEN = "TOKEN";
+    public static final String KEY_USER_ID = "KEY_USER_ID";
     public static final String KEY_PHONE = "PHONE";
     public static final String KEY_EMAIL = "EMAIL";
     public static final String KEY_PASSWORD = "PASSWORD";

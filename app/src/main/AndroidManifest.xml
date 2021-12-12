@@ -13,9 +13,12 @@
         android:theme="@style/Theme.FormSystem"
         android:usesCleartextTraffic="true">
         <activity
-            android:name=".ui.LoginActivity"
+            android:name=".ui.ActivitiesActivity"
+            android:exported="true" />
+        <activity
+            android:name=".ui.SplashActivity"
             android:exported="true"
-            android:theme="@style/Theme.FormSystem.login">
+            android:theme="@style/Theme.FormSystem.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -23,10 +26,12 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".ui.LoginActivity"
+            android:exported="true"
+            android:theme="@style/Theme.FormSystem.login"></activity>
+        <activity
             android:name=".MainActivity"
-            android:exported="true">
-
-        </activity>
+            android:exported="true"></activity>
 
         <meta-data
             android:name="preloaded_fonts"

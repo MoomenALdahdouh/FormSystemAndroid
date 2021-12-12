@@ -7,6 +7,8 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.example.formsystem.client.FormSystemClient;
+import com.example.formsystem.model.Activity;
+import com.example.formsystem.model.ActivityResults;
 import com.example.formsystem.model.Form;
 import com.example.formsystem.model.Login;
 import com.example.formsystem.model.Token;
@@ -17,6 +19,7 @@ import retrofit2.Response;
 
 public class FormSystemViewModel extends ViewModel {
     public MutableLiveData<Token> tokenMutableLiveData = new MutableLiveData<>();
+    public MutableLiveData<ActivityResults> activitiesMutableLiveData = new MutableLiveData<>();
     public MutableLiveData<Form> formsMutableLiveData = new MutableLiveData<>();
 
     public void login(Login login) {
@@ -31,6 +34,22 @@ public class FormSystemViewModel extends ViewModel {
             public void onFailure(@NonNull Call<Token> call, @NonNull Throwable t) {
                 t.printStackTrace();
                 //Log.d("onFailure", t.getMessage());
+            }
+        });
+    }
+
+    public void getAllActivities(String authToken) {
+        FormSystemClient.getINSTANCE().getAllActivities(authToken).enqueue(new Callback<ActivityResults>() {
+            @Override
+            public void onResponse(@NonNull Call<ActivityResults> call, @NonNull Response<ActivityResults> response) {
+                Log.d("onResponse", response.toString());
+                activitiesMutableLiveData.setValue(response.body());
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<ActivityResults> call, @NonNull Throwable t) {
+                t.printStackTrace();
+                Log.d("onFailure", t.getMessage());
             }
         });
     }
