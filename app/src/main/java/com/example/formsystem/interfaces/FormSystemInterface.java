@@ -5,6 +5,8 @@ import com.example.formsystem.model.ActivityResults;
 import com.example.formsystem.model.Form;
 import com.example.formsystem.model.Login;
 import com.example.formsystem.model.Token;
+import com.example.formsystem.model.User;
+import com.example.formsystem.model.UserResults;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
@@ -16,7 +18,7 @@ import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 public interface FormSystemInterface {
-    //@Headers("Content-Type: application/json")
+
     @POST("login")
     Call<Token> login(@Body Login login);
 
@@ -26,6 +28,13 @@ public interface FormSystemInterface {
     })
     @GET("activities/{id}")
     Call<ActivityResults> getAllActivities(@Header("authorization") String authToken, @Path("id") String id);
+
+    @Headers({
+            "Content-Type: application/json",
+            "Accept: application/json"
+    })
+    @GET("user/{id}")
+    Call<UserResults> getUser(@Header("authorization") String authToken, @Path("id") String id);
 
     //@Headers("Content-Type: application/json")
     @GET("forms/{id}")

@@ -8,4 +8,6 @@
     <string name="logingin">Login...</string>
     <string name="dircams">DIRCAMS</string>
     <string name="follow_up_workers_activities_and_submit_forms">Follow up workers activities and submit forms</string>
+    <string name="welcome">Welcome</string>
+    <string name="worker_activities">Worker Activities</string>
 </resources>

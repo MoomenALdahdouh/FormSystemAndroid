@@ -1,5 +1,6 @@
 package com.example.formsystem.adapter;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -37,10 +38,14 @@ public class ActivitiesAdapter extends RecyclerView.Adapter<ActivitiesAdapter.Vi
         return new ViewHolder(view);
     }
 
+    @SuppressLint("SetTextI18n")
     @Override
     public void onBindViewHolder(@NonNull ActivitiesAdapter.ViewHolder holder, int position) {
         Activity activity = activityArrayList.get(position);
         holder.textViewActivityName.setText(activity.getName());
+        holder.textViewActivityDesc.setText(activity.getDescription());
+        if (activity.getType().equals("0"))
+            holder.textViewActivityType.setText("Form");
     }
 
     @Override
@@ -49,11 +54,13 @@ public class ActivitiesAdapter extends RecyclerView.Adapter<ActivitiesAdapter.Vi
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView textViewActivityName;
+        TextView textViewActivityName, textViewActivityDesc, textViewActivityType;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             textViewActivityName = itemView.findViewById(R.id.textViewActivityName);
+            textViewActivityDesc = itemView.findViewById(R.id.textViewActivityDescription);
+            textViewActivityType = itemView.findViewById(R.id.textViewActivityType);
             //int adapterPosition = getAdapterPosition();
         }
     }

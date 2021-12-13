@@ -8,6 +8,8 @@ import com.example.formsystem.model.ActivityResults;
 import com.example.formsystem.model.Form;
 import com.example.formsystem.model.Login;
 import com.example.formsystem.model.Token;
+import com.example.formsystem.model.User;
+import com.example.formsystem.model.UserResults;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -71,6 +73,10 @@ public class FormSystemClient {
 
     public Call<ActivityResults> getAllActivities(String authToken, String id) {
         return formSystemInterface.getAllActivities("Bearer " + authToken, id);
+    }
+
+    public Call<UserResults> getUser(String authToken, String id) {
+        return formSystemInterface.getUser("Bearer " + authToken, id);
     }
 
     public Call<Form> getAllForms(String authToken, String id) {

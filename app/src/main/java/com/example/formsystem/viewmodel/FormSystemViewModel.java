@@ -12,6 +12,8 @@ import com.example.formsystem.model.ActivityResults;
 import com.example.formsystem.model.Form;
 import com.example.formsystem.model.Login;
 import com.example.formsystem.model.Token;
+import com.example.formsystem.model.User;
+import com.example.formsystem.model.UserResults;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -20,6 +22,7 @@ import retrofit2.Response;
 public class FormSystemViewModel extends ViewModel {
     public MutableLiveData<Token> tokenMutableLiveData = new MutableLiveData<>();
     public MutableLiveData<ActivityResults> activitiesMutableLiveData = new MutableLiveData<>();
+    public MutableLiveData<UserResults> userMutableLiveData = new MutableLiveData<>();
     public MutableLiveData<Form> formsMutableLiveData = new MutableLiveData<>();
 
     public void login(Login login) {
@@ -48,6 +51,22 @@ public class FormSystemViewModel extends ViewModel {
 
             @Override
             public void onFailure(@NonNull Call<ActivityResults> call, @NonNull Throwable t) {
+                t.printStackTrace();
+                Log.d("onFailure", t.getMessage());
+            }
+        });
+    }
+
+    public void getUser(String authToken, String id) {
+        FormSystemClient.getINSTANCE().getUser(authToken,id).enqueue(new Callback<UserResults>() {
+            @Override
+            public void onResponse(@NonNull Call<UserResults> call, @NonNull Response<UserResults> response) {
+                Log.d("onResponse", response.toString());
+                userMutableLiveData.setValue(response.body());
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<UserResults> call, @NonNull Throwable t) {
                 t.printStackTrace();
                 Log.d("onFailure", t.getMessage());
             }

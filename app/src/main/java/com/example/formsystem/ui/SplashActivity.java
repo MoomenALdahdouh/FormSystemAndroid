@@ -20,7 +20,7 @@ public class SplashActivity extends AppCompatActivity {
             @Override
             public void run() {
                 if (!PreferenceUtils.getToken(SplashActivity.this).isEmpty()) {
-                    startActivity(new Intent(SplashActivity.this, MainActivity.class));
+                    startActivity(new Intent(SplashActivity.this, ActivitiesActivity.class));
                 } else {
                     startActivity(new Intent(SplashActivity.this, LoginActivity.class));
                 }

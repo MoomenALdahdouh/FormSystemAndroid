@@ -16,6 +16,8 @@ import com.example.formsystem.databinding.ActivityActivitiesBinding;
 import com.example.formsystem.model.Activity;
 import com.example.formsystem.model.ActivityResults;
 import com.example.formsystem.model.Form;
+import com.example.formsystem.model.User;
+import com.example.formsystem.model.UserResults;
 import com.example.formsystem.utils.PreferenceUtils;
 import com.example.formsystem.viewmodel.FormSystemViewModel;
 
@@ -25,6 +27,7 @@ public class ActivitiesActivity extends AppCompatActivity {
 
     private ActivityActivitiesBinding binding;
     private FormSystemViewModel activitiesSystemViewModel;
+    private FormSystemViewModel userSystemViewModel;
     private RecyclerView recyclerView;
     private ActivitiesAdapter activitiesAdapter;
     private ArrayList<Activity> activityArrayList;
@@ -39,6 +42,7 @@ public class ActivitiesActivity extends AppCompatActivity {
         token = PreferenceUtils.getToken(ActivitiesActivity.this);
         userId = PreferenceUtils.getUserId(ActivitiesActivity.this);
         activitiesSystemViewModel = new ViewModelProvider(this).get(FormSystemViewModel.class);
+        userSystemViewModel = new ViewModelProvider(this).get(FormSystemViewModel.class);
         recyclerView = binding.recyclerView;
         activitiesAdapter = new ActivitiesAdapter(ActivitiesActivity.this);
         activityArrayList = new ArrayList<>();
@@ -48,11 +52,25 @@ public class ActivitiesActivity extends AppCompatActivity {
         recyclerView.setHasFixedSize(true);
 
         getActivities();
+        getUserDetails();
 
     }
 
+    private void getUserDetails() {
+        userSystemViewModel.getUser(token, userId);
+        userSystemViewModel.userMutableLiveData.observe(this, new Observer<UserResults>() {
+            @SuppressLint("NotifyDataSetChanged")
+            @Override
+            public void onChanged(UserResults userResults) {
+                User user = userResults.getUser();
+                binding.textViewUserName.setText(user.getName());
+                binding.textViewUserEmail.setText(user.getEmail());
+            }
+        });
+    }
+
     private void getActivities() {
-        activitiesSystemViewModel.getAllActivities(token,userId);
+        activitiesSystemViewModel.getAllActivities(token, userId);
         activitiesSystemViewModel.activitiesMutableLiveData.observe(this, new Observer<ActivityResults>() {
             @SuppressLint("NotifyDataSetChanged")
             @Override

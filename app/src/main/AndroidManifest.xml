@@ -13,6 +13,9 @@
         android:theme="@style/Theme.FormSystem"
         android:usesCleartextTraffic="true">
         <activity
+            android:name=".ui.ViewActivitiesActivity"
+            android:exported="true" />
+        <activity
             android:name=".ui.ActivitiesActivity"
             android:exported="true" />
         <activity
@@ -28,10 +31,10 @@
         <activity
             android:name=".ui.LoginActivity"
             android:exported="true"
-            android:theme="@style/Theme.FormSystem.login"></activity>
+            android:theme="@style/Theme.FormSystem.login" />
         <activity
             android:name=".MainActivity"
-            android:exported="true"></activity>
+            android:exported="true" />
 
         <meta-data
             android:name="preloaded_fonts"
