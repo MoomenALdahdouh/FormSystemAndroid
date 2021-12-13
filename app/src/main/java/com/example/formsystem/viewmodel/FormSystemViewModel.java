@@ -10,6 +10,7 @@ import com.example.formsystem.client.FormSystemClient;
 import com.example.formsystem.model.Activity;
 import com.example.formsystem.model.ActivityResults;
 import com.example.formsystem.model.Form;
+import com.example.formsystem.model.FormResults;
 import com.example.formsystem.model.Login;
 import com.example.formsystem.model.Token;
 import com.example.formsystem.model.User;
@@ -23,6 +24,7 @@ public class FormSystemViewModel extends ViewModel {
     public MutableLiveData<Token> tokenMutableLiveData = new MutableLiveData<>();
     public MutableLiveData<ActivityResults> activitiesMutableLiveData = new MutableLiveData<>();
     public MutableLiveData<UserResults> userMutableLiveData = new MutableLiveData<>();
+    public MutableLiveData<FormResults> formMutableLiveData = new MutableLiveData<>();
     public MutableLiveData<Form> formsMutableLiveData = new MutableLiveData<>();
 
     public void login(Login login) {
@@ -67,6 +69,22 @@ public class FormSystemViewModel extends ViewModel {
 
             @Override
             public void onFailure(@NonNull Call<UserResults> call, @NonNull Throwable t) {
+                t.printStackTrace();
+                Log.d("onFailure", t.getMessage());
+            }
+        });
+    }
+
+    public void getForm(String authToken, String id) {
+        FormSystemClient.getINSTANCE().getForm(authToken,id).enqueue(new Callback<FormResults>() {
+            @Override
+            public void onResponse(@NonNull Call<FormResults> call, @NonNull Response<FormResults> response) {
+                Log.d("onResponse", response.toString());
+                formMutableLiveData.setValue(response.body());
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<FormResults> call, @NonNull Throwable t) {
                 t.printStackTrace();
                 Log.d("onFailure", t.getMessage());
             }
