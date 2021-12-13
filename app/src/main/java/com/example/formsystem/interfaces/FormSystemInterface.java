@@ -4,6 +4,7 @@ import com.example.formsystem.model.Activity;
 import com.example.formsystem.model.ActivityResults;
 import com.example.formsystem.model.Form;
 import com.example.formsystem.model.FormResults;
+import com.example.formsystem.model.InterviewResults;
 import com.example.formsystem.model.Login;
 import com.example.formsystem.model.Token;
 import com.example.formsystem.model.User;
@@ -43,6 +44,13 @@ public interface FormSystemInterface {
     })
     @GET("activities/{id}/form")
     Call<FormResults> getForm(@Header("authorization") String authToken, @Path("id") String id);
+
+    @Headers({
+            "Content-Type: application/json",
+            "Accept: application/json"
+    })
+    @GET("forms/{id}/interviews")
+    Call<InterviewResults> getInterviews(@Header("authorization") String authToken, @Path("id") String id);
 
     //@Headers("Content-Type: application/json")
     @GET("forms/{id}")

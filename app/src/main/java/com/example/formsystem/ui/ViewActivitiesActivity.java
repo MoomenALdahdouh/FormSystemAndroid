@@ -14,10 +14,14 @@ import com.example.formsystem.adapter.ActivitiesAdapter;
 import com.example.formsystem.databinding.ActivityViewActivitiesBinding;
 import com.example.formsystem.model.Form;
 import com.example.formsystem.model.FormResults;
+import com.example.formsystem.model.Interview;
+import com.example.formsystem.model.InterviewResults;
 import com.example.formsystem.model.User;
 import com.example.formsystem.model.UserResults;
 import com.example.formsystem.utils.PreferenceUtils;
 import com.example.formsystem.viewmodel.FormSystemViewModel;
+
+import java.util.ArrayList;
 
 public class ViewActivitiesActivity extends AppCompatActivity {
 
@@ -26,8 +30,10 @@ public class ViewActivitiesActivity extends AppCompatActivity {
     private String activityId;
     private String formId;
     private FormSystemViewModel formSystemViewModel;
+    private FormSystemViewModel interviewsSystemViewModel;
     private String token;
     private String userId;
+    private ArrayList<Interview> interviewArrayList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,17 +42,32 @@ public class ViewActivitiesActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
         token = PreferenceUtils.getToken(ViewActivitiesActivity.this);
         formSystemViewModel = new ViewModelProvider(this).get(FormSystemViewModel.class);
+        interviewsSystemViewModel = new ViewModelProvider(this).get(FormSystemViewModel.class);
         userId = PreferenceUtils.getUserId(ViewActivitiesActivity.this);
+        interviewArrayList = new ArrayList<>();
         Intent intent = getIntent();
         if (intent != null && intent.hasExtra(ActivitiesAdapter.ACTIVITY_ID)) {
             activityId = intent.getStringExtra(ActivitiesAdapter.ACTIVITY_ID);
             makeInterviewClick();
             getForm();
-            getInterviews();
+
         }
     }
 
-    private void getInterviews() {
+    private void getInterviews(String formId) {
+        interviewsSystemViewModel.getInterviews(token, formId);
+        interviewsSystemViewModel.interviewsMutableLiveData.observe(this, new Observer<InterviewResults>() {
+            @SuppressLint("NotifyDataSetChanged")
+            @Override
+            public void onChanged(InterviewResults interviewResults) {
+                try {
+                    interviewArrayList = interviewResults.getInterviews();
+                    binding.textView8.setText(interviewArrayList.get(0).getTitle());
+                } catch (Exception e) {
+                }
+
+            }
+        });
     }
 
     private void getForm() {
@@ -55,9 +76,10 @@ public class ViewActivitiesActivity extends AppCompatActivity {
             @SuppressLint("NotifyDataSetChanged")
             @Override
             public void onChanged(FormResults formResults) {
-                Form form = formResults.getForm();
                 try {
+                    Form form = formResults.getForm();
                     formId = form.getId();
+                    getInterviews(formId);
                 } catch (Exception e) {
 
                 }
