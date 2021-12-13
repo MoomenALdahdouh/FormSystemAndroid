@@ -10,4 +10,6 @@
     <string name="follow_up_workers_activities_and_submit_forms">Follow up workers activities and submit forms</string>
     <string name="welcome">Welcome</string>
     <string name="worker_activities">Worker Activities</string>
+    <string name="make_interview">Make Interview</string>
+    <string name="make_new_interview">Make new Interview</string>
 </resources>

@@ -63,8 +63,13 @@ public class ActivitiesActivity extends AppCompatActivity {
             @Override
             public void onChanged(UserResults userResults) {
                 User user = userResults.getUser();
-                binding.textViewUserName.setText(user.getName());
-                binding.textViewUserEmail.setText(user.getEmail());
+                try {
+                    binding.textViewUserName.setText(user.getName());
+                    binding.textViewUserEmail.setText(user.getEmail());
+                } catch (Exception e) {
+
+                }
+
             }
         });
     }
@@ -76,7 +81,6 @@ public class ActivitiesActivity extends AppCompatActivity {
             @Override
             public void onChanged(ActivityResults activityResults) {
                 activityArrayList = activityResults.getResults();
-                //binding.textView5.setText(activityArrayList.get(0).getName());
                 activitiesAdapter.setList(activityArrayList);
                 activitiesAdapter.notifyDataSetChanged();
             }

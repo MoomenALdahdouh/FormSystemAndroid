@@ -13,6 +13,9 @@
         android:theme="@style/Theme.FormSystem"
         android:usesCleartextTraffic="true">
         <activity
+            android:name=".ui.MakeInterviewActivity"
+            android:exported="true" />
+        <activity
             android:name=".ui.ViewActivitiesActivity"
             android:exported="true" />
         <activity
