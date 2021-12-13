@@ -3,6 +3,8 @@ package com.example.formsystem.ui;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
@@ -11,6 +13,7 @@ import android.view.View;
 
 import com.example.formsystem.R;
 import com.example.formsystem.adapter.ActivitiesAdapter;
+import com.example.formsystem.adapter.InterviewsAdapter;
 import com.example.formsystem.databinding.ActivityViewActivitiesBinding;
 import com.example.formsystem.model.Form;
 import com.example.formsystem.model.FormResults;
@@ -33,6 +36,9 @@ public class ViewActivitiesActivity extends AppCompatActivity {
     private FormSystemViewModel interviewsSystemViewModel;
     private String token;
     private String userId;
+    private RecyclerView recyclerView;
+    private InterviewsAdapter interviewsAdapter;
+    private ArrayList<Interview> interviewsArrayList;
     private ArrayList<Interview> interviewArrayList;
 
     @Override
@@ -45,6 +51,13 @@ public class ViewActivitiesActivity extends AppCompatActivity {
         interviewsSystemViewModel = new ViewModelProvider(this).get(FormSystemViewModel.class);
         userId = PreferenceUtils.getUserId(ViewActivitiesActivity.this);
         interviewArrayList = new ArrayList<>();
+        recyclerView = binding.recyclerView;
+        interviewsAdapter = new InterviewsAdapter(ViewActivitiesActivity.this);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
+        interviewsAdapter.setList(interviewArrayList);
+        recyclerView.setAdapter(interviewsAdapter);
+        recyclerView.setHasFixedSize(true);
+
         Intent intent = getIntent();
         if (intent != null && intent.hasExtra(ActivitiesAdapter.ACTIVITY_ID)) {
             activityId = intent.getStringExtra(ActivitiesAdapter.ACTIVITY_ID);
@@ -62,7 +75,8 @@ public class ViewActivitiesActivity extends AppCompatActivity {
             public void onChanged(InterviewResults interviewResults) {
                 try {
                     interviewArrayList = interviewResults.getInterviews();
-                    binding.textView8.setText(interviewArrayList.get(0).getTitle());
+                    interviewsAdapter.setList(interviewArrayList);
+                    interviewsAdapter.notifyDataSetChanged();
                 } catch (Exception e) {
                 }
 
