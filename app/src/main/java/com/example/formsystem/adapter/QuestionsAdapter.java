@@ -1,18 +1,23 @@
 package com.example.formsystem.adapter;
 
 import android.annotation.SuppressLint;
+import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.text.Editable;
+import android.text.InputType;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.formsystem.R;
@@ -20,8 +25,10 @@ import com.example.formsystem.model.Answer;
 import com.example.formsystem.model.Interview;
 import com.example.formsystem.model.Questions;
 import com.example.formsystem.ui.ViewInterviewActivity;
+import com.google.android.material.textfield.TextInputLayout;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 
 public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.ViewHolder> {
     public static final String QUESTION_ID = "QUESTION_ID";
@@ -50,11 +57,100 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.View
         return new ViewHolder(view);
     }
 
-    @SuppressLint("SetTextI18n")
+    @SuppressLint({"SetTextI18n", "ClickableViewAccessibility"})
     @Override
     public void onBindViewHolder(@NonNull QuestionsAdapter.ViewHolder holder, @SuppressLint("RecyclerView") int position) {
         try {
             Questions questions = questionsArrayList.get(position);
+            switch (questions.getType()) {
+                case "0"://Text
+                    break;
+                case "1"://Text
+                    break;
+                case "2"://Number
+                    holder.editTextQuestion.setCompoundDrawablesWithIntrinsicBounds(null, null, ContextCompat.getDrawable(context, R.drawable.ic_baseline_123_24), null);
+                    holder.editTextQuestion.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+                    break;
+                case "3"://Calender
+                    holder.editTextQuestion.setCompoundDrawablesWithIntrinsicBounds(null, null, ContextCompat.getDrawable(context, R.drawable.ic_baseline_calendar_month_24), null);
+                    holder.editTextQuestion.setOnTouchListener(new View.OnTouchListener() {
+                        @Override
+                        public boolean onTouch(View v, MotionEvent event) {
+                            final int DRAWABLE_LEFT = 0;
+                            final int DRAWABLE_TOP = 1;
+                            final int DRAWABLE_RIGHT = 2;
+                            final int DRAWABLE_BOTTOM = 3;
+
+                            if (event.getAction() == MotionEvent.ACTION_UP) {
+                                if (event.getRawX() >= (holder.editTextQuestion.getRight() - holder.editTextQuestion.getCompoundDrawables()[DRAWABLE_RIGHT].getBounds().width())) {
+                                    Calendar mcurrentDate = Calendar.getInstance();
+                                    int mYear = mcurrentDate.get(Calendar.YEAR);
+                                    int mMonth = mcurrentDate.get(Calendar.MONTH);
+                                    int mDay = mcurrentDate.get(Calendar.DAY_OF_MONTH);
+
+                                    DatePickerDialog mDatePicker = new DatePickerDialog(context, new DatePickerDialog.OnDateSetListener() {
+                                        public void onDateSet(DatePicker datepicker, int selectedyear, int selectedmonth, int selectedday) {
+                                            // TODO Auto-generated method stub
+                                            /*      Your code   to get date and time    */
+                                        }
+                                    }, mYear, mMonth, mDay);
+                                    mDatePicker.setTitle("Select date");
+                                    mDatePicker.show();
+                                    return true;
+                                }
+                            }
+                            return false;
+                        }
+                    });
+                    holder.editTextQuestion.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            Calendar mcurrentDate = Calendar.getInstance();
+                            int mYear = mcurrentDate.get(Calendar.YEAR);
+                            int mMonth = mcurrentDate.get(Calendar.MONTH);
+                            int mDay = mcurrentDate.get(Calendar.DAY_OF_MONTH);
+
+                            DatePickerDialog mDatePicker = new DatePickerDialog(context, new DatePickerDialog.OnDateSetListener() {
+                                public void onDateSet(DatePicker datepicker, int selectedyear, int selectedmonth, int selectedday) {
+                                    holder.editTextQuestion.setText(selectedyear + "/" + selectedmonth + "/" + selectedday);
+                                }
+                            }, mYear, mMonth, mDay);
+                            mDatePicker.setTitle("Select date");
+                            mDatePicker.show();
+                        }
+                    });
+                    break;
+                case "4"://Image
+                    holder.textInputLayoutQuestion.setHint("Upload Image");
+
+                    holder.editTextQuestion.setFocusable(false);
+                    holder.editTextQuestion.setCompoundDrawablesWithIntrinsicBounds(null, null, ContextCompat.getDrawable(context, R.drawable.ic_baseline_cloud_upload_24), null);
+                    holder.editTextQuestion.setOnTouchListener(new View.OnTouchListener() {
+                        @Override
+                        public boolean onTouch(View v, MotionEvent event) {
+                            final int DRAWABLE_LEFT = 0;
+                            final int DRAWABLE_TOP = 1;
+                            final int DRAWABLE_RIGHT = 2;
+                            final int DRAWABLE_BOTTOM = 3;
+
+                            if (event.getAction() == MotionEvent.ACTION_UP) {
+                                if (event.getRawX() >= (holder.editTextQuestion.getRight() - holder.editTextQuestion.getCompoundDrawables()[DRAWABLE_RIGHT].getBounds().width())) {
+                                    holder.editTextQuestion.setText("Uploaded");
+                                    return true;
+                                }
+                            }
+                            return false;
+                        }
+                    });
+                    holder.editTextQuestion.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            holder.editTextQuestion.setText("Uploaded");
+                        }
+                    });
+                    break;
+            }
+
             holder.textViewQuestionTitle.setText(questions.getTitle());
 
             /**/
@@ -94,12 +190,14 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.View
     public class ViewHolder extends RecyclerView.ViewHolder {
         TextView textViewQuestionTitle;
         EditText editTextQuestion;
+        TextInputLayout textInputLayoutQuestion;
         ConstraintLayout constraintLayoutInterview;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             textViewQuestionTitle = itemView.findViewById(R.id.textViewQuestionTitle);
             editTextQuestion = itemView.findViewById(R.id.editTextQuestion);
+            textInputLayoutQuestion = itemView.findViewById(R.id.textInputLayoutQuestion);
             //constraintLayoutInterview = itemView.findViewById(R.id.interviewItemId);
             /*constraintLayoutInterview.setOnClickListener(new View.OnClickListener() {
                 @Override
