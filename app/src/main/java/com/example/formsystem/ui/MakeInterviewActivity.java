@@ -1,17 +1,29 @@
 package com.example.formsystem.ui;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.app.ActivityCompat;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentSender;
+import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
+import android.location.LocationManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -33,8 +45,24 @@ import com.example.formsystem.model.Questions;
 import com.example.formsystem.model.QuestionsResults;
 import com.example.formsystem.utils.PreferenceUtils;
 import com.example.formsystem.viewmodel.FormSystemViewModel;
+import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.common.api.ResolvableApiException;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResponse;
+import com.google.android.gms.location.LocationSettingsStatusCodes;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapView;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 
 public class MakeInterviewActivity extends AppCompatActivity {
 
@@ -52,16 +80,22 @@ public class MakeInterviewActivity extends AppCompatActivity {
     private ArrayList<Answer> answersArrayList;
     private ImageView imageView;
     private TextView textView;
-    private String interviewTitle;
-
-    public MakeInterviewActivity() {
-    }
+    private String interviewTitle = "";
+    private String interviewLocation = "";
+    private String latitude = "";
+    private String longitude = "";
+    private LocationRequest locationRequest;
+    private GoogleMap googleMap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityMakeInterviewBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        locationRequest = LocationRequest.create();
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        locationRequest.setInterval(5000);
+        locationRequest.setFastestInterval(2000);
         token = PreferenceUtils.getToken(MakeInterviewActivity.this);
         userId = PreferenceUtils.getToken(MakeInterviewActivity.this);
         questionsSystemViewModel = new ViewModelProvider(this).get(FormSystemViewModel.class);
@@ -77,12 +111,14 @@ public class MakeInterviewActivity extends AppCompatActivity {
         recyclerView.setAdapter(questionsAdapter);
         recyclerView.setHasFixedSize(true);
         binding.constraintLayoutEmptyData.setVisibility(View.GONE);
+        binding.textViewErrorLocation.setVisibility(View.GONE);
         Intent intent = getIntent();
         if (intent != null && intent.hasExtra(ViewActivitiesActivity.FORM_ID)) {
             formId = intent.getStringExtra(ViewActivitiesActivity.FORM_ID);
             //binding.textView9.setText(formId);
             getFormQuestions();
             submitInterview();
+            getCurrentLocation();
         }
     }
 
@@ -97,7 +133,9 @@ public class MakeInterviewActivity extends AppCompatActivity {
                     binding.editTextInterviewTitle.setError(getString(R.string.interview_title_required));
                     return;
                 }
-                Interview interview = new Interview(formId, "new interview", "Palestine");
+                //Check location
+
+                Interview interview = new Interview(formId, interviewTitle, interviewLocation, latitude, longitude);
                 showDialog();
                 postInterview(interview);
             }
@@ -134,7 +172,6 @@ public class MakeInterviewActivity extends AppCompatActivity {
             public void onChanged(Interview interview) {
                 try {
                     /* Success*/
-                    String sd = interview.getInterview_id();
                     questionAnswersArrayList.clear();
                     answersArrayList.clear();
                     adapterQuestionAnswers(interview.getInterview_id());
@@ -197,5 +234,140 @@ public class MakeInterviewActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    private void getCurrentLocation() {
+        binding.constraintLayoutLocation.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (ActivityCompat.checkSelfPermission(MakeInterviewActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+
+                    if (isGPSEnabled()) {
+
+                        LocationServices.getFusedLocationProviderClient(MakeInterviewActivity.this)
+                                .requestLocationUpdates(locationRequest, new LocationCallback() {
+                                    @SuppressLint({"SetTextI18n", "ResourceAsColor"})
+                                    @Override
+                                    public void onLocationResult(@NonNull LocationResult locationResult) {
+                                        super.onLocationResult(locationResult);
+
+                                        LocationServices.getFusedLocationProviderClient(MakeInterviewActivity.this)
+                                                .removeLocationUpdates(this);
+
+                                        if (locationResult != null && locationResult.getLocations().size() > 0) {
+
+                                            int index = locationResult.getLocations().size() - 1;
+                                            double latitude = locationResult.getLocations().get(index).getLatitude();
+                                            double longitude = locationResult.getLocations().get(index).getLongitude();
+                                            Geocoder geocoder;
+                                            ArrayList<Address> addresses = new ArrayList<>();
+                                            geocoder = new Geocoder(MakeInterviewActivity.this, Locale.getDefault());
+                                            try {
+                                                addresses = (ArrayList<Address>) geocoder.getFromLocation(latitude, longitude, 1); // Here 1 represent max location result to returned, by documents it recommended 1 to 5
+                                            } catch (IOException e) {
+                                                e.printStackTrace();
+                                            }
+                                            String address = addresses.get(0).getAddressLine(0); // If any additional address line present than only, check with max available address lines by getMaxAddressLineIndex()
+                                            String city = addresses.get(0).getLocality();
+                                            String state = addresses.get(0).getAdminArea();
+                                            String country = addresses.get(0).getCountryName();
+                                            String postalCode = addresses.get(0).getPostalCode();
+                                            String knownName = addresses.get(0).getFeatureName();
+                                            binding.textViewErrorLocation.setVisibility(View.VISIBLE);
+                                            binding.textViewErrorLocation.setText("Current Location: " + country + ", " + city + ", " + address + ", " + latitude + ", " + longitude);
+                                            binding.textViewErrorLocation.setTextColor(R.color.teal_700);
+
+                                            AlertDialog.Builder alertDialog = new AlertDialog.Builder(MakeInterviewActivity.this);
+                                            LayoutInflater factory = LayoutInflater.from(MakeInterviewActivity.this);
+                                            final View view = factory.inflate(R.layout.map_dialog, null);
+                                            TextView textView = view.findViewById(R.id.textViewLocation);
+                                            textView.setText(country + ", " + city + ", " + address + ", " + latitude + ", " + longitude);
+                                            MapView mapView = view.findViewById(R.id.mapView);
+
+
+                                            alertDialog.setView(view);
+                                            alertDialog.show();
+                                        }
+                                    }
+                                }, Looper.getMainLooper());
+
+                    } else {
+                        turnOnGPS();
+                    }
+
+                } else {
+                    requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+                }
+            }
+        });
+    }
+
+    private void turnOnGPS() {
+        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
+                .addLocationRequest(locationRequest);
+        builder.setAlwaysShow(true);
+
+        Task<LocationSettingsResponse> result = LocationServices.getSettingsClient(getApplicationContext())
+                .checkLocationSettings(builder.build());
+
+        result.addOnCompleteListener(new OnCompleteListener<LocationSettingsResponse>() {
+            @Override
+            public void onComplete(@NonNull Task<LocationSettingsResponse> task) {
+
+                try {
+                    LocationSettingsResponse response = task.getResult(ApiException.class);
+                    Toast.makeText(MakeInterviewActivity.this, "GPS is already tured on", Toast.LENGTH_SHORT).show();
+
+                } catch (ApiException e) {
+
+                    switch (e.getStatusCode()) {
+                        case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
+
+                            try {
+                                ResolvableApiException resolvableApiException = (ResolvableApiException) e;
+                                resolvableApiException.startResolutionForResult(MakeInterviewActivity.this, 2);
+                            } catch (IntentSender.SendIntentException ex) {
+                                ex.printStackTrace();
+                            }
+                            break;
+
+                        case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
+                            //Device does not have location
+                            break;
+                    }
+                }
+            }
+        });
+
+    }
+
+    private boolean isGPSEnabled() {
+        LocationManager locationManager = null;
+        boolean isEnabled = false;
+
+        if (locationManager == null) {
+            locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        }
+
+        isEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        return isEnabled;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == 1) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                if (isGPSEnabled()) {
+
+                    getCurrentLocation();
+
+                } else {
+
+                    turnOnGPS();
+                }
+            }
+        }
     }
 }

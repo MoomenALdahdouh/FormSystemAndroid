@@ -21,8 +21,20 @@ public class Interview {
     private String customer_location;
     @SerializedName("interview_id")
     private String interview_id;
+    @SerializedName("latitude")
+    private String 	latitude;
+    @SerializedName("longitude")
+    private String 	longitude;
 
     public Interview() {
+    }
+
+    public Interview(String form_fk_id, String title, String customer_location, String latitude, String longitude) {
+        this.form_fk_id = form_fk_id;
+        this.title = title;
+        this.customer_location = customer_location;
+        this.latitude = latitude;
+        this.longitude = longitude;
     }
 
     public Interview(String form_fk_id, String title, String customer_location) {
@@ -103,5 +115,21 @@ public class Interview {
 
     public void setInterview_id(String interview_id) {
         this.interview_id = interview_id;
+    }
+
+    public String getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(String latitude) {
+        this.latitude = latitude;
+    }
+
+    public String getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(String longitude) {
+        this.longitude = longitude;
     }
 }
