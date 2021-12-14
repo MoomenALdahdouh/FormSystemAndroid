@@ -35,7 +35,7 @@ public class FormSystemViewModel extends ViewModel {
     public MutableLiveData<FormResults> formMutableLiveData = new MutableLiveData<>();
     public MutableLiveData<InterviewResults> interviewsMutableLiveData = new MutableLiveData<>();
     public MutableLiveData<Interview> postInterviewMutableLiveData = new MutableLiveData<>();
-    public MutableLiveData<Answer> postAnswerMutableLiveData = new MutableLiveData<>();
+    public MutableLiveData<PostAnswersList> postAnswerMutableLiveData = new MutableLiveData<>();
     public MutableLiveData<QuestionsResults> questionsMutableLiveData = new MutableLiveData<>();
     public MutableLiveData<Form> formsMutableLiveData = new MutableLiveData<>();
 
@@ -153,16 +153,16 @@ public class FormSystemViewModel extends ViewModel {
     }
 
 
-    public void postAnswer(Answer answer) {
-        FormSystemClient.getINSTANCE().postAnswer(answer).enqueue(new Callback<Answer>() {
+    public void postAnswer(PostAnswersList answer) {
+        FormSystemClient.getINSTANCE().postAnswer(answer).enqueue(new Callback<PostAnswersList>() {
             @Override
-            public void onResponse(@NonNull Call<Answer> call, @NonNull Response<Answer> response) {
+            public void onResponse(@NonNull Call<PostAnswersList> call, @NonNull Response<PostAnswersList> response) {
                 Log.d("onResponse", response.toString());
                 postAnswerMutableLiveData.setValue(response.body());
             }
 
             @Override
-            public void onFailure(@NonNull Call<Answer> call, @NonNull Throwable t) {
+            public void onFailure(@NonNull Call<PostAnswersList> call, @NonNull Throwable t) {
                 t.printStackTrace();
                 Log.d("onFailure", t.getMessage());
             }

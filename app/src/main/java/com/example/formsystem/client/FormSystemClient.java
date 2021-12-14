@@ -101,7 +101,7 @@ public class FormSystemClient {
         return formSystemInterface.getQuestions("Bearer " + authToken, id);
     }
 
-    public Call<Answer> postAnswer(Answer answer) {
+    public Call<PostAnswersList> postAnswer(PostAnswersList answer) {
         return formSystemInterface.postAnswer(answer);
     }
 

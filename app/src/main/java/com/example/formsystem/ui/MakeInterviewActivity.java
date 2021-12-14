@@ -1,5 +1,6 @@
 package com.example.formsystem.ui;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -7,11 +8,18 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.annotation.SuppressLint;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.formsystem.R;
 import com.example.formsystem.adapter.ActivitiesAdapter;
 import com.example.formsystem.adapter.InterviewsAdapter;
 import com.example.formsystem.adapter.QuestionsAdapter;
@@ -42,6 +50,9 @@ public class MakeInterviewActivity extends AppCompatActivity {
     private ArrayList<Questions> questionsArrayList;
     private ArrayList<Questions> questionAnswersArrayList;
     private ArrayList<Answer> answersArrayList;
+    private ImageView imageView;
+    private TextView textView;
+    private String interviewTitle;
 
     public MakeInterviewActivity() {
     }
@@ -79,10 +90,40 @@ public class MakeInterviewActivity extends AppCompatActivity {
         binding.buttonSubmitInterview.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                //checkInterviewTitle();
+                interviewTitle = binding.editTextInterviewTitle.getText().toString();
+                if (interviewTitle.isEmpty()) {
+                    binding.textInputLayout3.setError(getString(R.string.interview_title_required));
+                    binding.editTextInterviewTitle.setError(getString(R.string.interview_title_required));
+                    return;
+                }
                 Interview interview = new Interview(formId, "new interview", "Palestine");
+                showDialog();
                 postInterview(interview);
             }
         });
+    }
+
+    @SuppressLint("UseCompatLoadingForDrawables")
+    private void checkInterviewTitle() {
+        interviewTitle = binding.editTextInterviewTitle.getText().toString();
+        if (interviewTitle.isEmpty()) {
+            binding.editTextInterviewTitle.setError(getString(R.string.interview_title_required));
+        }
+    }
+
+    @SuppressLint("UseCompatLoadingForDrawables")
+    private void showDialog() {
+        AlertDialog.Builder alertadd = new AlertDialog.Builder(MakeInterviewActivity.this);
+        LayoutInflater factory = LayoutInflater.from(MakeInterviewActivity.this);
+        final View view = factory.inflate(R.layout.succes_create, null);
+        ImageView close = view.findViewById(R.id.imageView6);
+        imageView = view.findViewById(R.id.imageViewDialog);
+        textView = view.findViewById(R.id.textViewMessage);
+        imageView.setImageResource(R.drawable.loading);
+        textView.setText(R.string.running_to_submit_interview);
+        alertadd.setView(view);
+        alertadd.show();
     }
 
     private void postInterview(Interview interview) {
@@ -109,23 +150,29 @@ public class MakeInterviewActivity extends AppCompatActivity {
             Questions questions = questionAnswersArrayList.get(i);
             Answer answer = questions.getAnswer();
             answer.setInterview_fk_id(interviewId);
-            //answersArrayList.add(answer);
-            postAnswer(answer);
+            answersArrayList.add(answer);
+            //postAnswer(answer);
         }
-        //PostAnswersList postAnswersList = new PostAnswersList(answersArrayList);
-        //postAnswer(postAnswersList);
+        PostAnswersList postAnswersList = new PostAnswersList(answersArrayList);
+        postAnswer(postAnswersList);
     }
 
-    private void postAnswer(Answer answer) {
+    private void postAnswer(PostAnswersList answer) {
         postAnswerSystemViewModel.postAnswer(answer);
-        postAnswerSystemViewModel.postAnswerMutableLiveData.observe(this, new Observer<Answer>() {
+        postAnswerSystemViewModel.postAnswerMutableLiveData.observe(this, new Observer<PostAnswersList>() {
             @SuppressLint("NotifyDataSetChanged")
             @Override
-            public void onChanged(Answer response) {
+            public void onChanged(PostAnswersList response) {
                 try {
-                    Toast.makeText(getApplicationContext(), "" + response, Toast.LENGTH_SHORT).show();
-                    /*Success*/
-                    // finish();
+                    imageView.setImageResource(R.drawable.success);
+                    textView.setText(R.string.success_submit_interview);
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            //Toast.makeText(getApplicationContext(), "" + response.getSuccess(), Toast.LENGTH_SHORT).show();
+                            finish();
+                        }
+                    }, 2000);
                 } catch (Exception e) {
                 }
             }
