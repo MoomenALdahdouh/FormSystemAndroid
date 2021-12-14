@@ -3,7 +3,6 @@ package com.example.formsystem.ui;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -13,33 +12,28 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.LocationManager;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.view.InflateException;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.Button;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.formsystem.R;
-import com.example.formsystem.adapter.ActivitiesAdapter;
-import com.example.formsystem.adapter.InterviewsAdapter;
 import com.example.formsystem.adapter.QuestionsAdapter;
-import com.example.formsystem.databinding.ActivityMainBinding;
 import com.example.formsystem.databinding.ActivityMakeInterviewBinding;
 import com.example.formsystem.model.Answer;
 import com.example.formsystem.model.Interview;
-import com.example.formsystem.model.InterviewResults;
 import com.example.formsystem.model.PostAnswersList;
 import com.example.formsystem.model.Questions;
 import com.example.formsystem.model.QuestionsResults;
@@ -54,17 +48,20 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResponse;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapView;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
 
-public class MakeInterviewActivity extends AppCompatActivity {
+public class MakeInterviewActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     private ActivityMakeInterviewBinding binding;
     private String formId;
@@ -82,16 +79,18 @@ public class MakeInterviewActivity extends AppCompatActivity {
     private TextView textView;
     private String interviewTitle = "";
     private String interviewLocation = "";
-    private String latitude = "";
-    private String longitude = "";
+    private double latitude;
+    private double longitude;
     private LocationRequest locationRequest;
     private GoogleMap googleMap;
+    private View viewMap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityMakeInterviewBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
         locationRequest = LocationRequest.create();
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         locationRequest.setInterval(5000);
@@ -115,7 +114,6 @@ public class MakeInterviewActivity extends AppCompatActivity {
         Intent intent = getIntent();
         if (intent != null && intent.hasExtra(ViewActivitiesActivity.FORM_ID)) {
             formId = intent.getStringExtra(ViewActivitiesActivity.FORM_ID);
-            //binding.textView9.setText(formId);
             getFormQuestions();
             submitInterview();
             getCurrentLocation();
@@ -124,6 +122,7 @@ public class MakeInterviewActivity extends AppCompatActivity {
 
     private void submitInterview() {
         binding.buttonSubmitInterview.setOnClickListener(new View.OnClickListener() {
+            @SuppressLint("ResourceAsColor")
             @Override
             public void onClick(View view) {
                 //checkInterviewTitle();
@@ -134,8 +133,13 @@ public class MakeInterviewActivity extends AppCompatActivity {
                     return;
                 }
                 //Check location
-
-                Interview interview = new Interview(formId, interviewTitle, interviewLocation, latitude, longitude);
+                if (interviewLocation.isEmpty() || (Double.toString(latitude).isEmpty() && Double.toString(longitude).isEmpty())) {
+                    binding.textViewErrorLocation.setVisibility(View.VISIBLE);
+                    binding.textViewErrorLocation.setText(getString(R.string.the_location_required));
+                    binding.textViewErrorLocation.setTextColor(getColor(R.color.danger));
+                    return;
+                }
+                Interview interview = new Interview(formId, interviewTitle, interviewLocation, latitude + "", longitude + "");
                 showDialog();
                 postInterview(interview);
             }
@@ -154,7 +158,7 @@ public class MakeInterviewActivity extends AppCompatActivity {
     private void showDialog() {
         AlertDialog.Builder alertadd = new AlertDialog.Builder(MakeInterviewActivity.this);
         LayoutInflater factory = LayoutInflater.from(MakeInterviewActivity.this);
-        final View view = factory.inflate(R.layout.succes_create, null);
+        final View view = factory.inflate(R.layout.succes_create_dialog, null);
         ImageView close = view.findViewById(R.id.imageView6);
         imageView = view.findViewById(R.id.imageViewDialog);
         textView = view.findViewById(R.id.textViewMessage);
@@ -257,8 +261,8 @@ public class MakeInterviewActivity extends AppCompatActivity {
                                         if (locationResult != null && locationResult.getLocations().size() > 0) {
 
                                             int index = locationResult.getLocations().size() - 1;
-                                            double latitude = locationResult.getLocations().get(index).getLatitude();
-                                            double longitude = locationResult.getLocations().get(index).getLongitude();
+                                            latitude = locationResult.getLocations().get(index).getLatitude();
+                                            longitude = locationResult.getLocations().get(index).getLongitude();
                                             Geocoder geocoder;
                                             ArrayList<Address> addresses = new ArrayList<>();
                                             geocoder = new Geocoder(MakeInterviewActivity.this, Locale.getDefault());
@@ -267,25 +271,37 @@ public class MakeInterviewActivity extends AppCompatActivity {
                                             } catch (IOException e) {
                                                 e.printStackTrace();
                                             }
-                                            String address = addresses.get(0).getAddressLine(0); // If any additional address line present than only, check with max available address lines by getMaxAddressLineIndex()
+                                            interviewLocation = addresses.get(0).getAddressLine(0); // If any additional address line present than only, check with max available address lines by getMaxAddressLineIndex()
                                             String city = addresses.get(0).getLocality();
                                             String state = addresses.get(0).getAdminArea();
                                             String country = addresses.get(0).getCountryName();
                                             String postalCode = addresses.get(0).getPostalCode();
                                             String knownName = addresses.get(0).getFeatureName();
+
                                             binding.textViewErrorLocation.setVisibility(View.VISIBLE);
-                                            binding.textViewErrorLocation.setText("Current Location: " + country + ", " + city + ", " + address + ", " + latitude + ", " + longitude);
-                                            binding.textViewErrorLocation.setTextColor(R.color.teal_700);
+                                            binding.textViewErrorLocation.setText("Current Location: " + interviewLocation + ", " + latitude + ", " + longitude);
+                                            binding.textViewErrorLocation.setTextColor(getColor(R.color.teal_700));
 
                                             AlertDialog.Builder alertDialog = new AlertDialog.Builder(MakeInterviewActivity.this);
                                             LayoutInflater factory = LayoutInflater.from(MakeInterviewActivity.this);
-                                            final View view = factory.inflate(R.layout.map_dialog, null);
-                                            TextView textView = view.findViewById(R.id.textViewLocation);
-                                            textView.setText(country + ", " + city + ", " + address + ", " + latitude + ", " + longitude);
-                                            MapView mapView = view.findViewById(R.id.mapView);
-
-
-                                            alertDialog.setView(view);
+                                            if (viewMap != null) {
+                                                ViewGroup parent = (ViewGroup) viewMap.getParent();
+                                                if (parent != null)
+                                                    parent.removeView(viewMap);
+                                            }
+                                            try {
+                                                viewMap = factory.inflate(R.layout.map_dialog, null);
+                                            } catch (InflateException e) {
+                                                /* map is already there, just return view as it is */
+                                            }
+                                            //viewMap = factory.inflate(R.layout.map_dialog, null);
+                                            TextView textView = viewMap.findViewById(R.id.textViewLocation);
+                                            textView.setText(interviewLocation + ", " + latitude + ", " + longitude);
+                                            //MapView mapView = view.findViewById(R.id.mapView);
+                                            SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                                                    .findFragmentById(R.id.mapView);
+                                            mapFragment.getMapAsync(MakeInterviewActivity.this);
+                                            alertDialog.setView(viewMap);
                                             alertDialog.show();
                                         }
                                     }
@@ -369,5 +385,14 @@ public class MakeInterviewActivity extends AppCompatActivity {
                 }
             }
         }
+    }
+
+    @Override
+    public void onMapReady(@NonNull GoogleMap googleMap) {
+        googleMap = googleMap;
+        LatLng latLng = new LatLng(latitude, longitude);
+        googleMap.addMarker(new MarkerOptions().position(latLng).title(interviewLocation));
+        googleMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+
     }
 }

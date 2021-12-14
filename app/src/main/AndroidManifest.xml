@@ -29,7 +29,7 @@
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="API_KEY_HERE" />
+            android:value="@string/map_key" />
 
         <activity
             android:name=".ui.ViewInterviewActivity"
