@@ -72,6 +72,12 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.View
                     holder.editTextQuestion.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
                     break;
                 case "3"://Calender
+                    Calendar mcurrentDate = Calendar.getInstance();
+                    int mYear = mcurrentDate.get(Calendar.YEAR);
+                    int mMonth = mcurrentDate.get(Calendar.MONTH);
+                    int mDay = mcurrentDate.get(Calendar.DAY_OF_MONTH);
+                    holder.editTextQuestion.setText(mYear + "/" + mMonth + "/" + mDay);
+
                     holder.editTextQuestion.setCompoundDrawablesWithIntrinsicBounds(null, null, ContextCompat.getDrawable(context, R.drawable.ic_baseline_calendar_month_24), null);
                     holder.editTextQuestion.setOnTouchListener(new View.OnTouchListener() {
                         @Override
@@ -83,46 +89,23 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.View
 
                             if (event.getAction() == MotionEvent.ACTION_UP) {
                                 if (event.getRawX() >= (holder.editTextQuestion.getRight() - holder.editTextQuestion.getCompoundDrawables()[DRAWABLE_RIGHT].getBounds().width())) {
-                                    Calendar mcurrentDate = Calendar.getInstance();
-                                    int mYear = mcurrentDate.get(Calendar.YEAR);
-                                    int mMonth = mcurrentDate.get(Calendar.MONTH);
-                                    int mDay = mcurrentDate.get(Calendar.DAY_OF_MONTH);
-
-                                    DatePickerDialog mDatePicker = new DatePickerDialog(context, new DatePickerDialog.OnDateSetListener() {
-                                        public void onDateSet(DatePicker datepicker, int selectedyear, int selectedmonth, int selectedday) {
-                                            // TODO Auto-generated method stub
-                                            /*      Your code   to get date and time    */
-                                        }
-                                    }, mYear, mMonth, mDay);
-                                    mDatePicker.setTitle("Select date");
-                                    mDatePicker.show();
-                                    return true;
+                                    showCalender(holder, mYear, mMonth, mDay);
                                 }
                             }
                             return false;
                         }
                     });
-                    holder.editTextQuestion.setOnClickListener(new View.OnClickListener() {
+                   /* holder.editTextQuestion.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            Calendar mcurrentDate = Calendar.getInstance();
-                            int mYear = mcurrentDate.get(Calendar.YEAR);
-                            int mMonth = mcurrentDate.get(Calendar.MONTH);
-                            int mDay = mcurrentDate.get(Calendar.DAY_OF_MONTH);
-
-                            DatePickerDialog mDatePicker = new DatePickerDialog(context, new DatePickerDialog.OnDateSetListener() {
-                                public void onDateSet(DatePicker datepicker, int selectedyear, int selectedmonth, int selectedday) {
-                                    holder.editTextQuestion.setText(selectedyear + "/" + selectedmonth + "/" + selectedday);
-                                }
-                            }, mYear, mMonth, mDay);
-                            mDatePicker.setTitle("Select date");
-                            mDatePicker.show();
+                            showCalender(holder, mYear, mMonth, mDay);
                         }
-                    });
+                    });*/
                     break;
                 case "4"://Image
                     holder.textInputLayoutQuestion.setHint("Upload Image");
-
+                    //holder.editTextQuestion.setEnabled(false);
+                    //holder.editTextQuestion.setClickable(true);
                     holder.editTextQuestion.setFocusable(false);
                     holder.editTextQuestion.setCompoundDrawablesWithIntrinsicBounds(null, null, ContextCompat.getDrawable(context, R.drawable.ic_baseline_cloud_upload_24), null);
                     holder.editTextQuestion.setOnTouchListener(new View.OnTouchListener() {
@@ -180,6 +163,16 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.View
         } catch (Exception exception) {
 
         }
+    }
+
+    private void showCalender(ViewHolder holder, int mYear, int mMonth, int mDay) {
+        DatePickerDialog mDatePicker = new DatePickerDialog(context, new DatePickerDialog.OnDateSetListener() {
+            public void onDateSet(DatePicker datepicker, int selectedyear, int selectedmonth, int selectedday) {
+                holder.editTextQuestion.setText(selectedyear + "/" + selectedmonth + "/" + selectedday);
+            }
+        }, mYear, mMonth, mDay);
+        //mDatePicker.setTitle("Select date");
+        mDatePicker.show();
     }
 
     @Override
