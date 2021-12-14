@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 
 import com.example.formsystem.R;
 import com.example.formsystem.adapter.ActivitiesAdapter;
@@ -50,7 +51,7 @@ public class ActivitiesActivity extends AppCompatActivity {
         activitiesAdapter.setList(activityArrayList);
         recyclerView.setAdapter(activitiesAdapter);
         recyclerView.setHasFixedSize(true);
-
+        binding.constraintLayoutEmptyData.setVisibility(View.GONE);
         getActivities();
         getUserDetails();
 
@@ -81,8 +82,12 @@ public class ActivitiesActivity extends AppCompatActivity {
             @Override
             public void onChanged(ActivityResults activityResults) {
                 activityArrayList = activityResults.getResults();
-                activitiesAdapter.setList(activityArrayList);
-                activitiesAdapter.notifyDataSetChanged();
+                if (!activityArrayList.isEmpty()) {
+                    binding.constraintLayoutEmptyData.setVisibility(View.GONE);
+                    activitiesAdapter.setList(activityArrayList);
+                    activitiesAdapter.notifyDataSetChanged();
+                } else
+                    binding.constraintLayoutEmptyData.setVisibility(View.VISIBLE);
             }
         });
     }

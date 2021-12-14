@@ -13,6 +13,8 @@ import com.example.formsystem.model.Form;
 import com.example.formsystem.model.FormResults;
 import com.example.formsystem.model.InterviewResults;
 import com.example.formsystem.model.Login;
+import com.example.formsystem.model.Questions;
+import com.example.formsystem.model.QuestionsResults;
 import com.example.formsystem.model.Token;
 import com.example.formsystem.model.User;
 import com.example.formsystem.model.UserResults;
@@ -27,6 +29,7 @@ public class FormSystemViewModel extends ViewModel {
     public MutableLiveData<UserResults> userMutableLiveData = new MutableLiveData<>();
     public MutableLiveData<FormResults> formMutableLiveData = new MutableLiveData<>();
     public MutableLiveData<InterviewResults> interviewsMutableLiveData = new MutableLiveData<>();
+    public MutableLiveData<QuestionsResults> questionsMutableLiveData = new MutableLiveData<>();
     public MutableLiveData<Form> formsMutableLiveData = new MutableLiveData<>();
 
     public void login(Login login) {
@@ -46,7 +49,7 @@ public class FormSystemViewModel extends ViewModel {
     }
 
     public void getAllActivities(String authToken, String id) {
-        FormSystemClient.getINSTANCE().getAllActivities(authToken,id).enqueue(new Callback<ActivityResults>() {
+        FormSystemClient.getINSTANCE().getAllActivities(authToken, id).enqueue(new Callback<ActivityResults>() {
             @Override
             public void onResponse(@NonNull Call<ActivityResults> call, @NonNull Response<ActivityResults> response) {
                 Log.d("onResponse", response.toString());
@@ -62,7 +65,7 @@ public class FormSystemViewModel extends ViewModel {
     }
 
     public void getUser(String authToken, String id) {
-        FormSystemClient.getINSTANCE().getUser(authToken,id).enqueue(new Callback<UserResults>() {
+        FormSystemClient.getINSTANCE().getUser(authToken, id).enqueue(new Callback<UserResults>() {
             @Override
             public void onResponse(@NonNull Call<UserResults> call, @NonNull Response<UserResults> response) {
                 Log.d("onResponse", response.toString());
@@ -78,7 +81,7 @@ public class FormSystemViewModel extends ViewModel {
     }
 
     public void getForm(String authToken, String id) {
-        FormSystemClient.getINSTANCE().getForm(authToken,id).enqueue(new Callback<FormResults>() {
+        FormSystemClient.getINSTANCE().getForm(authToken, id).enqueue(new Callback<FormResults>() {
             @Override
             public void onResponse(@NonNull Call<FormResults> call, @NonNull Response<FormResults> response) {
                 Log.d("onResponse", response.toString());
@@ -94,7 +97,7 @@ public class FormSystemViewModel extends ViewModel {
     }
 
     public void getInterviews(String authToken, String id) {
-        FormSystemClient.getINSTANCE().getInterviews(authToken,id).enqueue(new Callback<InterviewResults>() {
+        FormSystemClient.getINSTANCE().getInterviews(authToken, id).enqueue(new Callback<InterviewResults>() {
             @Override
             public void onResponse(@NonNull Call<InterviewResults> call, @NonNull Response<InterviewResults> response) {
                 Log.d("onResponse", response.toString());
@@ -103,6 +106,22 @@ public class FormSystemViewModel extends ViewModel {
 
             @Override
             public void onFailure(@NonNull Call<InterviewResults> call, @NonNull Throwable t) {
+                t.printStackTrace();
+                Log.d("onFailure", t.getMessage());
+            }
+        });
+    }
+
+    public void getQuestions(String authToken, String id) {
+        FormSystemClient.getINSTANCE().getQuestions(authToken, id).enqueue(new Callback<QuestionsResults>() {
+            @Override
+            public void onResponse(@NonNull Call<QuestionsResults> call, @NonNull Response<QuestionsResults> response) {
+                Log.d("onResponse", response.toString());
+                questionsMutableLiveData.setValue(response.body());
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<QuestionsResults> call, @NonNull Throwable t) {
                 t.printStackTrace();
                 Log.d("onFailure", t.getMessage());
             }

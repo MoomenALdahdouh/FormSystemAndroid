@@ -57,7 +57,7 @@ public class ViewActivitiesActivity extends AppCompatActivity {
         interviewsAdapter.setList(interviewArrayList);
         recyclerView.setAdapter(interviewsAdapter);
         recyclerView.setHasFixedSize(true);
-
+        binding.constraintLayoutEmptyData.setVisibility(View.GONE);
         Intent intent = getIntent();
         if (intent != null && intent.hasExtra(ActivitiesAdapter.ACTIVITY_ID)) {
             activityId = intent.getStringExtra(ActivitiesAdapter.ACTIVITY_ID);
@@ -75,8 +75,12 @@ public class ViewActivitiesActivity extends AppCompatActivity {
             public void onChanged(InterviewResults interviewResults) {
                 try {
                     interviewArrayList = interviewResults.getInterviews();
-                    interviewsAdapter.setList(interviewArrayList);
-                    interviewsAdapter.notifyDataSetChanged();
+                    if (!interviewArrayList.isEmpty()) {
+                        binding.constraintLayoutEmptyData.setVisibility(View.GONE);
+                        interviewsAdapter.setList(interviewArrayList);
+                        interviewsAdapter.notifyDataSetChanged();
+                    } else
+                        binding.constraintLayoutEmptyData.setVisibility(View.VISIBLE);
                 } catch (Exception e) {
                 }
 

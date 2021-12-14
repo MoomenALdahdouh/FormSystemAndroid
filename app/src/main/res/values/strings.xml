@@ -13,4 +13,8 @@
     <string name="make_interview">Make Interview</string>
     <string name="make_new_interview">Make new Interview</string>
     <string name="form">Form</string>
+    <string name="you_not_have_any_question_yet">You not have any question yet</string>
+    <string name="no_questions_exist">No Questions exist!</string>
+    <string name="submit">Submit</string>
+    <string name="interview_questions">Interview Questions</string>
 </resources>

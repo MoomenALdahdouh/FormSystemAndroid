@@ -16,11 +16,12 @@ import com.example.formsystem.R;
 import com.example.formsystem.model.Activity;
 import com.example.formsystem.model.Interview;
 import com.example.formsystem.ui.ViewActivitiesActivity;
+import com.example.formsystem.ui.ViewInterviewActivity;
 
 import java.util.ArrayList;
 
 public class InterviewsAdapter extends RecyclerView.Adapter<InterviewsAdapter.ViewHolder> {
-    public static final String ACTIVITY_ID = "ACTIVITY_ID";
+    public static final String INTERVIEW_ID = "INTERVIEW_ID";
     private Context context;
     private ArrayList<Interview> interviewsArrayList;
 
@@ -71,9 +72,9 @@ public class InterviewsAdapter extends RecyclerView.Adapter<InterviewsAdapter.Vi
                 public void onClick(View view) {
                     int adapterPosition = getAdapterPosition();
                     Interview activityClicked = interviewsArrayList.get(adapterPosition);
-                    String activityId = activityClicked.getId();
-                    Intent intent = new Intent(context, ViewActivitiesActivity.class);
-                    intent.putExtra(ACTIVITY_ID, activityId);
+                    String interviewId = activityClicked.getId();
+                    Intent intent = new Intent(context, ViewInterviewActivity.class);
+                    intent.putExtra(INTERVIEW_ID, interviewId);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     context.startActivity(intent);
                 }

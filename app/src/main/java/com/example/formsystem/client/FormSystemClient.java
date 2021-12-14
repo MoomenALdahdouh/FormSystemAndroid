@@ -9,6 +9,7 @@ import com.example.formsystem.model.Form;
 import com.example.formsystem.model.FormResults;
 import com.example.formsystem.model.InterviewResults;
 import com.example.formsystem.model.Login;
+import com.example.formsystem.model.QuestionsResults;
 import com.example.formsystem.model.Token;
 import com.example.formsystem.model.User;
 import com.example.formsystem.model.UserResults;
@@ -87,6 +88,10 @@ public class FormSystemClient {
 
     public Call<InterviewResults> getInterviews(String authToken, String id) {
         return formSystemInterface.getInterviews("Bearer " + authToken, id);
+    }
+
+    public Call<QuestionsResults> getQuestions(String authToken, String id) {
+        return formSystemInterface.getQuestions("Bearer " + authToken, id);
     }
 
     public Call<Form> getAllForms(String authToken, String id) {
