@@ -89,7 +89,16 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.View
 
                             if (event.getAction() == MotionEvent.ACTION_UP) {
                                 if (event.getRawX() >= (holder.editTextQuestion.getRight() - holder.editTextQuestion.getCompoundDrawables()[DRAWABLE_RIGHT].getBounds().width())) {
-                                    showCalender(holder, mYear, mMonth, mDay);
+                                    //showCalender(holder, mYear, mMonth, mDay);
+                                    DatePickerDialog mDatePicker = new DatePickerDialog(context, new DatePickerDialog.OnDateSetListener() {
+                                        public void onDateSet(DatePicker datepicker, int selectedyear, int selectedmonth, int selectedday) {
+                                            String selectedDate = selectedyear + "/" + selectedmonth + "/" + selectedday;
+                                            Answer answer = new Answer(questions.getId(), "", selectedDate);
+                                            answerArrayList.get(position).setAnswer(answer);
+                                            holder.editTextQuestion.setText(selectedDate);
+                                        }
+                                    }, mYear, mMonth, mDay);
+                                    mDatePicker.show();
                                 }
                             }
                             return false;
@@ -118,6 +127,8 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.View
 
                             if (event.getAction() == MotionEvent.ACTION_UP) {
                                 if (event.getRawX() >= (holder.editTextQuestion.getRight() - holder.editTextQuestion.getCompoundDrawables()[DRAWABLE_RIGHT].getBounds().width())) {
+                                    Answer answer = new Answer(questions.getId(), "", "Uploaded");
+                                    answerArrayList.get(position).setAnswer(answer);
                                     holder.editTextQuestion.setText("Uploaded");
                                     return true;
                                 }
@@ -128,6 +139,8 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.View
                     holder.editTextQuestion.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
+                            Answer answer = new Answer(questions.getId(), "", "Uploaded");
+                            answerArrayList.get(position).setAnswer(answer);
                             holder.editTextQuestion.setText("Uploaded");
                         }
                     });
@@ -168,6 +181,7 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.View
     private void showCalender(ViewHolder holder, int mYear, int mMonth, int mDay) {
         DatePickerDialog mDatePicker = new DatePickerDialog(context, new DatePickerDialog.OnDateSetListener() {
             public void onDateSet(DatePicker datepicker, int selectedyear, int selectedmonth, int selectedday) {
+
                 holder.editTextQuestion.setText(selectedyear + "/" + selectedmonth + "/" + selectedday);
             }
         }, mYear, mMonth, mDay);

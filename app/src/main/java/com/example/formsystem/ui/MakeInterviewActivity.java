@@ -240,6 +240,7 @@ public class MakeInterviewActivity extends AppCompatActivity implements OnMapRea
         });
     }
 
+    /*Map section*/
     private void getCurrentLocation() {
         binding.constraintLayoutLocation.setOnClickListener(new View.OnClickListener() {
             @Override
