@@ -19,8 +19,16 @@ public class Interview {
     private String status;
     @SerializedName("customer_location")
     private String customer_location;
+    @SerializedName("interview_id")
+    private String interview_id;
 
     public Interview() {
+    }
+
+    public Interview(String form_fk_id, String title, String customer_location) {
+        this.form_fk_id = form_fk_id;
+        this.title = title;
+        this.customer_location = customer_location;
     }
 
     public Interview(String id, String form_fk_id, String title, String created_at, String updated_at, String status, String customer_location) {
@@ -87,5 +95,13 @@ public class Interview {
 
     public void setCustomer_location(String customer_location) {
         this.customer_location = customer_location;
+    }
+
+    public String getInterview_id() {
+        return interview_id;
+    }
+
+    public void setInterview_id(String interview_id) {
+        this.interview_id = interview_id;
     }
 }

@@ -3,6 +3,8 @@ package com.example.formsystem.adapter;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +16,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.formsystem.R;
+import com.example.formsystem.model.Answer;
 import com.example.formsystem.model.Interview;
 import com.example.formsystem.model.Questions;
 import com.example.formsystem.ui.ViewInterviewActivity;
@@ -24,6 +27,7 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.View
     public static final String QUESTION_ID = "QUESTION_ID";
     private Context context;
     private ArrayList<Questions> questionsArrayList;
+    private ArrayList<Questions> answerArrayList;
 
     public QuestionsAdapter(Context context) {
         this.context = context;
@@ -31,6 +35,11 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.View
 
     public void setList(ArrayList<Questions> interviewsArrayList) {
         this.questionsArrayList = interviewsArrayList;
+        this.answerArrayList = interviewsArrayList;
+    }
+
+    public ArrayList<Questions> getAnswerArrayList() {
+        return answerArrayList;
     }
 
     @NonNull
@@ -43,10 +52,35 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.View
 
     @SuppressLint("SetTextI18n")
     @Override
-    public void onBindViewHolder(@NonNull QuestionsAdapter.ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull QuestionsAdapter.ViewHolder holder, @SuppressLint("RecyclerView") int position) {
         try {
             Questions questions = questionsArrayList.get(position);
             holder.textViewQuestionTitle.setText(questions.getTitle());
+
+            /**/
+            TextWatcher textWatcher = new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                }
+
+                @Override
+                public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                    //TODO:: Action when change text in edit text
+                    String questionAnswer = holder.editTextQuestion.getText().toString();
+                    Answer answer = new Answer(questions.getId(), "", questionAnswer);
+                    //questionsArrayList.get(position).setAnswer(answer);
+                    answerArrayList.get(position).setAnswer(answer);
+                }
+
+                @Override
+                public void afterTextChanged(Editable editable) {
+
+                }
+            };
+            holder.editTextQuestion.addTextChangedListener(textWatcher);
+
+
         } catch (Exception exception) {
 
         }
@@ -81,4 +115,14 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.View
             });*/
         }
     }
+
+    private boolean checkInput(EditText editText) {
+        String value = editText.getText().toString().trim();
+        if (value.isEmpty())
+            return true;
+        else
+            return false;
+    }
+
+
 }

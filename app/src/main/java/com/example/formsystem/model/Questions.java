@@ -17,6 +17,9 @@ public class Questions {
     private String body;
     @SerializedName("type")
     private String type;
+    /*User answer field to save question answer in adapter*/
+    @SerializedName("answer")
+    private Answer answer = new Answer("","","");
 
     public Questions() {
     }
@@ -76,5 +79,13 @@ public class Questions {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public Answer getAnswer() {
+        return answer;
+    }
+
+    public void setAnswer(Answer answer) {
+        this.answer = answer;
     }
 }

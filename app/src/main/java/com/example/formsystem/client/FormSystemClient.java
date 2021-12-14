@@ -5,10 +5,13 @@ import androidx.annotation.NonNull;
 import com.example.formsystem.interfaces.FormSystemInterface;
 import com.example.formsystem.model.Activity;
 import com.example.formsystem.model.ActivityResults;
+import com.example.formsystem.model.Answer;
 import com.example.formsystem.model.Form;
 import com.example.formsystem.model.FormResults;
+import com.example.formsystem.model.Interview;
 import com.example.formsystem.model.InterviewResults;
 import com.example.formsystem.model.Login;
+import com.example.formsystem.model.PostAnswersList;
 import com.example.formsystem.model.QuestionsResults;
 import com.example.formsystem.model.Token;
 import com.example.formsystem.model.User;
@@ -17,6 +20,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
@@ -89,9 +93,16 @@ public class FormSystemClient {
     public Call<InterviewResults> getInterviews(String authToken, String id) {
         return formSystemInterface.getInterviews("Bearer " + authToken, id);
     }
+    public Call<Interview> postInterview(Interview interview) {
+        return formSystemInterface.postInterview(interview);
+    }
 
     public Call<QuestionsResults> getQuestions(String authToken, String id) {
         return formSystemInterface.getQuestions("Bearer " + authToken, id);
+    }
+
+    public Call<Answer> postAnswer(Answer answer) {
+        return formSystemInterface.postAnswer(answer);
     }
 
     public Call<Form> getAllForms(String authToken, String id) {

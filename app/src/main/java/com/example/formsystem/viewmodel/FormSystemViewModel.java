@@ -9,15 +9,20 @@ import androidx.lifecycle.ViewModel;
 import com.example.formsystem.client.FormSystemClient;
 import com.example.formsystem.model.Activity;
 import com.example.formsystem.model.ActivityResults;
+import com.example.formsystem.model.Answer;
 import com.example.formsystem.model.Form;
 import com.example.formsystem.model.FormResults;
+import com.example.formsystem.model.Interview;
 import com.example.formsystem.model.InterviewResults;
 import com.example.formsystem.model.Login;
+import com.example.formsystem.model.PostAnswersList;
 import com.example.formsystem.model.Questions;
 import com.example.formsystem.model.QuestionsResults;
 import com.example.formsystem.model.Token;
 import com.example.formsystem.model.User;
 import com.example.formsystem.model.UserResults;
+
+import java.util.ArrayList;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -29,6 +34,8 @@ public class FormSystemViewModel extends ViewModel {
     public MutableLiveData<UserResults> userMutableLiveData = new MutableLiveData<>();
     public MutableLiveData<FormResults> formMutableLiveData = new MutableLiveData<>();
     public MutableLiveData<InterviewResults> interviewsMutableLiveData = new MutableLiveData<>();
+    public MutableLiveData<Interview> postInterviewMutableLiveData = new MutableLiveData<>();
+    public MutableLiveData<Answer> postAnswerMutableLiveData = new MutableLiveData<>();
     public MutableLiveData<QuestionsResults> questionsMutableLiveData = new MutableLiveData<>();
     public MutableLiveData<Form> formsMutableLiveData = new MutableLiveData<>();
 
@@ -112,6 +119,23 @@ public class FormSystemViewModel extends ViewModel {
         });
     }
 
+    public void postInterview(Interview interview) {
+        FormSystemClient.getINSTANCE().postInterview(interview).enqueue(new Callback<Interview>() {
+            @Override
+            public void onResponse(@NonNull Call<Interview> call, @NonNull Response<Interview> response) {
+                Log.d("onResponse", response.toString());
+                postInterviewMutableLiveData.setValue(response.body());
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<Interview> call, @NonNull Throwable t) {
+                t.printStackTrace();
+                Log.d("onFailure", t.getMessage());
+            }
+        });
+    }
+
+
     public void getQuestions(String authToken, String id) {
         FormSystemClient.getINSTANCE().getQuestions(authToken, id).enqueue(new Callback<QuestionsResults>() {
             @Override
@@ -122,6 +146,23 @@ public class FormSystemViewModel extends ViewModel {
 
             @Override
             public void onFailure(@NonNull Call<QuestionsResults> call, @NonNull Throwable t) {
+                t.printStackTrace();
+                Log.d("onFailure", t.getMessage());
+            }
+        });
+    }
+
+
+    public void postAnswer(Answer answer) {
+        FormSystemClient.getINSTANCE().postAnswer(answer).enqueue(new Callback<Answer>() {
+            @Override
+            public void onResponse(@NonNull Call<Answer> call, @NonNull Response<Answer> response) {
+                Log.d("onResponse", response.toString());
+                postAnswerMutableLiveData.setValue(response.body());
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<Answer> call, @NonNull Throwable t) {
                 t.printStackTrace();
                 Log.d("onFailure", t.getMessage());
             }

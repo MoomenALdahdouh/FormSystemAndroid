@@ -2,10 +2,13 @@ package com.example.formsystem.interfaces;
 
 import com.example.formsystem.model.Activity;
 import com.example.formsystem.model.ActivityResults;
+import com.example.formsystem.model.Answer;
 import com.example.formsystem.model.Form;
 import com.example.formsystem.model.FormResults;
+import com.example.formsystem.model.Interview;
 import com.example.formsystem.model.InterviewResults;
 import com.example.formsystem.model.Login;
+import com.example.formsystem.model.PostAnswersList;
 import com.example.formsystem.model.QuestionsResults;
 import com.example.formsystem.model.Token;
 import com.example.formsystem.model.User;
@@ -53,6 +56,9 @@ public interface FormSystemInterface {
     @GET("forms/{id}/interviews")
     Call<InterviewResults> getInterviews(@Header("authorization") String authToken, @Path("id") String id);
 
+    @POST("interviews/create")
+    Call<Interview> postInterview(@Body Interview interview);
+
     @Headers({
             "Content-Type: application/json",
             "Accept: application/json"
@@ -60,21 +66,12 @@ public interface FormSystemInterface {
     @GET("forms/{id}/questions")
     Call<QuestionsResults> getQuestions(@Header("authorization") String authToken, @Path("id") String id);
 
+    @POST("answers/add")
+    Call<Answer> postAnswer(@Body Answer answer);
 
-    //@Headers("Content-Type: application/json")
+
     @GET("forms/{id}")
     Call<Form> getAllForms(@Header("authorization") String authToken, @Path("id") String id);
 
-   /* @GET("movie/{movie_id}")
-    Call<DetailMovie> getDetailMovieById(@Path("movie_id") String movie_id, @Query("api_key") String api_key);*/
-
-    /*@GET("movie/upcoming")
-    Call<MoviesModel> getLatestTrailer(@Query("api_key") String api_key, @Query("page") String page, @Query("sort_by") String release_date);
-
-    @GET("movie/popular")
-    Call<MoviesModel> getMoviesPopular(@Query("api_key") String api_key, @Query("page") String page);
-
-    @GET("movie/top_rated")
-    Call<MoviesModel> getMoviesTopRated(@Query("api_key") String api_key, @Query("page") String page);*/
 
 }
