@@ -111,6 +111,7 @@ public class MakeInterviewActivity extends AppCompatActivity implements OnMapRea
         recyclerView.setAdapter(questionsAdapter);
         recyclerView.setHasFixedSize(true);
         binding.constraintLayoutEmptyData.setVisibility(View.GONE);
+        binding.loadingDataConstraint.setVisibility(View.GONE);
         binding.textViewErrorLocation.setVisibility(View.GONE);
         Intent intent = getIntent();
         if (intent != null && intent.hasExtra(ViewActivitiesActivity.FORM_ID)) {
@@ -222,12 +223,14 @@ public class MakeInterviewActivity extends AppCompatActivity implements OnMapRea
     }
 
     private void getFormQuestions() {
+        binding.loadingDataConstraint.setVisibility(View.VISIBLE);
         questionsSystemViewModel.getQuestions(token, formId);
         questionsSystemViewModel.questionsMutableLiveData.observe(this, new Observer<QuestionsResults>() {
             @SuppressLint("NotifyDataSetChanged")
             @Override
             public void onChanged(QuestionsResults questionsResults) {
                 try {
+                    binding.loadingDataConstraint.setVisibility(View.GONE);
                     questionsArrayList = questionsResults.getQuestions();
                     if (!questionsArrayList.isEmpty()) {
                         binding.constraintLayoutEmptyData.setVisibility(View.GONE);

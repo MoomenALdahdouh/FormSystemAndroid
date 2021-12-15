@@ -58,6 +58,7 @@ public class ViewActivitiesActivity extends AppCompatActivity {
         recyclerView.setAdapter(interviewsAdapter);
         recyclerView.setHasFixedSize(true);
         binding.constraintLayoutEmptyData.setVisibility(View.GONE);
+        binding.loadingDataConstraint.setVisibility(View.GONE);
         Intent intent = getIntent();
         if (intent != null && intent.hasExtra(ActivitiesAdapter.ACTIVITY_ID)) {
             activityId = intent.getStringExtra(ActivitiesAdapter.ACTIVITY_ID);
@@ -68,12 +69,14 @@ public class ViewActivitiesActivity extends AppCompatActivity {
     }
 
     private void getInterviews(String formId) {
+        binding.loadingDataConstraint.setVisibility(View.VISIBLE);
         interviewsSystemViewModel.getInterviews(token, formId);
         interviewsSystemViewModel.interviewsMutableLiveData.observe(this, new Observer<InterviewResults>() {
             @SuppressLint("NotifyDataSetChanged")
             @Override
             public void onChanged(InterviewResults interviewResults) {
                 try {
+                    binding.loadingDataConstraint.setVisibility(View.GONE);
                     interviewArrayList = interviewResults.getInterviews();
                     if (!interviewArrayList.isEmpty()) {
                         binding.constraintLayoutEmptyData.setVisibility(View.GONE);

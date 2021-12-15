@@ -29,4 +29,7 @@
     <string name="update">Update</string>
     <string name="save_update">Save Update</string>
     <string name="submit_interview">Submit Interview</string>
+    <string name="wait_a_moment_n_loading_data">Wait a moment \n Loading data …</string>
+    <string name="loading">Loading …</string>
+
 </resources>

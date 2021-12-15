@@ -32,7 +32,6 @@ import android.widget.Toast;
 import com.example.formsystem.R;
 import com.example.formsystem.adapter.InterviewsAdapter;
 import com.example.formsystem.adapter.QuestionsAdapter;
-import com.example.formsystem.databinding.ActivityMakeInterviewBinding;
 import com.example.formsystem.databinding.ActivityViewInterviewBinding;
 import com.example.formsystem.model.Answer;
 import com.example.formsystem.model.AnswersResults;
@@ -119,6 +118,7 @@ public class ViewInterviewActivity extends AppCompatActivity implements OnMapRea
         recyclerView.setAdapter(questionsAdapter);
         recyclerView.setHasFixedSize(true);
         binding.constraintLayoutEmptyData.setVisibility(View.GONE);
+        binding.loadingDataConstraint.setVisibility(View.GONE);
         binding.textViewErrorLocation.setVisibility(View.GONE);
         Intent intent = getIntent();
         if (intent != null && intent.hasExtra(InterviewsAdapter.FORM_ID)) {
@@ -192,6 +192,20 @@ public class ViewInterviewActivity extends AppCompatActivity implements OnMapRea
         alertadd.show();
     }
 
+    @SuppressLint("UseCompatLoadingForDrawables")
+    private void loadingDataDialog() {
+        AlertDialog.Builder dialog = new AlertDialog.Builder(ViewInterviewActivity.this);
+        LayoutInflater factory = LayoutInflater.from(ViewInterviewActivity.this);
+        final View view = factory.inflate(R.layout.alert_dialog, null);
+        /*ImageView close = view.findViewById(R.id.imageView6);
+        imageView = view.findViewById(R.id.imageViewDialog);
+        textView = view.findViewById(R.id.textViewMessage);
+        imageView.setImageResource(R.drawable.loading);
+        textView.setText(R.string.running_to_save_interview);*/
+        dialog.setView(view);
+        dialog.show();
+    }
+
     private void postInterview(Interview interview) {
         postInterviewSystemViewModel.postInterview(interview);
         postInterviewSystemViewModel.postInterviewMutableLiveData.observe(this, new Observer<Interview>() {
@@ -245,12 +259,14 @@ public class ViewInterviewActivity extends AppCompatActivity implements OnMapRea
     }
 
     private void getFormQuestions() {
+        binding.loadingDataConstraint.setVisibility(View.VISIBLE);
         questionsSystemViewModel.getQuestions(token, formId);
         questionsSystemViewModel.questionsMutableLiveData.observe(this, new Observer<QuestionsResults>() {
             @SuppressLint("NotifyDataSetChanged")
             @Override
             public void onChanged(QuestionsResults questionsResults) {
                 try {
+                    binding.loadingDataConstraint.setVisibility(View.GONE);
                     questionsArrayList = questionsResults.getQuestions();
                     if (!questionsArrayList.isEmpty()) {
                         binding.constraintLayoutEmptyData.setVisibility(View.GONE);

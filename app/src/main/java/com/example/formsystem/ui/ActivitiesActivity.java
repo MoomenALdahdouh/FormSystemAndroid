@@ -52,6 +52,7 @@ public class ActivitiesActivity extends AppCompatActivity {
         recyclerView.setAdapter(activitiesAdapter);
         recyclerView.setHasFixedSize(true);
         binding.constraintLayoutEmptyData.setVisibility(View.GONE);
+        binding.loadingDataConstraint.setVisibility(View.GONE);
         getActivities();
         getUserDetails();
 
@@ -76,11 +77,13 @@ public class ActivitiesActivity extends AppCompatActivity {
     }
 
     private void getActivities() {
+        binding.loadingDataConstraint.setVisibility(View.VISIBLE);
         activitiesSystemViewModel.getAllActivities(token, userId);
         activitiesSystemViewModel.activitiesMutableLiveData.observe(this, new Observer<ActivityResults>() {
             @SuppressLint("NotifyDataSetChanged")
             @Override
             public void onChanged(ActivityResults activityResults) {
+                binding.loadingDataConstraint.setVisibility(View.GONE);
                 activityArrayList = activityResults.getResults();
                 if (!activityArrayList.isEmpty()) {
                     binding.constraintLayoutEmptyData.setVisibility(View.GONE);
