@@ -79,6 +79,7 @@ public class ViewActivitiesActivity extends AppCompatActivity {
                         binding.constraintLayoutEmptyData.setVisibility(View.GONE);
                         interviewsAdapter.setList(interviewArrayList);
                         interviewsAdapter.notifyDataSetChanged();
+                        interviewsAdapter.setFormId(formId);
                     } else
                         binding.constraintLayoutEmptyData.setVisibility(View.VISIBLE);
                 } catch (Exception e) {

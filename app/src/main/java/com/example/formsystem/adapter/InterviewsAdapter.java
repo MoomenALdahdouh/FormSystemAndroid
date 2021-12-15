@@ -22,8 +22,10 @@ import java.util.ArrayList;
 
 public class InterviewsAdapter extends RecyclerView.Adapter<InterviewsAdapter.ViewHolder> {
     public static final String INTERVIEW_ID = "INTERVIEW_ID";
+    public static final String FORM_ID = "FORM_ID";
     private Context context;
     private ArrayList<Interview> interviewsArrayList;
+    private String formId;
 
     public InterviewsAdapter(Context context) {
         this.context = context;
@@ -31,6 +33,10 @@ public class InterviewsAdapter extends RecyclerView.Adapter<InterviewsAdapter.Vi
 
     public void setList(ArrayList<Interview> interviewsArrayList) {
         this.interviewsArrayList = interviewsArrayList;
+    }
+
+    public void setFormId(String formId) {
+        this.formId = formId;
     }
 
     @NonNull
@@ -75,6 +81,7 @@ public class InterviewsAdapter extends RecyclerView.Adapter<InterviewsAdapter.Vi
                     String interviewId = activityClicked.getId();
                     Intent intent = new Intent(context, ViewInterviewActivity.class);
                     intent.putExtra(INTERVIEW_ID, interviewId);
+                    intent.putExtra(FORM_ID, formId);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     context.startActivity(intent);
                 }

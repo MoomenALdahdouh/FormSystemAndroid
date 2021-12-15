@@ -25,4 +25,7 @@
     <string name="the_location_required">The Location Required!</string>
     <string name="success_select_location">Success Select Location</string>
     <string name="current_location">Current Location</string>
+    <string name="update">Update</string>
+    <string name="save_update">Save Update</string>
+    <string name="submit_interview">Submit Interview</string>
 </resources>

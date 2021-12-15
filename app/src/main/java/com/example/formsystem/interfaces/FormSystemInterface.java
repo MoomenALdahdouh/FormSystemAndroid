@@ -69,6 +69,9 @@ public interface FormSystemInterface {
     @POST("answers/create")
     Call<PostAnswersList> postAnswer(@Body PostAnswersList answer);
 
+    /*@GET("interviews/{id}}/answers")
+    Call<InterviewResults> getInterviews(@Header("authorization") String authToken, @Path("id") String id);*/
+
 
     @GET("forms/{id}")
     Call<Form> getAllForms(@Header("authorization") String authToken, @Path("id") String id);
