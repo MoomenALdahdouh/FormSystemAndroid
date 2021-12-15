@@ -3,6 +3,7 @@ package com.example.formsystem.interfaces;
 import com.example.formsystem.model.Activity;
 import com.example.formsystem.model.ActivityResults;
 import com.example.formsystem.model.Answer;
+import com.example.formsystem.model.AnswersResults;
 import com.example.formsystem.model.Form;
 import com.example.formsystem.model.FormResults;
 import com.example.formsystem.model.Interview;
@@ -69,8 +70,8 @@ public interface FormSystemInterface {
     @POST("answers/create")
     Call<PostAnswersList> postAnswer(@Body PostAnswersList answer);
 
-    /*@GET("interviews/{id}}/answers")
-    Call<InterviewResults> getInterviews(@Header("authorization") String authToken, @Path("id") String id);*/
+    @GET("interviews/{id}/answers")
+    Call<AnswersResults> getAnswers(@Header("authorization") String authToken, @Path("id") String id);
 
 
     @GET("forms/{id}")

@@ -35,6 +35,8 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.View
     private Context context;
     private ArrayList<Questions> questionsArrayList;
     private ArrayList<Questions> answerArrayList;
+    private ArrayList<Answer> answersFromDbArrayList;
+    private boolean updateInterview = false;
 
     public QuestionsAdapter(Context context) {
         this.context = context;
@@ -43,6 +45,14 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.View
     public void setList(ArrayList<Questions> interviewsArrayList) {
         this.questionsArrayList = interviewsArrayList;
         this.answerArrayList = interviewsArrayList;
+    }
+
+    public void setAnswersFromDbList(ArrayList<Answer> answersFromDbArrayList) {
+        this.answersFromDbArrayList = answersFromDbArrayList;
+    }
+
+    public void isUpdateInterview(boolean updateInterview) {
+        this.updateInterview = updateInterview;
     }
 
     public ArrayList<Questions> getAnswerArrayList() {
@@ -62,6 +72,15 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.View
     public void onBindViewHolder(@NonNull QuestionsAdapter.ViewHolder holder, @SuppressLint("RecyclerView") int position) {
         try {
             Questions questions = questionsArrayList.get(position);
+            holder.textViewQuestionTitle.setText(questions.getTitle());
+
+            if (updateInterview) {
+                for (int i = 0; i < answersFromDbArrayList.size(); i++) {
+                    Answer answer = answersFromDbArrayList.get(position);
+                    if (answer.getQuestions_fk_id().equals(questions.getId()))
+                        holder.editTextQuestion.setText(answer.getAnswer().toString());
+                }
+            }
             switch (questions.getType()) {
                 case "0"://Text
                     break;
@@ -146,8 +165,6 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.View
                     });
                     break;
             }
-
-            holder.textViewQuestionTitle.setText(questions.getTitle());
 
             /**/
             TextWatcher textWatcher = new TextWatcher() {

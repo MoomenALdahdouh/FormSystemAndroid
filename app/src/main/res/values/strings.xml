@@ -20,6 +20,7 @@
     <string name="interview_title">Interview Title</string>
     <string name="success_submit_interview">Success Submit Interview</string>
     <string name="running_to_submit_interview">Running to submit interview …</string>
+    <string name="running_to_save_interview">Save interview update …</string>
     <string name="interview_title_required">Interview Title Required</string>
     <string name="location">Location</string>
     <string name="the_location_required">The Location Required!</string>

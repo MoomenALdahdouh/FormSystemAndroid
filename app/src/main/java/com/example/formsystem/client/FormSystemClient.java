@@ -6,6 +6,7 @@ import com.example.formsystem.interfaces.FormSystemInterface;
 import com.example.formsystem.model.Activity;
 import com.example.formsystem.model.ActivityResults;
 import com.example.formsystem.model.Answer;
+import com.example.formsystem.model.AnswersResults;
 import com.example.formsystem.model.Form;
 import com.example.formsystem.model.FormResults;
 import com.example.formsystem.model.Interview;
@@ -103,6 +104,10 @@ public class FormSystemClient {
 
     public Call<PostAnswersList> postAnswer(PostAnswersList answer) {
         return formSystemInterface.postAnswer(answer);
+    }
+
+    public Call<AnswersResults> getAnswers(String authToken, String id) {
+        return formSystemInterface.getAnswers("Bearer " + authToken, id);
     }
 
     public Call<Form> getAllForms(String authToken, String id) {

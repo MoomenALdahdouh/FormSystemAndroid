@@ -214,7 +214,7 @@
         app:layout_constraintStart_toStartOf="parent">
 
         <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/buttonSubmitInterview"
+            android:id="@+id/buttonUpdateInterview"
             android:layout_width="wrap_content"
             android:layout_height="?actionBarSize"
             android:background="@drawable/corner_left_pup"

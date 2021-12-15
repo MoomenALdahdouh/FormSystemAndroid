@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.formsystem.R;
 import com.example.formsystem.model.Activity;
+import com.example.formsystem.model.Form;
 import com.example.formsystem.model.Interview;
 import com.example.formsystem.ui.ViewActivitiesActivity;
 import com.example.formsystem.ui.ViewInterviewActivity;
@@ -23,9 +24,13 @@ import java.util.ArrayList;
 public class InterviewsAdapter extends RecyclerView.Adapter<InterviewsAdapter.ViewHolder> {
     public static final String INTERVIEW_ID = "INTERVIEW_ID";
     public static final String FORM_ID = "FORM_ID";
+    public static final String INTERVIEW_TITLE = "INTERVIEW_TITLE";
+    public static final String INTERVIEW_LOCATION = "INTERVIEW_LOCATION";
+    public static final String INTERVIEW_LATITUDE = "INTERVIEW_LATITUDE";
+    public static final String INTERVIEW_LONGITUDE = "INTERVIEW_LONGITUDE";
     private Context context;
     private ArrayList<Interview> interviewsArrayList;
-    private String formId;
+    private Form form;
 
     public InterviewsAdapter(Context context) {
         this.context = context;
@@ -35,8 +40,8 @@ public class InterviewsAdapter extends RecyclerView.Adapter<InterviewsAdapter.Vi
         this.interviewsArrayList = interviewsArrayList;
     }
 
-    public void setFormId(String formId) {
-        this.formId = formId;
+    public void setForm(Form form) {
+        this.form = form;
     }
 
     @NonNull
@@ -77,11 +82,19 @@ public class InterviewsAdapter extends RecyclerView.Adapter<InterviewsAdapter.Vi
                 @Override
                 public void onClick(View view) {
                     int adapterPosition = getAdapterPosition();
-                    Interview activityClicked = interviewsArrayList.get(adapterPosition);
-                    String interviewId = activityClicked.getId();
+                    Interview interviewClicked = interviewsArrayList.get(adapterPosition);
+                    String interviewId = interviewClicked.getId();
+                    String interviewTitle = interviewClicked.getTitle();
+                    String interviewLocation = interviewClicked.getId();
+                    String interviewLatitude = interviewClicked.getLatitude();
+                    String interviewLongitude = interviewClicked.getLongitude();
                     Intent intent = new Intent(context, ViewInterviewActivity.class);
                     intent.putExtra(INTERVIEW_ID, interviewId);
-                    intent.putExtra(FORM_ID, formId);
+                    intent.putExtra(INTERVIEW_TITLE, interviewTitle);
+                    intent.putExtra(INTERVIEW_LOCATION, interviewLocation);
+                    intent.putExtra(INTERVIEW_LATITUDE, interviewLatitude);
+                    intent.putExtra(INTERVIEW_LONGITUDE, interviewLongitude);
+                    intent.putExtra(FORM_ID, form.getId());
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     context.startActivity(intent);
                 }

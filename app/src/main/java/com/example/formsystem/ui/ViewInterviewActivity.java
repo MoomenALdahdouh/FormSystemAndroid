@@ -30,10 +30,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.formsystem.R;
+import com.example.formsystem.adapter.InterviewsAdapter;
 import com.example.formsystem.adapter.QuestionsAdapter;
 import com.example.formsystem.databinding.ActivityMakeInterviewBinding;
 import com.example.formsystem.databinding.ActivityViewInterviewBinding;
 import com.example.formsystem.model.Answer;
+import com.example.formsystem.model.AnswersResults;
 import com.example.formsystem.model.Interview;
 import com.example.formsystem.model.PostAnswersList;
 import com.example.formsystem.model.Questions;
@@ -62,11 +64,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Locale;
 
-public class ViewInterviewActivity extends AppCompatActivity  implements OnMapReadyCallback {
+public class ViewInterviewActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     private ActivityViewInterviewBinding binding;
-    private String formId;
     private FormSystemViewModel questionsSystemViewModel;
+    private FormSystemViewModel answersSystemViewModel;
     private FormSystemViewModel postInterviewSystemViewModel;
     private FormSystemViewModel postAnswerSystemViewModel;
     private String token;
@@ -74,12 +76,15 @@ public class ViewInterviewActivity extends AppCompatActivity  implements OnMapRe
     private RecyclerView recyclerView;
     private QuestionsAdapter questionsAdapter;
     private ArrayList<Questions> questionsArrayList;
+    private ArrayList<Answer> answersFromDbArrayList;
     private ArrayList<Questions> questionAnswersArrayList;
     private ArrayList<Answer> answersArrayList;
     private ImageView imageView;
     private TextView textView;
     private String interviewTitle = "";
     private String interviewLocation = "";
+    private String formId;
+    private String interviewId = "";
     private double latitude;
     private double longitude;
     private LocationRequest locationRequest;
@@ -99,31 +104,48 @@ public class ViewInterviewActivity extends AppCompatActivity  implements OnMapRe
         token = PreferenceUtils.getToken(ViewInterviewActivity.this);
         userId = PreferenceUtils.getToken(ViewInterviewActivity.this);
         questionsSystemViewModel = new ViewModelProvider(this).get(FormSystemViewModel.class);
+        answersSystemViewModel = new ViewModelProvider(this).get(FormSystemViewModel.class);
         postInterviewSystemViewModel = new ViewModelProvider(this).get(FormSystemViewModel.class);
         postAnswerSystemViewModel = new ViewModelProvider(this).get(FormSystemViewModel.class);
         recyclerView = binding.recyclerView;
         questionAnswersArrayList = new ArrayList<>();
         answersArrayList = new ArrayList<>();
+        answersFromDbArrayList = new ArrayList<>();
         questionsAdapter = new QuestionsAdapter(ViewInterviewActivity.this);
         questionsArrayList = new ArrayList<>();
         recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
         questionsAdapter.setList(questionsArrayList);
+        questionsAdapter.isUpdateInterview(true);
         recyclerView.setAdapter(questionsAdapter);
         recyclerView.setHasFixedSize(true);
         binding.constraintLayoutEmptyData.setVisibility(View.GONE);
         binding.textViewErrorLocation.setVisibility(View.GONE);
         Intent intent = getIntent();
-        if (intent != null && intent.hasExtra(ViewActivitiesActivity.FORM_ID)) {
-            formId = intent.getStringExtra(ViewActivitiesActivity.FORM_ID);
+        if (intent != null && intent.hasExtra(InterviewsAdapter.FORM_ID)) {
+            formId = intent.getStringExtra(InterviewsAdapter.FORM_ID);
+            interviewId = intent.getStringExtra(InterviewsAdapter.INTERVIEW_ID);
+            interviewTitle = intent.getStringExtra(InterviewsAdapter.INTERVIEW_TITLE);
+            interviewLocation = intent.getStringExtra(InterviewsAdapter.INTERVIEW_LOCATION);
+            latitude = Double.parseDouble(intent.getStringExtra(InterviewsAdapter.INTERVIEW_LATITUDE));
+            longitude = Double.parseDouble(intent.getStringExtra(InterviewsAdapter.INTERVIEW_LONGITUDE));
             getFormQuestions();
-            submitInterview();
+            updateInterview();
             getCurrentLocation();
+            fetchInterviewData();
         }
+    }
+
+    @SuppressLint("SetTextI18n")
+    private void fetchInterviewData() {
+        binding.textViewErrorLocation.setVisibility(View.VISIBLE);
+        binding.textViewErrorLocation.setText("Current Location: " + interviewLocation + ", " + latitude + ", " + longitude);
+        binding.textViewErrorLocation.setTextColor(getColor(R.color.teal_700));
+        binding.editTextInterviewTitle.setText(interviewTitle);
 
     }
 
-    private void submitInterview() {
-        binding.buttonSubmitInterview.setOnClickListener(new View.OnClickListener() {
+    private void updateInterview() {
+        binding.buttonUpdateInterview.setOnClickListener(new View.OnClickListener() {
             @SuppressLint("ResourceAsColor")
             @Override
             public void onClick(View view) {
@@ -165,7 +187,7 @@ public class ViewInterviewActivity extends AppCompatActivity  implements OnMapRe
         imageView = view.findViewById(R.id.imageViewDialog);
         textView = view.findViewById(R.id.textViewMessage);
         imageView.setImageResource(R.drawable.loading);
-        textView.setText(R.string.running_to_submit_interview);
+        textView.setText(R.string.running_to_save_interview);
         alertadd.setView(view);
         alertadd.show();
     }
@@ -234,8 +256,25 @@ public class ViewInterviewActivity extends AppCompatActivity  implements OnMapRe
                         binding.constraintLayoutEmptyData.setVisibility(View.GONE);
                         questionsAdapter.setList(questionsArrayList);
                         questionsAdapter.notifyDataSetChanged();
+                        getInterviewsAnswers();
                     } else
                         binding.constraintLayoutEmptyData.setVisibility(View.VISIBLE);
+                } catch (Exception e) {
+                }
+            }
+        });
+    }
+
+    private void getInterviewsAnswers() {
+        questionsSystemViewModel.getAnswers(token, interviewId);
+        answersSystemViewModel.answersMutableLiveData.observe(this, new Observer<AnswersResults>() {
+            @SuppressLint("NotifyDataSetChanged")
+            @Override
+            public void onChanged(AnswersResults answersResults) {
+                try {
+                    answersFromDbArrayList = answersResults.getAnswers();
+                    questionsAdapter.setAnswersFromDbList(answersFromDbArrayList);
+                    questionsAdapter.notifyDataSetChanged();
                 } catch (Exception e) {
                 }
             }
@@ -285,6 +324,7 @@ public class ViewInterviewActivity extends AppCompatActivity  implements OnMapRe
                                             binding.textViewErrorLocation.setText("Current Location: " + interviewLocation + ", " + latitude + ", " + longitude);
                                             binding.textViewErrorLocation.setTextColor(getColor(R.color.teal_700));
 
+                                            /*Map dialog*/
                                             AlertDialog.Builder alertDialog = new AlertDialog.Builder(ViewInterviewActivity.this);
                                             LayoutInflater factory = LayoutInflater.from(ViewInterviewActivity.this);
                                             if (viewMap != null) {

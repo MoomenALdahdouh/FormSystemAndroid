@@ -107,6 +107,7 @@ public class MakeInterviewActivity extends AppCompatActivity implements OnMapRea
         questionsArrayList = new ArrayList<>();
         recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
         questionsAdapter.setList(questionsArrayList);
+        questionsAdapter.isUpdateInterview(false);
         recyclerView.setAdapter(questionsAdapter);
         recyclerView.setHasFixedSize(true);
         binding.constraintLayoutEmptyData.setVisibility(View.GONE);
