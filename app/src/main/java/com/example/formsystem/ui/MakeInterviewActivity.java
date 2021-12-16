@@ -10,6 +10,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Base64;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -26,6 +27,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.view.InflateException;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -68,7 +70,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.Locale;
 import java.util.Random;
 
@@ -219,12 +220,14 @@ public class MakeInterviewActivity extends AppCompatActivity implements OnMapRea
     }
 
     private void postAnswer(PostAnswersList answer) {
+        Log.d("onResponse", "Answer step 2 post : " + answer.getAnswersList().get(4).getAnswer());
         postAnswerSystemViewModel.postAnswer(answer);
         postAnswerSystemViewModel.postAnswerMutableLiveData.observe(this, new Observer<PostAnswersList>() {
             @SuppressLint("NotifyDataSetChanged")
             @Override
             public void onChanged(PostAnswersList response) {
                 try {
+                    Log.d("onResponse", "Answer step 3 response : " + response);
                     if (response != null) {
                         imageView.setImageResource(R.drawable.success);
                         textView.setText(R.string.success_submit_interview);
@@ -235,7 +238,7 @@ public class MakeInterviewActivity extends AppCompatActivity implements OnMapRea
                                 finish();
                             }
                         }, 2000);
-                    }else {
+                    } else {
                         imageView.setImageResource(R.drawable.ic_baseline_error_outline_24);
                         textView.setText(R.string.failed_submit_interview);
                     }
@@ -478,9 +481,10 @@ public class MakeInterviewActivity extends AppCompatActivity implements OnMapRea
             ByteArrayOutputStream byteArrayInputStream = new ByteArrayOutputStream();
             compressor.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayInputStream);
             byte[] thumpData = byteArrayInputStream.toByteArray();
-            String imageAnswer = android.util.Base64.encodeToString(thumpData, android.util.Base64.DEFAULT);
+            String imageAnswer = Base64.encodeToString(thumpData, Base64.DEFAULT);
             Answer answer = new Answer(questionId, "", imageAnswer, "4");
             imageAnswersList.add(answer);
+            Log.d("onResponse", "Answer step 1: " + answer.getAnswer());
             Toast.makeText(getApplicationContext(), imageName, Toast.LENGTH_LONG).show();
             //StorageReference filePath = storageReference.child("category_image/").child(imageName);
             // UploadTask uploadTask = filePath.putBytes(thumpData);
