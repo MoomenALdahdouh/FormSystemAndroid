@@ -89,14 +89,14 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.View
             Questions questions = questionsArrayList.get(position);
             holder.textViewQuestionTitle.setText(questions.getTitle());
 
-            if (updateInterview) {
+            if (updateInterview) {//If update interview fill answer
                 for (int i = 0; i < answersFromDbArrayList.size(); i++) {
                     Answer answer = answersFromDbArrayList.get(position);
                     if (answer.getQuestions_fk_id().equals(questions.getId()))
                         holder.editTextQuestion.setText(answer.getAnswer().toString());
                 }
             }
-            switch (questions.getType()) {
+            switch (questions.getType()) {//Custom design edit text with question type
                 case "0"://Text
                     break;
                 case "1"://Text
@@ -127,7 +127,7 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.View
                                     DatePickerDialog mDatePicker = new DatePickerDialog(context, new DatePickerDialog.OnDateSetListener() {
                                         public void onDateSet(DatePicker datepicker, int selectedyear, int selectedmonth, int selectedday) {
                                             String selectedDate = selectedyear + "/" + selectedmonth + "/" + selectedday;
-                                            Answer answer = new Answer(questions.getId(), "", selectedDate,questions.getType());
+                                            Answer answer = new Answer(questions.getId(), "", selectedDate, questions.getType());
                                             answerArrayList.get(position).setAnswer(answer);
                                             holder.editTextQuestion.setText(selectedDate);
                                         }
@@ -164,12 +164,15 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.View
                                     /*Upload image*/
 
                                     //((MakeInterviewActivity)context).cropImage();questionPosition
-                                    Answer answer = new Answer(questions.getId(), "", "Uploaded",questions.getType());
+                                    Answer answer = new Answer(questions.getId(), "", "UploadImage.jpg", questions.getType());
                                     answerArrayList.get(position).setAnswer(answer);
-                                    ((MakeInterviewActivity)context).setQuestionId(questions.getId());
+                                    if (updateInterview)
+                                        ((ViewInterviewActivity) context).setQuestionId(questions.getId());
+                                    else
+                                        ((MakeInterviewActivity) context).setQuestionId(questions.getId());
                                     cropImage();
                                     /**/
-                                    holder.editTextQuestion.setText("Uploaded");
+                                    holder.editTextQuestion.setText("UploadImage.jpg");
                                     return true;
                                 }
                             }
@@ -198,9 +201,14 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.View
                 public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                     //TODO:: Action when change text in edit text
                     String questionAnswer = holder.editTextQuestion.getText().toString();
-                    Answer answer = new Answer(questions.getId(), "", questionAnswer,questions.getType());
-                    //questionsArrayList.get(position).setAnswer(answer);
-                    answerArrayList.get(position).setAnswer(answer);
+                    if (updateInterview) {
+                        Answer answer = answersFromDbArrayList.get(position);
+                        answerArrayList.get(position).setAnswer(answer);
+                    } else {
+                        Answer answer = new Answer(questions.getId(), "", questionAnswer, questions.getType());
+                        answerArrayList.get(position).setAnswer(answer);
+                    }
+
                 }
 
                 @Override
@@ -215,6 +223,19 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.View
 
         }
     }
+
+    public static String randomFakeName() {
+        Random generator = new Random();
+        StringBuilder randomStringBuilder = new StringBuilder();
+        int randomLength = generator.nextInt(15);
+        char tempChar;
+        for (int i = 0; i < randomLength; i++) {
+            tempChar = (char) (generator.nextInt(96) + 32);
+            randomStringBuilder.append(tempChar);
+        }
+        return randomStringBuilder.toString();
+    }
+
     private void cropImage() {
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions((Activity) context, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 1);

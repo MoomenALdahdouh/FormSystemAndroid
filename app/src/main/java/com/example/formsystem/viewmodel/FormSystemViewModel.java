@@ -37,6 +37,7 @@ public class FormSystemViewModel extends ViewModel {
     public MutableLiveData<InterviewResults> interviewsMutableLiveData = new MutableLiveData<>();
     public MutableLiveData<Interview> postInterviewMutableLiveData = new MutableLiveData<>();
     public MutableLiveData<PostAnswersList> postAnswerMutableLiveData = new MutableLiveData<>();
+    public MutableLiveData<PostAnswersList> updateAnswerMutableLiveData = new MutableLiveData<>();
     public MutableLiveData<QuestionsResults> questionsMutableLiveData = new MutableLiveData<>();
     public MutableLiveData<AnswersResults> answersMutableLiveData = new MutableLiveData<>();
     public MutableLiveData<Form> formsMutableLiveData = new MutableLiveData<>();
@@ -178,6 +179,22 @@ public class FormSystemViewModel extends ViewModel {
             public void onResponse(@NonNull Call<PostAnswersList> call, @NonNull Response<PostAnswersList> response) {
                 Log.d("onResponse", response.toString());
                 postAnswerMutableLiveData.setValue(response.body());
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<PostAnswersList> call, @NonNull Throwable t) {
+                t.printStackTrace();
+                Log.d("onFailure", t.getMessage());
+            }
+        });
+    }
+
+    public void updateAnswers(PostAnswersList answer) {
+        FormSystemClient.getINSTANCE().updateAnswers(answer).enqueue(new Callback<PostAnswersList>() {
+            @Override
+            public void onResponse(@NonNull Call<PostAnswersList> call, @NonNull Response<PostAnswersList> response) {
+                Log.d("onResponse", response.toString());
+                updateAnswerMutableLiveData.setValue(response.body());
             }
 
             @Override

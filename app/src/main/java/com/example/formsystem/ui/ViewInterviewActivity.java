@@ -15,12 +15,16 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Base64;
+import android.util.Log;
 import android.view.InflateException;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -58,10 +62,16 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.theartofdev.edmodo.cropper.CropImage;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Locale;
+import java.util.Random;
+
+import id.zelory.compressor.Compressor;
 
 public class ViewInterviewActivity extends AppCompatActivity implements OnMapReadyCallback {
 
@@ -70,6 +80,7 @@ public class ViewInterviewActivity extends AppCompatActivity implements OnMapRea
     private FormSystemViewModel answersSystemViewModel;
     private FormSystemViewModel postInterviewSystemViewModel;
     private FormSystemViewModel postAnswerSystemViewModel;
+    private FormSystemViewModel updateAnswerSystemViewModel;
     private String token;
     private String userId;
     private RecyclerView recyclerView;
@@ -106,6 +117,7 @@ public class ViewInterviewActivity extends AppCompatActivity implements OnMapRea
         answersSystemViewModel = new ViewModelProvider(this).get(FormSystemViewModel.class);
         postInterviewSystemViewModel = new ViewModelProvider(this).get(FormSystemViewModel.class);
         postAnswerSystemViewModel = new ViewModelProvider(this).get(FormSystemViewModel.class);
+        updateAnswerSystemViewModel = new ViewModelProvider(this).get(FormSystemViewModel.class);
         recyclerView = binding.recyclerView;
         questionAnswersArrayList = new ArrayList<>();
         answersArrayList = new ArrayList<>();
@@ -120,6 +132,12 @@ public class ViewInterviewActivity extends AppCompatActivity implements OnMapRea
         binding.constraintLayoutEmptyData.setVisibility(View.GONE);
         binding.loadingDataConstraint.setVisibility(View.GONE);
         binding.textViewErrorLocation.setVisibility(View.GONE);
+        binding.editTextInterviewTitle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Toast.makeText(getApplicationContext(), "Update interview tile not available", Toast.LENGTH_LONG).show();
+            }
+        });
         Intent intent = getIntent();
         if (intent != null && intent.hasExtra(InterviewsAdapter.FORM_ID)) {
             formId = intent.getStringExtra(InterviewsAdapter.FORM_ID);
@@ -141,7 +159,7 @@ public class ViewInterviewActivity extends AppCompatActivity implements OnMapRea
         binding.textViewErrorLocation.setText("Current Location: " + interviewLocation + ", " + latitude + ", " + longitude);
         binding.textViewErrorLocation.setTextColor(getColor(R.color.teal_700));
         binding.editTextInterviewTitle.setText(interviewTitle);
-
+        binding.editTextInterviewTitle.setFocusable(false);
     }
 
     private void updateInterview() {
@@ -165,7 +183,7 @@ public class ViewInterviewActivity extends AppCompatActivity implements OnMapRea
                 }
                 Interview interview = new Interview(formId, interviewTitle, interviewLocation, latitude + "", longitude + "");
                 showDialog();
-                postInterview(interview);
+                updateAnswerInterview();
             }
         });
     }
@@ -206,52 +224,44 @@ public class ViewInterviewActivity extends AppCompatActivity implements OnMapRea
         dialog.show();
     }
 
-    private void postInterview(Interview interview) {
-        postInterviewSystemViewModel.postInterview(interview);
-        postInterviewSystemViewModel.postInterviewMutableLiveData.observe(this, new Observer<Interview>() {
-            @SuppressLint("NotifyDataSetChanged")
-            @Override
-            public void onChanged(Interview interview) {
-                try {
-                    /* Success*/
-                    questionAnswersArrayList.clear();
-                    answersArrayList.clear();
-                    adapterQuestionAnswers(interview.getInterview_id());
-                } catch (Exception e) {
-                }
-            }
-        });
-    }
-
-    private void adapterQuestionAnswers(String interviewId) {
+    private void updateAnswerInterview() {
         questionAnswersArrayList = questionsAdapter.getAnswerArrayList();
         for (int i = 0; i < questionAnswersArrayList.size(); i++) {
             Questions questions = questionAnswersArrayList.get(i);
             Answer answer = questions.getAnswer();
             answer.setInterview_fk_id(interviewId);
+            for (int j = 0; j < imageAnswersList.size(); j++) {
+                if (imageAnswersList.get(j).getQuestions_fk_id().equals(questions.getId()))
+                    answer.setAnswer(imageAnswersList.get(j).getAnswer());
+            }
             answersArrayList.add(answer);
             //postAnswer(answer);
         }
         PostAnswersList postAnswersList = new PostAnswersList(answersArrayList);
-        postAnswer(postAnswersList);
+        updateAnswers(postAnswersList);
     }
 
-    private void postAnswer(PostAnswersList answer) {
-        postAnswerSystemViewModel.postAnswer(answer);
-        postAnswerSystemViewModel.postAnswerMutableLiveData.observe(this, new Observer<PostAnswersList>() {
+    private void updateAnswers(PostAnswersList answer) {
+        updateAnswerSystemViewModel.updateAnswers(answer);
+        updateAnswerSystemViewModel.updateAnswerMutableLiveData.observe(this, new Observer<PostAnswersList>() {
             @SuppressLint("NotifyDataSetChanged")
             @Override
             public void onChanged(PostAnswersList response) {
                 try {
-                    imageView.setImageResource(R.drawable.success);
-                    textView.setText(R.string.success_submit_interview);
-                    new Handler().postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            //Toast.makeText(getApplicationContext(), "" + response.getSuccess(), Toast.LENGTH_SHORT).show();
-                            finish();
-                        }
-                    }, 2000);
+                    if (response != null) {
+                        imageView.setImageResource(R.drawable.success);
+                        textView.setText(R.string.success_submit_interview);
+                        new Handler().postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                //Toast.makeText(getApplicationContext(), "" + response.getSuccess(), Toast.LENGTH_SHORT).show();
+                                finish();
+                            }
+                        }, 2000);
+                    } else {
+                        imageView.setImageResource(R.drawable.ic_baseline_error_outline_24);
+                        textView.setText(R.string.failed_save_answers);
+                    }
                 } catch (Exception e) {
                 }
             }
@@ -302,7 +312,8 @@ public class ViewInterviewActivity extends AppCompatActivity implements OnMapRea
         binding.constraintLayoutLocation.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (ActivityCompat.checkSelfPermission(ViewInterviewActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(getApplicationContext(), "Update location not available", Toast.LENGTH_LONG).show();
+                /*if (ActivityCompat.checkSelfPermission(ViewInterviewActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
 
                     if (isGPSEnabled()) {
 
@@ -340,7 +351,7 @@ public class ViewInterviewActivity extends AppCompatActivity implements OnMapRea
                                             binding.textViewErrorLocation.setText("Current Location: " + interviewLocation + ", " + latitude + ", " + longitude);
                                             binding.textViewErrorLocation.setTextColor(getColor(R.color.teal_700));
 
-                                            /*Map dialog*/
+                                            *//*Map dialog*//*
                                             AlertDialog.Builder alertDialog = new AlertDialog.Builder(ViewInterviewActivity.this);
                                             LayoutInflater factory = LayoutInflater.from(ViewInterviewActivity.this);
                                             if (viewMap != null) {
@@ -351,7 +362,7 @@ public class ViewInterviewActivity extends AppCompatActivity implements OnMapRea
                                             try {
                                                 viewMap = factory.inflate(R.layout.map_dialog, null);
                                             } catch (InflateException e) {
-                                                /* map is already there, just return view as it is */
+                                                *//* map is already there, just return view as it is *//*
                                             }
                                             //viewMap = factory.inflate(R.layout.map_dialog, null);
                                             TextView textView = viewMap.findViewById(R.id.textViewLocation);
@@ -372,7 +383,7 @@ public class ViewInterviewActivity extends AppCompatActivity implements OnMapRea
 
                 } else {
                     requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
-                }
+                }*/
             }
         });
     }
@@ -453,5 +464,77 @@ public class ViewInterviewActivity extends AppCompatActivity implements OnMapRea
         googleMap.addMarker(new MarkerOptions().position(latLng).title(interviewLocation));
         googleMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
 
+    }
+
+    public String questionId;
+    private ArrayList<Answer> imageAnswersList = new ArrayList<>();
+    private String imageName;
+    private Bitmap compressor;
+    private String downloadUri = null;
+    private Uri imageUri = null;
+    private static final int MAX_LENGTH = 100;
+    private String imageUrl = "";
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
+            CropImage.ActivityResult result = CropImage.getActivityResult(data);
+            if (resultCode == RESULT_OK) {
+                imageUri = result.getUri();
+                postImage();
+                //Toast.makeText(getApplicationContext(), imageUri + "", Toast.LENGTH_SHORT).show();
+            } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
+                Exception error = result.getError();
+            }
+        }
+    }
+
+    public void setQuestionId(String questionId) {
+        this.questionId = questionId;
+    }
+
+    private void postImage() {
+        if (imageUri != null) {
+            compressAndNameImage(imageUri);
+            ByteArrayOutputStream byteArrayInputStream = new ByteArrayOutputStream();
+            compressor.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayInputStream);
+            byte[] thumpData = byteArrayInputStream.toByteArray();
+            String imageAnswer = Base64.encodeToString(thumpData, Base64.DEFAULT);
+            Answer answer = new Answer(questionId, "", imageAnswer, "4");
+            imageAnswersList.add(answer);
+            Log.d("onResponse", "Answer step 1: " + answer.getAnswer());
+            Toast.makeText(getApplicationContext(), imageName, Toast.LENGTH_LONG).show();
+            //StorageReference filePath = storageReference.child("category_image/").child(imageName);
+            // UploadTask uploadTask = filePath.putBytes(thumpData);
+            /*Post*/
+        }
+    }
+
+    private void compressAndNameImage(Uri imageUri) {
+        imageName = random() + ".jpg";
+        File imageFile = new File(imageUri.getPath());
+        try {
+            compressor = new Compressor(ViewInterviewActivity.this)
+                    .setMaxHeight(240)
+                    .setMaxWidth(360)
+                    .setQuality(5)
+                    .compressToBitmap(imageFile);
+        } catch (Exception exception) {
+            exception.printStackTrace();
+        }
+    }
+
+    //Name image
+    public static String random() {
+        Random generator = new Random();
+        StringBuilder randomStringBuilder = new StringBuilder();
+        int randomLength = generator.nextInt(MAX_LENGTH);
+        char tempChar;
+        for (int i = 0; i < randomLength; i++) {
+            tempChar = (char) (generator.nextInt(96) + 32);
+            randomStringBuilder.append(tempChar);
+        }
+        return randomStringBuilder.toString();
     }
 }

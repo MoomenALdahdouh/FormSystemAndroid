@@ -240,7 +240,7 @@ public class MakeInterviewActivity extends AppCompatActivity implements OnMapRea
                         }, 2000);
                     } else {
                         imageView.setImageResource(R.drawable.ic_baseline_error_outline_24);
-                        textView.setText(R.string.failed_submit_interview);
+                        textView.setText(R.string.failed_save_answers);
                     }
 
                 } catch (Exception e) {
@@ -457,24 +457,6 @@ public class MakeInterviewActivity extends AppCompatActivity implements OnMapRea
         this.questionId = questionId;
     }
 
-    /*public void cropImage() {
-                if (ContextCompat.checkSelfPermission(MakeInterviewActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(MakeInterviewActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
-
-                } else {
-                    //TODO: Must add activity on Manifest file add this line code
-                    //            AndroidManifest.xml
-                    //            <activity
-                    //            android:name="com.theartofdev.edmodo.cropper.CropImageActivity"
-                    //            android:theme="@style/Base.Theme.AppCompat" />
-                    CropImage.activity()
-                            .setGuidelines(CropImageView.Guidelines.ON)
-                            //.setMinCropResultSize(512,512)
-                            .setBackgroundColor(Color.parseColor("#00000000"))
-                            .setAspectRatio(4, 4)
-                            .start(MakeInterviewActivity.this);
-                }
-            }*/
     private void postImage() {
         if (imageUri != null) {
             compressAndNameImage(imageUri);

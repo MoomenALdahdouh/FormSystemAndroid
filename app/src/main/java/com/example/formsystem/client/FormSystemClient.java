@@ -106,6 +106,10 @@ public class FormSystemClient {
         return formSystemInterface.postAnswer(answer);
     }
 
+    public Call<PostAnswersList> updateAnswers(PostAnswersList answer) {
+        return formSystemInterface.updateAnswers(answer);
+    }
+
     public Call<AnswersResults> getAnswers(String authToken, String id) {
         return formSystemInterface.getAnswers("Bearer " + authToken, id);
     }
