@@ -11,22 +11,26 @@ public class Answer {
     private String interview_fk_id;
     @SerializedName("answer")
     private String answer;
+    @SerializedName("type")
+    private String type;
 
 
     public Answer() {
     }
 
-    public Answer(String questions_fk_id, String interview_fk_id, String answer) {
+    public Answer(String questions_fk_id, String interview_fk_id, String answer, String type) {
         this.questions_fk_id = questions_fk_id;
         this.interview_fk_id = interview_fk_id;
         this.answer = answer;
+        this.type = type;
     }
 
-    public Answer(String id, String questions_fk_id, String interview_fk_id, String answer) {
+    public Answer(String id, String questions_fk_id, String interview_fk_id, String answer, String type) {
         this.id = id;
         this.questions_fk_id = questions_fk_id;
         this.interview_fk_id = interview_fk_id;
         this.answer = answer;
+        this.type = type;
     }
 
     public String getId() {
@@ -59,5 +63,13 @@ public class Answer {
 
     public void setAnswer(String answer) {
         this.answer = answer;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 }

@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -11,13 +12,17 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -56,10 +61,18 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.theartofdev.edmodo.cropper.CropImage;
+import com.theartofdev.edmodo.cropper.CropImageView;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Locale;
+import java.util.Random;
+
+import id.zelory.compressor.Compressor;
 
 public class MakeInterviewActivity extends AppCompatActivity implements OnMapReadyCallback {
 
@@ -193,6 +206,11 @@ public class MakeInterviewActivity extends AppCompatActivity implements OnMapRea
             Questions questions = questionAnswersArrayList.get(i);
             Answer answer = questions.getAnswer();
             answer.setInterview_fk_id(interviewId);
+            /*Get image answer if not empty*/
+            for (int j = 0; j < imageAnswersList.size(); j++) {
+                if (imageAnswersList.get(j).getQuestions_fk_id().equals(questions.getId()))
+                    answer.setAnswer(imageAnswersList.get(j).getAnswer());
+            }
             answersArrayList.add(answer);
             //postAnswer(answer);
         }
@@ -207,15 +225,21 @@ public class MakeInterviewActivity extends AppCompatActivity implements OnMapRea
             @Override
             public void onChanged(PostAnswersList response) {
                 try {
-                    imageView.setImageResource(R.drawable.success);
-                    textView.setText(R.string.success_submit_interview);
-                    new Handler().postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            //Toast.makeText(getApplicationContext(), "" + response.getSuccess(), Toast.LENGTH_SHORT).show();
-                            finish();
-                        }
-                    }, 2000);
+                    if (response != null) {
+                        imageView.setImageResource(R.drawable.success);
+                        textView.setText(R.string.success_submit_interview);
+                        new Handler().postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                //Toast.makeText(getApplicationContext(), "" + response.getSuccess(), Toast.LENGTH_SHORT).show();
+                                finish();
+                            }
+                        }, 2000);
+                    }else {
+                        imageView.setImageResource(R.drawable.ic_baseline_error_outline_24);
+                        textView.setText(R.string.failed_submit_interview);
+                    }
+
                 } catch (Exception e) {
                 }
             }
@@ -400,4 +424,95 @@ public class MakeInterviewActivity extends AppCompatActivity implements OnMapRea
         googleMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
 
     }
+
+    private String imageName;
+    private Bitmap compressor;
+    private String downloadUri = null;
+    private Uri imageUri = null;
+    private static final int MAX_LENGTH = 100;
+    private String imageUrl = "";
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
+            CropImage.ActivityResult result = CropImage.getActivityResult(data);
+            if (resultCode == RESULT_OK) {
+                imageUri = result.getUri();
+                postImage();
+                //Toast.makeText(getApplicationContext(), imageUri + "", Toast.LENGTH_SHORT).show();
+            } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
+                Exception error = result.getError();
+            }
+        }
+    }
+
+    public String questionId;
+    private ArrayList<Answer> imageAnswersList = new ArrayList<>();
+
+    public void setQuestionId(String questionId) {
+        this.questionId = questionId;
+    }
+
+    /*public void cropImage() {
+                if (ContextCompat.checkSelfPermission(MakeInterviewActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(MakeInterviewActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
+
+                } else {
+                    //TODO: Must add activity on Manifest file add this line code
+                    //            AndroidManifest.xml
+                    //            <activity
+                    //            android:name="com.theartofdev.edmodo.cropper.CropImageActivity"
+                    //            android:theme="@style/Base.Theme.AppCompat" />
+                    CropImage.activity()
+                            .setGuidelines(CropImageView.Guidelines.ON)
+                            //.setMinCropResultSize(512,512)
+                            .setBackgroundColor(Color.parseColor("#00000000"))
+                            .setAspectRatio(4, 4)
+                            .start(MakeInterviewActivity.this);
+                }
+            }*/
+    private void postImage() {
+        if (imageUri != null) {
+            compressAndNameImage(imageUri);
+            ByteArrayOutputStream byteArrayInputStream = new ByteArrayOutputStream();
+            compressor.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayInputStream);
+            byte[] thumpData = byteArrayInputStream.toByteArray();
+            String imageAnswer = android.util.Base64.encodeToString(thumpData, android.util.Base64.DEFAULT);
+            Answer answer = new Answer(questionId, "", imageAnswer, "4");
+            imageAnswersList.add(answer);
+            Toast.makeText(getApplicationContext(), imageName, Toast.LENGTH_LONG).show();
+            //StorageReference filePath = storageReference.child("category_image/").child(imageName);
+            // UploadTask uploadTask = filePath.putBytes(thumpData);
+            /*Post*/
+        }
+    }
+
+    private void compressAndNameImage(Uri imageUri) {
+        imageName = random() + ".jpg";
+        File imageFile = new File(imageUri.getPath());
+        try {
+            compressor = new Compressor(MakeInterviewActivity.this)
+                    .setMaxHeight(240)
+                    .setMaxWidth(360)
+                    .setQuality(5)
+                    .compressToBitmap(imageFile);
+        } catch (Exception exception) {
+            exception.printStackTrace();
+        }
+    }
+
+    //Name image
+    public static String random() {
+        Random generator = new Random();
+        StringBuilder randomStringBuilder = new StringBuilder();
+        int randomLength = generator.nextInt(MAX_LENGTH);
+        char tempChar;
+        for (int i = 0; i < randomLength; i++) {
+            tempChar = (char) (generator.nextInt(96) + 32);
+            randomStringBuilder.append(tempChar);
+        }
+        return randomStringBuilder.toString();
+    }
+
 }

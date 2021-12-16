@@ -19,7 +19,7 @@ public class Questions {
     private String type;
     /*User answer field to save question answer in adapter*/
     @SerializedName("answer")
-    private Answer answer = new Answer("","","");
+    private Answer answer = new Answer("","","","");
 
     public Questions() {
     }

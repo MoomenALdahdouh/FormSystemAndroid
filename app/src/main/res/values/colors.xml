@@ -11,4 +11,5 @@
     <color name="white">#FFFFFFFF</color>
     <color name="danger">#FF0000</color>
     <color name="blur_gray">#E6000025</color>
+    <color name="blur_gray_2">#E8000025</color>
 </resources>

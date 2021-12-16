@@ -1,9 +1,15 @@
 package com.example.formsystem.adapter;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.net.Uri;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
@@ -17,6 +23,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -24,11 +31,18 @@ import com.example.formsystem.R;
 import com.example.formsystem.model.Answer;
 import com.example.formsystem.model.Interview;
 import com.example.formsystem.model.Questions;
+import com.example.formsystem.ui.MakeInterviewActivity;
 import com.example.formsystem.ui.ViewInterviewActivity;
 import com.google.android.material.textfield.TextInputLayout;
+import com.theartofdev.edmodo.cropper.CropImage;
+import com.theartofdev.edmodo.cropper.CropImageView;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Random;
+
+import id.zelory.compressor.Compressor;
 
 public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.ViewHolder> {
     public static final String QUESTION_ID = "QUESTION_ID";
@@ -37,6 +51,7 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.View
     private ArrayList<Questions> answerArrayList;
     private ArrayList<Answer> answersFromDbArrayList;
     private boolean updateInterview = false;
+    //Upload image
 
     public QuestionsAdapter(Context context) {
         this.context = context;
@@ -112,7 +127,7 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.View
                                     DatePickerDialog mDatePicker = new DatePickerDialog(context, new DatePickerDialog.OnDateSetListener() {
                                         public void onDateSet(DatePicker datepicker, int selectedyear, int selectedmonth, int selectedday) {
                                             String selectedDate = selectedyear + "/" + selectedmonth + "/" + selectedday;
-                                            Answer answer = new Answer(questions.getId(), "", selectedDate);
+                                            Answer answer = new Answer(questions.getId(), "", selectedDate,questions.getType());
                                             answerArrayList.get(position).setAnswer(answer);
                                             holder.editTextQuestion.setText(selectedDate);
                                         }
@@ -133,7 +148,7 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.View
                 case "4"://Image
                     holder.textInputLayoutQuestion.setHint("Upload Image");
                     //holder.editTextQuestion.setEnabled(false);
-                    //holder.editTextQuestion.setClickable(true);
+                    holder.editTextQuestion.setClickable(true);
                     holder.editTextQuestion.setFocusable(false);
                     holder.editTextQuestion.setCompoundDrawablesWithIntrinsicBounds(null, null, ContextCompat.getDrawable(context, R.drawable.ic_baseline_cloud_upload_24), null);
                     holder.editTextQuestion.setOnTouchListener(new View.OnTouchListener() {
@@ -146,8 +161,14 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.View
 
                             if (event.getAction() == MotionEvent.ACTION_UP) {
                                 if (event.getRawX() >= (holder.editTextQuestion.getRight() - holder.editTextQuestion.getCompoundDrawables()[DRAWABLE_RIGHT].getBounds().width())) {
-                                    Answer answer = new Answer(questions.getId(), "", "Uploaded");
+                                    /*Upload image*/
+
+                                    //((MakeInterviewActivity)context).cropImage();questionPosition
+                                    Answer answer = new Answer(questions.getId(), "", "Uploaded",questions.getType());
                                     answerArrayList.get(position).setAnswer(answer);
+                                    ((MakeInterviewActivity)context).setQuestionId(questions.getId());
+                                    cropImage();
+                                    /**/
                                     holder.editTextQuestion.setText("Uploaded");
                                     return true;
                                 }
@@ -155,14 +176,14 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.View
                             return false;
                         }
                     });
-                    holder.editTextQuestion.setOnClickListener(new View.OnClickListener() {
+                    /*holder.editTextQuestion.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
                             Answer answer = new Answer(questions.getId(), "", "Uploaded");
                             answerArrayList.get(position).setAnswer(answer);
                             holder.editTextQuestion.setText("Uploaded");
                         }
-                    });
+                    });*/
                     break;
             }
 
@@ -177,7 +198,7 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.View
                 public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                     //TODO:: Action when change text in edit text
                     String questionAnswer = holder.editTextQuestion.getText().toString();
-                    Answer answer = new Answer(questions.getId(), "", questionAnswer);
+                    Answer answer = new Answer(questions.getId(), "", questionAnswer,questions.getType());
                     //questionsArrayList.get(position).setAnswer(answer);
                     answerArrayList.get(position).setAnswer(answer);
                 }
@@ -194,16 +215,23 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.View
 
         }
     }
+    private void cropImage() {
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions((Activity) context, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
 
-    private void showCalender(ViewHolder holder, int mYear, int mMonth, int mDay) {
-        DatePickerDialog mDatePicker = new DatePickerDialog(context, new DatePickerDialog.OnDateSetListener() {
-            public void onDateSet(DatePicker datepicker, int selectedyear, int selectedmonth, int selectedday) {
-
-                holder.editTextQuestion.setText(selectedyear + "/" + selectedmonth + "/" + selectedday);
-            }
-        }, mYear, mMonth, mDay);
-        //mDatePicker.setTitle("Select date");
-        mDatePicker.show();
+        } else {
+            //TODO: Must add activity on Manifest file add this line code
+            //            AndroidManifest.xml
+            //            <activity
+            //            android:name="com.theartofdev.edmodo.cropper.CropImageActivity"
+            //            android:theme="@style/Base.Theme.AppCompat" />
+            CropImage.activity()
+                    .setGuidelines(CropImageView.Guidelines.ON)
+                    //.setMinCropResultSize(512,512)
+                    .setBackgroundColor(Color.parseColor("#00000000"))
+                    .setAspectRatio(4, 4)
+                    .start((Activity) context);
+        }
     }
 
     @Override

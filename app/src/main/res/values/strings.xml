@@ -19,6 +19,7 @@
     <string name="interview_questions">Interview Questions</string>
     <string name="interview_title">Interview Title</string>
     <string name="success_submit_interview">Success Submit Interview</string>
+    <string name="failed_submit_interview">Failed Submit Interview</string>
     <string name="running_to_submit_interview">Running to submit interview …</string>
     <string name="running_to_save_interview">Save interview update …</string>
     <string name="interview_title_required">Interview Title Required</string>
