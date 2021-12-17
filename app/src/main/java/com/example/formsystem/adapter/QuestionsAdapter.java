@@ -32,6 +32,7 @@ import com.example.formsystem.model.Answer;
 import com.example.formsystem.model.Interview;
 import com.example.formsystem.model.Questions;
 import com.example.formsystem.ui.MakeInterviewActivity;
+import com.example.formsystem.ui.ViewImageActivity;
 import com.example.formsystem.ui.ViewInterviewActivity;
 import com.google.android.material.textfield.TextInputLayout;
 import com.theartofdev.edmodo.cropper.CropImage;
@@ -155,7 +156,10 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.View
                     //holder.editTextQuestion.setEnabled(false);
                     holder.editTextQuestion.setClickable(true);
                     holder.editTextQuestion.setFocusable(false);
-                    holder.editTextQuestion.setCompoundDrawablesWithIntrinsicBounds(null, null, ContextCompat.getDrawable(context, R.drawable.ic_baseline_cloud_upload_24), null);
+                    if (updateInterview)
+                        holder.editTextQuestion.setCompoundDrawablesWithIntrinsicBounds(null, null, ContextCompat.getDrawable(context, R.drawable.ic_baseline_preview_24), null);
+                    else
+                        holder.editTextQuestion.setCompoundDrawablesWithIntrinsicBounds(null, null, ContextCompat.getDrawable(context, R.drawable.ic_baseline_cloud_upload_24), null);
                     holder.editTextQuestion.setOnTouchListener(new View.OnTouchListener() {
                         @Override
                         public boolean onTouch(View v, MotionEvent event) {
@@ -166,18 +170,18 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.View
 
                             if (event.getAction() == MotionEvent.ACTION_UP) {
                                 if (event.getRawX() >= (holder.editTextQuestion.getRight() - holder.editTextQuestion.getCompoundDrawables()[DRAWABLE_RIGHT].getBounds().width())) {
-                                    /*Upload image*/
-
-                                    //((MakeInterviewActivity)context).cropImage();questionPosition
-                                    Answer answer = new Answer(questions.getId(), "", "UploadImage.jpg", questions.getType());
-                                    answerArrayList.get(position).setAnswer(answer);
-                                    if (updateInterview)
-                                        ((ViewInterviewActivity) context).setQuestionId(questions.getId());
-                                    else
+                                    if (updateInterview) {//View Image
+                                        Intent intent = new Intent(context, ViewImageActivity.class);
+                                        intent.putExtra("IMAGE_NAME", holder.editTextQuestion.getText().toString());
+                                        context.startActivity(intent);
+                                    } else {/*Upload image*/
+                                        Answer answer = new Answer(questions.getId(), "", "UploadImage.jpg", questions.getType());
+                                        answerArrayList.get(position).setAnswer(answer);
                                         ((MakeInterviewActivity) context).setQuestionId(questions.getId());
-                                    cropImage();
+                                        holder.editTextQuestion.setText("UploadImage.jpg");
+                                        cropImage();
+                                    }
                                     /**/
-                                    holder.editTextQuestion.setText("UploadImage.jpg");
                                     return true;
                                 }
                             }

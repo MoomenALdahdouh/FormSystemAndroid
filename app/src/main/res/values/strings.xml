@@ -38,5 +38,6 @@
     <string name="loading">Loading …</string>
     <string name="save_changes">Save Changes</string>
     <string name="delete_interview">Delete Interview</string>
+    <string name="interview">Interview</string>
 
 </resources>
