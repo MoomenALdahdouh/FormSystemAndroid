@@ -30,7 +30,7 @@ public class ViewImageActivity extends AppCompatActivity {
             String imageName = intent.getStringExtra(QuestionsAdapter.IMAGE_NAME);
             Picasso.get()
                     .load(Constants.IMAGES_STORAGE + imageName)//http://camranger.com/wp-content/uploads/2014/10/Android-Icon.png
-                    .into(binding.imageView8, new Callback() {
+                    .into(binding.imageView8, new com.squareup.picasso.Callback() {
                         @Override
                         public void onSuccess() {
                             binding.loadingDataConstraint.setVisibility(View.GONE);
@@ -42,6 +42,7 @@ public class ViewImageActivity extends AppCompatActivity {
                             binding.loadingDataConstraint.setVisibility(View.GONE);
                             binding.constraintLayoutEmptyData.setVisibility(View.VISIBLE);
                         }
+
                     });
         }
     }
