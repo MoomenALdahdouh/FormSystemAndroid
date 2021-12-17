@@ -19,6 +19,7 @@ import com.example.formsystem.model.Login;
 import com.example.formsystem.model.PostAnswersList;
 import com.example.formsystem.model.Questions;
 import com.example.formsystem.model.QuestionsResults;
+import com.example.formsystem.model.ResponseSuccess;
 import com.example.formsystem.model.Token;
 import com.example.formsystem.model.User;
 import com.example.formsystem.model.UserResults;
@@ -38,6 +39,7 @@ public class FormSystemViewModel extends ViewModel {
     public MutableLiveData<Interview> postInterviewMutableLiveData = new MutableLiveData<>();
     public MutableLiveData<PostAnswersList> postAnswerMutableLiveData = new MutableLiveData<>();
     public MutableLiveData<PostAnswersList> updateAnswerMutableLiveData = new MutableLiveData<>();
+    public MutableLiveData<ResponseSuccess> deleteInterviewMutableLiveData = new MutableLiveData<>();
     public MutableLiveData<QuestionsResults> questionsMutableLiveData = new MutableLiveData<>();
     public MutableLiveData<AnswersResults> answersMutableLiveData = new MutableLiveData<>();
     public MutableLiveData<Form> formsMutableLiveData = new MutableLiveData<>();
@@ -199,6 +201,22 @@ public class FormSystemViewModel extends ViewModel {
 
             @Override
             public void onFailure(@NonNull Call<PostAnswersList> call, @NonNull Throwable t) {
+                t.printStackTrace();
+                Log.d("onFailure", t.getMessage());
+            }
+        });
+    }
+
+    public void deleteInterview(int id) {
+        FormSystemClient.getINSTANCE().deleteInterview(id).enqueue(new Callback<ResponseSuccess>() {
+            @Override
+            public void onResponse(@NonNull Call<ResponseSuccess> call, @NonNull Response<ResponseSuccess> response) {
+                Log.d("onResponse", response.toString());
+                deleteInterviewMutableLiveData.setValue(response.body());
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<ResponseSuccess> call, @NonNull Throwable t) {
                 t.printStackTrace();
                 Log.d("onFailure", t.getMessage());
             }

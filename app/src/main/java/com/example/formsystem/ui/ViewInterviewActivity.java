@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -43,6 +44,7 @@ import com.example.formsystem.model.Interview;
 import com.example.formsystem.model.PostAnswersList;
 import com.example.formsystem.model.Questions;
 import com.example.formsystem.model.QuestionsResults;
+import com.example.formsystem.model.ResponseSuccess;
 import com.example.formsystem.utils.PreferenceUtils;
 import com.example.formsystem.viewmodel.FormSystemViewModel;
 import com.google.android.gms.common.api.ApiException;
@@ -81,6 +83,7 @@ public class ViewInterviewActivity extends AppCompatActivity implements OnMapRea
     private FormSystemViewModel postInterviewSystemViewModel;
     private FormSystemViewModel postAnswerSystemViewModel;
     private FormSystemViewModel updateAnswerSystemViewModel;
+    private FormSystemViewModel deleteInterviewSystemViewModel;
     private String token;
     private String userId;
     private RecyclerView recyclerView;
@@ -118,6 +121,7 @@ public class ViewInterviewActivity extends AppCompatActivity implements OnMapRea
         postInterviewSystemViewModel = new ViewModelProvider(this).get(FormSystemViewModel.class);
         postAnswerSystemViewModel = new ViewModelProvider(this).get(FormSystemViewModel.class);
         updateAnswerSystemViewModel = new ViewModelProvider(this).get(FormSystemViewModel.class);
+        deleteInterviewSystemViewModel = new ViewModelProvider(this).get(FormSystemViewModel.class);
         recyclerView = binding.recyclerView;
         questionAnswersArrayList = new ArrayList<>();
         answersArrayList = new ArrayList<>();
@@ -140,17 +144,70 @@ public class ViewInterviewActivity extends AppCompatActivity implements OnMapRea
         });
         Intent intent = getIntent();
         if (intent != null && intent.hasExtra(InterviewsAdapter.FORM_ID)) {
-            formId = intent.getStringExtra(InterviewsAdapter.FORM_ID);
-            interviewId = intent.getStringExtra(InterviewsAdapter.INTERVIEW_ID);
-            interviewTitle = intent.getStringExtra(InterviewsAdapter.INTERVIEW_TITLE);
-            interviewLocation = intent.getStringExtra(InterviewsAdapter.INTERVIEW_LOCATION);
-            latitude = Double.parseDouble(intent.getStringExtra(InterviewsAdapter.INTERVIEW_LATITUDE));
-            longitude = Double.parseDouble(intent.getStringExtra(InterviewsAdapter.INTERVIEW_LONGITUDE));
-            getFormQuestions();
-            updateInterview();
-            getCurrentLocation();
-            fetchInterviewData();
+            try {
+                formId = intent.getStringExtra(InterviewsAdapter.FORM_ID);
+                interviewId = intent.getStringExtra(InterviewsAdapter.INTERVIEW_ID);
+                interviewTitle = intent.getStringExtra(InterviewsAdapter.INTERVIEW_TITLE);
+                interviewLocation = intent.getStringExtra(InterviewsAdapter.INTERVIEW_LOCATION);
+                latitude = Double.parseDouble(intent.getStringExtra(InterviewsAdapter.INTERVIEW_LATITUDE));
+                longitude = Double.parseDouble(intent.getStringExtra(InterviewsAdapter.INTERVIEW_LONGITUDE));
+                getFormQuestions();
+                //updateInterview();
+                getCurrentLocation();
+                fetchInterviewData();
+                deleteInterview();
+            } catch (Exception e) {
+
+            }
         }
+    }
+
+    private void deleteInterview() {
+        binding.buttonUpdateInterview.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                AlertDialog.Builder dialog = new AlertDialog.Builder(ViewInterviewActivity.this);
+                LayoutInflater factory = LayoutInflater.from(ViewInterviewActivity.this);
+                final View viewDialog = factory.inflate(R.layout.succes_create_dialog, null);
+                ImageView close = viewDialog.findViewById(R.id.imageView6);
+                imageView = viewDialog.findViewById(R.id.imageViewDialog);
+                textView = viewDialog.findViewById(R.id.textViewMessage);
+                imageView.setImageResource(R.drawable.loading);
+                textView.setText(R.string.delete_interview_running);
+                dialog.setView(viewDialog);
+                dialog.show();
+                deleteInterviewAction();
+            }
+        });
+    }
+
+    private void deleteInterviewAction() {
+        int id = Integer.parseInt(interviewId);
+        deleteInterviewSystemViewModel.deleteInterview(id);
+        deleteInterviewSystemViewModel.deleteInterviewMutableLiveData.observe(this, new Observer<ResponseSuccess>() {
+            @SuppressLint("NotifyDataSetChanged")
+            @Override
+            public void onChanged(ResponseSuccess response) {
+                try {
+                    if (response.getSuccess() != null) {
+                        new Handler().postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                imageView.setImageResource(R.drawable.ic_baseline_done_all_24);
+                                textView.setText(R.string.failed_success_delete);
+                                Toast.makeText(getApplicationContext(), "Success Delete Interview", Toast.LENGTH_SHORT).show();
+                                finish();
+                            }
+                        }, 2000);
+                    } else {
+                        imageView.setImageResource(R.drawable.ic_baseline_error_outline_24);
+                        textView.setText(R.string.failed_delete_interview);
+                    }
+                } catch (Exception e) {
+
+                }
+            }
+        });
     }
 
     @SuppressLint("SetTextI18n")

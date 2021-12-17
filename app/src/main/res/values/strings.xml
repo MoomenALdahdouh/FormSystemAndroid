@@ -21,8 +21,11 @@
     <string name="success_submit_interview">Success Submit Interview</string>
     <string name="failed_submit_interview">Failed Submit Interview</string>
     <string name="failed_save_answers">Failed Save Answer!</string>
+    <string name="failed_delete_interview">Failed Delete Interview!</string>
+    <string name="failed_success_delete">Success Delete Interview!</string>
     <string name="running_to_submit_interview">Running to submit interview …</string>
     <string name="running_to_save_interview">Save interview update …</string>
+    <string name="delete_interview_running">Delete Interview …</string>
     <string name="interview_title_required">Interview Title Required</string>
     <string name="location">Location</string>
     <string name="the_location_required">The Location Required!</string>
@@ -34,5 +37,6 @@
     <string name="wait_a_moment_n_loading_data">Wait a moment \n Loading data …</string>
     <string name="loading">Loading …</string>
     <string name="save_changes">Save Changes</string>
+    <string name="delete_interview">Delete Interview</string>
 
 </resources>

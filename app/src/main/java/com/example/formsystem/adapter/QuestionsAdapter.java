@@ -92,9 +92,14 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.View
             if (updateInterview) {//If update interview fill answer
                 for (int i = 0; i < answersFromDbArrayList.size(); i++) {
                     Answer answer = answersFromDbArrayList.get(position);
-                    if (answer.getQuestions_fk_id().equals(questions.getId()))
+                    if (answer.getQuestions_fk_id().equals(questions.getId())) {
                         holder.editTextQuestion.setText(answer.getAnswer().toString());
+                    }
                 }
+                //Disable edit text
+                //holder.editTextQuestion.setEnabled(false);
+                holder.editTextQuestion.setClickable(false);
+                holder.editTextQuestion.setFocusable(false);
             }
             switch (questions.getType()) {//Custom design edit text with question type
                 case "0"://Text

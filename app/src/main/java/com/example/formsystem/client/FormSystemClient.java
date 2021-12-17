@@ -14,6 +14,7 @@ import com.example.formsystem.model.InterviewResults;
 import com.example.formsystem.model.Login;
 import com.example.formsystem.model.PostAnswersList;
 import com.example.formsystem.model.QuestionsResults;
+import com.example.formsystem.model.ResponseSuccess;
 import com.example.formsystem.model.Token;
 import com.example.formsystem.model.User;
 import com.example.formsystem.model.UserResults;
@@ -108,6 +109,10 @@ public class FormSystemClient {
 
     public Call<PostAnswersList> updateAnswers(PostAnswersList answer) {
         return formSystemInterface.updateAnswers(answer);
+    }
+
+    public Call<ResponseSuccess> deleteInterview(int id) {
+        return formSystemInterface.deleteInterview(id);
     }
 
     public Call<AnswersResults> getAnswers(String authToken, String id) {

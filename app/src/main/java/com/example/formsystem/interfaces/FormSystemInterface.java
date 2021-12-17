@@ -11,12 +11,14 @@ import com.example.formsystem.model.InterviewResults;
 import com.example.formsystem.model.Login;
 import com.example.formsystem.model.PostAnswersList;
 import com.example.formsystem.model.QuestionsResults;
+import com.example.formsystem.model.ResponseSuccess;
 import com.example.formsystem.model.Token;
 import com.example.formsystem.model.User;
 import com.example.formsystem.model.UserResults;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
+import retrofit2.http.DELETE;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.Headers;
@@ -72,6 +74,9 @@ public interface FormSystemInterface {
 
     @POST("answers/update")
     Call<PostAnswersList> updateAnswers(@Body PostAnswersList answer);
+
+    @DELETE("interviews/delete/{id}")
+    Call<ResponseSuccess> deleteInterview(@Path("id") int id);
 
     @GET("interviews/{id}/answers")
     Call<AnswersResults> getAnswers(@Header("authorization") String authToken, @Path("id") String id);
