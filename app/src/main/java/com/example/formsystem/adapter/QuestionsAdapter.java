@@ -47,6 +47,7 @@ import id.zelory.compressor.Compressor;
 
 public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.ViewHolder> {
     public static final String QUESTION_ID = "QUESTION_ID";
+    public static final String IMAGE_NAME = "IMAGE_NAME";
     private Context context;
     private ArrayList<Questions> questionsArrayList;
     private ArrayList<Questions> answerArrayList;
@@ -172,7 +173,7 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.View
                                 if (event.getRawX() >= (holder.editTextQuestion.getRight() - holder.editTextQuestion.getCompoundDrawables()[DRAWABLE_RIGHT].getBounds().width())) {
                                     if (updateInterview) {//View Image
                                         Intent intent = new Intent(context, ViewImageActivity.class);
-                                        intent.putExtra("IMAGE_NAME", holder.editTextQuestion.getText().toString());
+                                        intent.putExtra(IMAGE_NAME, holder.editTextQuestion.getText().toString());
                                         context.startActivity(intent);
                                     } else {/*Upload image*/
                                         Answer answer = new Answer(questions.getId(), "", "UploadImage.jpg", questions.getType());

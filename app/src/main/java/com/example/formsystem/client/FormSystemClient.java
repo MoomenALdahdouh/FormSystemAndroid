@@ -18,6 +18,7 @@ import com.example.formsystem.model.ResponseSuccess;
 import com.example.formsystem.model.Token;
 import com.example.formsystem.model.User;
 import com.example.formsystem.model.UserResults;
+import com.example.formsystem.utils.Constants;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -34,7 +35,7 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class FormSystemClient {
-    public static final String BASE_URL = "http://190.187.247.236/api/";//190.187.247.236  //127.0.0.1:8000
+    //public static final String BASE_URL = "http://190.187.247.236/api/";//190.187.247.236  //127.0.0.1:8000
     private static FormSystemClient INSTANCE;
     private final FormSystemInterface formSystemInterface;
 
@@ -61,7 +62,7 @@ public class FormSystemClient {
                 .create();
 
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(BASE_URL)
+                .baseUrl(Constants.BASE_URL)
                 .client(okHttpClient.build())
                 .addConverterFactory(GsonConverterFactory.create(gson))
                 .build();
