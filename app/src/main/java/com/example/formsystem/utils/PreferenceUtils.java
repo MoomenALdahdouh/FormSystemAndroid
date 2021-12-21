@@ -84,17 +84,17 @@ public class PreferenceUtils {
         return preferences.getBoolean(Constants.KEY_INTRO, false);
     }
 
-    public static boolean savePassword(String password, Context context) {
+    public static boolean saveLanguage(String language, Context context) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = preferences.edit();
-        editor.putString(Constants.KEY_PASSWORD, password);
+        editor.putString(Constants.KEY_LANGUAGE, language);
         editor.apply();
         return true;
     }
 
-    public static String getPassword(Context context) {
+    public static String getLanguage(Context context) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-        return preferences.getString(Constants.KEY_PASSWORD, null);
+        return preferences.getString(Constants.KEY_LANGUAGE, "es");
     }
 
 }

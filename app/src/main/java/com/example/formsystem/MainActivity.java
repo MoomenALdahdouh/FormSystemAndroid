@@ -1,6 +1,7 @@
 package com.example.formsystem;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
@@ -9,6 +10,8 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
@@ -18,6 +21,8 @@ import com.example.formsystem.model.Token;
 import com.example.formsystem.ui.ActivitiesActivity;
 import com.example.formsystem.utils.PreferenceUtils;
 import com.example.formsystem.viewmodel.FormSystemViewModel;
+
+import io.reactivex.annotations.NonNull;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -64,7 +69,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void buttonClick(View view) {
-        Toast.makeText(getApplicationContext(), "TOKEN IS:" + PreferenceUtils.getToken(getApplicationContext()) + "  ID " +PreferenceUtils.getUserId(getApplicationContext()) , Toast.LENGTH_SHORT).show();
+        Toast.makeText(getApplicationContext(), "TOKEN IS:" + PreferenceUtils.getToken(getApplicationContext()) + "  ID " + PreferenceUtils.getUserId(getApplicationContext()), Toast.LENGTH_SHORT).show();
         startActivity(new Intent(getApplicationContext(), ActivitiesActivity.class));
     }
+
+
 }

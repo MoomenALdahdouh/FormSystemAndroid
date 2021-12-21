@@ -1,11 +1,11 @@
 <resources>
-    <string name="app_name">FormSystem</string>
+    <string name="app_name">Dircams</string>
     <string name="welcome_worker">Welcome Worker</string>
     <string name="login">Login</string>
     <string name="email">Email</string>
     <string name="password">Password</string>
     <string name="enter_your_email_and_password_to_login">Enter your email and password to login</string>
-    <string name="logingin">Login...</string>
+    <string name="logingin">Login…</string>
     <string name="dircams">DIRCAMS</string>
     <string name="follow_up_workers_activities_and_submit_forms">Follow up workers activities and submit forms</string>
     <string name="welcome">Welcome</string>
@@ -40,5 +40,9 @@
     <string name="delete_interview">Delete Interview</string>
     <string name="interview">Interview</string>
     <string name="not_found_image">Not found image!</string>
+    <string name="spanish">Spanish</string>
+    <string name="sign_out">Sign out</string>
+    <string name="english">English</string>
+    <string name="worker">Worker</string>
 
 </resources>
