@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">DIRCAMS</string>
-    <string name="welcome_worker">Bienvenido</string>
+    <string name="welcome_worker">Bienvenida</string>
     <string name="login">Login</string>
     <string name="email">Email</string>
     <string name="password">Contraseña</string>

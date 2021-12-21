@@ -3,19 +3,24 @@ package com.example.formsystem.ui;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
 import com.example.formsystem.R;
 import com.example.formsystem.adapter.ActivitiesAdapter;
@@ -27,11 +32,14 @@ import com.example.formsystem.model.User;
 import com.example.formsystem.model.UserResults;
 import com.example.formsystem.utils.PreferenceUtils;
 import com.example.formsystem.viewmodel.FormSystemViewModel;
+import com.example.formsystem.viewmodel.local.UserViewModel;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 import io.reactivex.annotations.NonNull;
+import io.reactivex.annotations.Nullable;
 
 public class ActivitiesActivity extends AppCompatActivity {
 
@@ -53,6 +61,7 @@ public class ActivitiesActivity extends AppCompatActivity {
         userId = PreferenceUtils.getUserId(ActivitiesActivity.this);
         activitiesSystemViewModel = new ViewModelProvider(this).get(FormSystemViewModel.class);
         userSystemViewModel = new ViewModelProvider(this).get(FormSystemViewModel.class);
+        userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
         recyclerView = binding.recyclerView;
         activitiesAdapter = new ActivitiesAdapter(ActivitiesActivity.this);
         activityArrayList = new ArrayList<>();
@@ -65,7 +74,7 @@ public class ActivitiesActivity extends AppCompatActivity {
         getActivities();
         getUserDetails();
         setUpLanguage(PreferenceUtils.getLanguage(getApplicationContext()));
-
+        checkInternet();
     }
 
     private void getUserDetails() {
@@ -137,11 +146,11 @@ public class ActivitiesActivity extends AppCompatActivity {
     }
 
     private void changeLanguage(String language) {
-        /*Resources resources = getResources();
+        Resources resources = getResources();
         DisplayMetrics displayMetrics = resources.getDisplayMetrics();
         Configuration configuration = resources.getConfiguration();
         configuration.setLocale(new Locale(language));
-        resources.updateConfiguration(configuration, displayMetrics);*/
+        resources.updateConfiguration(configuration, displayMetrics);
         PreferenceUtils.saveLanguage(language, getApplicationContext());
         startActivity(new Intent(getApplicationContext(), ActivitiesActivity.class));
         finish();
@@ -153,5 +162,29 @@ public class ActivitiesActivity extends AppCompatActivity {
         Configuration configuration = resources.getConfiguration();
         configuration.setLocale(new Locale(language));
         resources.updateConfiguration(configuration, displayMetrics);
+    }
+
+    private UserViewModel userViewModel;
+
+    private void checkInternet() {
+        if (isNetworkAvailable()) {
+            Toast.makeText(getApplicationContext(), "network", Toast.LENGTH_SHORT).show();
+        } else {
+            userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
+            userViewModel.getAllUsers().observe(this, new Observer<List<User>>() {
+                @Override
+                public void onChanged(@Nullable List<User> notes) {
+                    //update RecyclerView
+                    Toast.makeText(getApplicationContext(), "Local", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+    }
+
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 }

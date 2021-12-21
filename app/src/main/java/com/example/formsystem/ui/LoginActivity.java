@@ -48,7 +48,7 @@ public class LoginActivity extends AppCompatActivity {
                         binding.linearProgressLogin.setVisibility(View.GONE);
                         if (tokenResponse != null) {
                             PreferenceUtils.saveToken(tokenResponse, getApplicationContext());
-                            PreferenceUtils.saveUserId(user.getId(), getApplicationContext());
+                            PreferenceUtils.saveUserId(String.valueOf(user.getId()), getApplicationContext());
                             Toast.makeText(getApplicationContext(), "Successfully login", Toast.LENGTH_SHORT).show();
                             startActivity(new Intent(LoginActivity.this, ActivitiesActivity.class));
                             finish();
