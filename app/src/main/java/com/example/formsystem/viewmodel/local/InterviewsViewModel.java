@@ -35,11 +35,11 @@ public class InterviewsViewModel extends AndroidViewModel {
         repository.delete(interview);
     }
 
-    public void deleteAllUsers() {
+    public void deleteAllInterviews() {
         repository.deleteAllInterviews();
     }
 
-    public LiveData<List<Interview>> getAllUsers() {
+    public LiveData<List<Interview>> getAllInterviews() {
         return allInterviews;
     }
 }

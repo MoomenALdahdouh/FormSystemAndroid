@@ -83,9 +83,9 @@ public class InterviewsAdapter extends RecyclerView.Adapter<InterviewsAdapter.Vi
                 public void onClick(View view) {
                     int adapterPosition = getAdapterPosition();
                     Interview interviewClicked = interviewsArrayList.get(adapterPosition);
-                    String interviewId = interviewClicked.getId();
+                    String interviewId = String.valueOf(interviewClicked.getId());
                     String interviewTitle = interviewClicked.getTitle();
-                    String interviewLocation = interviewClicked.getId();
+                    String interviewLocation = String.valueOf(interviewClicked.getId());
                     String interviewLatitude = interviewClicked.getLatitude();
                     String interviewLongitude = interviewClicked.getLongitude();
                     Intent intent = new Intent(context, ViewInterviewActivity.class);

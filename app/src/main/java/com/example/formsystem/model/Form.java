@@ -1,12 +1,17 @@
 package com.example.formsystem.model;
 
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+@Entity(tableName = "form_table")
 public class Form {
+    @PrimaryKey(autoGenerate = false)
     @SerializedName("id")
     @Expose
-    private String id;
+    private int id;
     @SerializedName("activity_fk_id")
     @Expose
     private String activity_fk_id;
@@ -41,7 +46,7 @@ public class Form {
     public Form() {
     }
 
-    public Form(String id, String activity_fk_id, String user_fk_id, String subproject_fk_id
+    public Form(int id, String activity_fk_id, String user_fk_id, String subproject_fk_id
             , String project_fk_id, String name, String describtion, String image, String status, String created_at, String update_at) {
         this.id = id;
         this.activity_fk_id = activity_fk_id;
@@ -56,11 +61,11 @@ public class Form {
         this.update_at = update_at;
     }
 
-    public String getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(int id) {
         this.id = id;
     }
 

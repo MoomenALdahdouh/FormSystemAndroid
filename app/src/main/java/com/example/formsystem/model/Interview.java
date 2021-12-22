@@ -11,7 +11,7 @@ import java.util.ArrayList;
 public class Interview {
     @PrimaryKey(autoGenerate = true)
     @SerializedName("id")
-    private String id;
+    private int id;
     @SerializedName("form_fk_id")
     private String form_fk_id;
     @SerializedName("title")
@@ -48,7 +48,7 @@ public class Interview {
         this.customer_location = customer_location;
     }
 
-    public Interview(String id, String form_fk_id, String title, String created_at, String updated_at, String status, String customer_location) {
+    public Interview(int id, String form_fk_id, String title, String created_at, String updated_at, String status, String customer_location) {
         this.id = id;
         this.form_fk_id = form_fk_id;
         this.title = title;
@@ -58,11 +58,11 @@ public class Interview {
         this.customer_location = customer_location;
     }
 
-    public String getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(int id) {
         this.id = id;
     }
 

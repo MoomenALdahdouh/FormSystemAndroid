@@ -9,21 +9,21 @@ import androidx.room.Room;
 import androidx.room.RoomDatabase;
 import androidx.sqlite.db.SupportSQLiteDatabase;
 
-import com.example.formsystem.model.Interview;
+import com.example.formsystem.model.Form;
 import com.example.formsystem.model.User;
 
 import io.reactivex.annotations.NonNull;
 
-@Database(entities = {Interview.class}, version = 1)
-public abstract class InterviewsDatabase extends RoomDatabase {
-    private static InterviewsDatabase instance;
+@Database(entities = {Form.class}, version = 1)
+public abstract class FormDatabase extends RoomDatabase {
+    private static FormDatabase instance;
 
-    public abstract InterviewsDao interviewsDao();
+    public abstract FormDao formDao();
 
-    public static synchronized InterviewsDatabase getInstance(Context context) {
+    public static synchronized FormDatabase getInstance(Context context) {
         if (instance == null) {
             instance = Room.databaseBuilder(context.getApplicationContext(),
-                    InterviewsDatabase.class, "interviews_database")
+                    FormDatabase.class, "form_database")
                     .fallbackToDestructiveMigration()
                     .addCallback(roomCallback)
                     .build();
@@ -40,10 +40,10 @@ public abstract class InterviewsDatabase extends RoomDatabase {
     };
 
     private static class PopulateDbAsyncTask extends AsyncTask<Void, Void, Void> {
-        private InterviewsDao interviewsDao;
+        private FormDao formDao;
 
-        private PopulateDbAsyncTask(InterviewsDatabase db) {
-            interviewsDao = db.interviewsDao();
+        private PopulateDbAsyncTask(FormDatabase db) {
+            formDao = db.formDao();
         }
 
         @Override

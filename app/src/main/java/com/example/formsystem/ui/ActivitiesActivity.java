@@ -150,7 +150,6 @@ public class ActivitiesActivity extends AppCompatActivity {
 
     private void getActivitiesNoNet() {
         binding.loadingDataConstraint.setVisibility(View.VISIBLE);
-        activitiesSystemViewModel.getAllActivities(token, userId);
         activitiesViewModel.getAllActivities().observe(this, new Observer<List<Activity>>() {
             @SuppressLint("NotifyDataSetChanged")
             @Override
