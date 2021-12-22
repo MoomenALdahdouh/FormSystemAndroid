@@ -1,10 +1,15 @@
 package com.example.formsystem.model;
 
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
+
 import com.google.gson.annotations.SerializedName;
 
 import java.util.ArrayList;
 
+@Entity(tableName = "interviews_table")
 public class Interview {
+    @PrimaryKey(autoGenerate = true)
     @SerializedName("id")
     private String id;
     @SerializedName("form_fk_id")

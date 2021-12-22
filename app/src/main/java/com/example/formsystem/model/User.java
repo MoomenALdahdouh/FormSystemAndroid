@@ -1,13 +1,14 @@
 package com.example.formsystem.model;
 
 import androidx.room.Entity;
+import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
 import com.google.gson.annotations.SerializedName;
 
 @Entity(tableName = "user_table")
 public class User {
-    @PrimaryKey(autoGenerate = true)
+    @PrimaryKey(autoGenerate = false)
     @SerializedName("id")
     private int id;
     @SerializedName("project_fk_id")
@@ -47,6 +48,13 @@ public class User {
     @SerializedName("type")
     private String type;
 
+
+    public User(String name, String email) {
+        this.name = name;
+        this.email = email;
+    }
+
+    @Ignore
     public User(int id, String project_fk_id, String create_by_id, String name, String nickname
             , String email, String phone, String location, String email_verified_at, String password
             , String two_factor_secret, String two_factor_recovery_codes, String remember_token, String current_team_id

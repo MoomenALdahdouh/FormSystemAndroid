@@ -13,16 +13,16 @@ import com.example.formsystem.model.User;
 
 import io.reactivex.annotations.NonNull;
 
-@Database(entities = {User.class}, version = 2)
-public abstract class UserDatabase extends RoomDatabase {
-    private static UserDatabase instance;
+@Database(entities = {User.class}, version = 1)
+public abstract class InterviewsDatabase extends RoomDatabase {
+    private static InterviewsDatabase instance;
 
-    public abstract UserDao userDao();
+    public abstract InterviewsDao interviewsDao();
 
-    public static synchronized UserDatabase getInstance(Context context) {
+    public static synchronized InterviewsDatabase getInstance(Context context) {
         if (instance == null) {
             instance = Room.databaseBuilder(context.getApplicationContext(),
-                    UserDatabase.class, "user_database")
+                    InterviewsDatabase.class, "interviews_database")
                     .fallbackToDestructiveMigration()
                     .addCallback(roomCallback)
                     .build();
@@ -30,7 +30,7 @@ public abstract class UserDatabase extends RoomDatabase {
         return instance;
     }
 
-    private static RoomDatabase.Callback roomCallback = new RoomDatabase.Callback() {
+    private static Callback roomCallback = new Callback() {
         @Override
         public void onCreate(@NonNull SupportSQLiteDatabase db) {
             super.onCreate(db);
@@ -39,17 +39,14 @@ public abstract class UserDatabase extends RoomDatabase {
     };
 
     private static class PopulateDbAsyncTask extends AsyncTask<Void, Void, Void> {
-        private UserDao userDao;
+        private InterviewsDao interviewsDao;
 
-        private PopulateDbAsyncTask(UserDatabase db) {
-            userDao = db.userDao();
+        private PopulateDbAsyncTask(InterviewsDatabase db) {
+            interviewsDao = db.interviewsDao();
         }
 
         @Override
         protected Void doInBackground(Void... voids) {
-            /*userDao.insert(new User("Title 1", "Description 1", 1));
-            userDao.insert(new User("Title 2", "Description 2", 2));
-            userDao.insert(new User("Title 3", "Description 3", 3));*/
             return null;
         }
     }

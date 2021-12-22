@@ -71,7 +71,7 @@ public class ActivitiesAdapter extends RecyclerView.Adapter<ActivitiesAdapter.Vi
                 public void onClick(View view) {
                     int adapterPosition = getAdapterPosition();
                     Activity activityClicked = activityArrayList.get(adapterPosition);
-                    String activityId = activityClicked.getId();
+                    String activityId = String.valueOf(activityClicked.getId());
                     Intent intent = new Intent(context, ViewActivitiesActivity.class);
                     intent.putExtra(ACTIVITY_ID, activityId);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

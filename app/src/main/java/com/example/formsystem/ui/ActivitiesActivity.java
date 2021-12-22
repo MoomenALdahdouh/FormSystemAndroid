@@ -32,6 +32,7 @@ import com.example.formsystem.model.User;
 import com.example.formsystem.model.UserResults;
 import com.example.formsystem.utils.PreferenceUtils;
 import com.example.formsystem.viewmodel.FormSystemViewModel;
+import com.example.formsystem.viewmodel.local.ActivitiesViewModel;
 import com.example.formsystem.viewmodel.local.UserViewModel;
 
 import java.util.ArrayList;
@@ -46,6 +47,8 @@ public class ActivitiesActivity extends AppCompatActivity {
     private ActivityActivitiesBinding binding;
     private FormSystemViewModel activitiesSystemViewModel;
     private FormSystemViewModel userSystemViewModel;
+    private UserViewModel userViewModel;
+    private ActivitiesViewModel activitiesViewModel;
     private RecyclerView recyclerView;
     private ActivitiesAdapter activitiesAdapter;
     private ArrayList<Activity> activityArrayList;
@@ -62,6 +65,7 @@ public class ActivitiesActivity extends AppCompatActivity {
         activitiesSystemViewModel = new ViewModelProvider(this).get(FormSystemViewModel.class);
         userSystemViewModel = new ViewModelProvider(this).get(FormSystemViewModel.class);
         userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
+        activitiesViewModel = new ViewModelProvider(this).get(ActivitiesViewModel.class);
         recyclerView = binding.recyclerView;
         activitiesAdapter = new ActivitiesAdapter(ActivitiesActivity.this);
         activityArrayList = new ArrayList<>();
@@ -71,19 +75,32 @@ public class ActivitiesActivity extends AppCompatActivity {
         recyclerView.setHasFixedSize(true);
         binding.constraintLayoutEmptyData.setVisibility(View.GONE);
         binding.loadingDataConstraint.setVisibility(View.GONE);
-        getActivities();
-        getUserDetails();
+        if (isNetworkAvailable()) {
+            getUserDetailsNet();
+            getActivitiesNet();
+        } else {
+            getUserDetailsNoNet();
+            getActivitiesNoNet();
+        }
+        //getActivities();
+        //getUserDetailsNet();
         setUpLanguage(PreferenceUtils.getLanguage(getApplicationContext()));
-        checkInternet();
+        // checkInternet();
     }
 
-    private void getUserDetails() {
+    private void getUserDetailsNet() {
         userSystemViewModel.getUser(token, userId);
         userSystemViewModel.userMutableLiveData.observe(this, new Observer<UserResults>() {
             @SuppressLint("NotifyDataSetChanged")
             @Override
             public void onChanged(UserResults userResults) {
                 User user = userResults.getUser();
+                //Delete old user in local
+                userViewModel.delete(user);
+                //Save new user in local
+                userViewModel.insert(user);
+                Toast.makeText(getApplicationContext(), "connected", Toast.LENGTH_SHORT).show();
+                //view user details
                 try {
                     binding.textViewUserName.setText(user.getName());
                     binding.textViewUserEmail.setText(user.getEmail());
@@ -95,7 +112,20 @@ public class ActivitiesActivity extends AppCompatActivity {
         });
     }
 
-    private void getActivities() {
+    private void getUserDetailsNoNet() {
+        userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
+        userViewModel.getAllUsers().observe(this, new Observer<List<User>>() {
+            @Override
+            public void onChanged(@Nullable List<User> users) {
+                User user = users.get(0);
+                binding.textViewUserName.setText(user.getName());
+                binding.textViewUserEmail.setText(user.getEmail());
+                Toast.makeText(getApplicationContext(), "Local", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void getActivitiesNet() {
         binding.loadingDataConstraint.setVisibility(View.VISIBLE);
         activitiesSystemViewModel.getAllActivities(token, userId);
         activitiesSystemViewModel.activitiesMutableLiveData.observe(this, new Observer<ActivityResults>() {
@@ -104,8 +134,32 @@ public class ActivitiesActivity extends AppCompatActivity {
             public void onChanged(ActivityResults activityResults) {
                 binding.loadingDataConstraint.setVisibility(View.GONE);
                 activityArrayList = activityResults.getResults();
+                activitiesViewModel.deleteAllActivities();
+                for (int i = 0; i < activityArrayList.size(); i++) {
+                    activitiesViewModel.insert(activityArrayList.get(i));
+                }
                 if (!activityArrayList.isEmpty()) {
                     binding.constraintLayoutEmptyData.setVisibility(View.GONE);
+                    activitiesAdapter.setList(activityArrayList);
+                    activitiesAdapter.notifyDataSetChanged();
+                } else
+                    binding.constraintLayoutEmptyData.setVisibility(View.VISIBLE);
+            }
+        });
+    }
+
+    private void getActivitiesNoNet() {
+        binding.loadingDataConstraint.setVisibility(View.VISIBLE);
+        activitiesSystemViewModel.getAllActivities(token, userId);
+        activitiesViewModel.getAllActivities().observe(this, new Observer<List<Activity>>() {
+            @SuppressLint("NotifyDataSetChanged")
+            @Override
+            public void onChanged(@Nullable List<Activity> activities) {
+                binding.loadingDataConstraint.setVisibility(View.GONE);
+                assert activities != null;
+                if (!activities.isEmpty()) {
+                    binding.constraintLayoutEmptyData.setVisibility(View.GONE);
+                    activityArrayList.addAll(activities);
                     activitiesAdapter.setList(activityArrayList);
                     activitiesAdapter.notifyDataSetChanged();
                 } else
@@ -162,23 +216,6 @@ public class ActivitiesActivity extends AppCompatActivity {
         Configuration configuration = resources.getConfiguration();
         configuration.setLocale(new Locale(language));
         resources.updateConfiguration(configuration, displayMetrics);
-    }
-
-    private UserViewModel userViewModel;
-
-    private void checkInternet() {
-        if (isNetworkAvailable()) {
-            Toast.makeText(getApplicationContext(), "network", Toast.LENGTH_SHORT).show();
-        } else {
-            userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
-            userViewModel.getAllUsers().observe(this, new Observer<List<User>>() {
-                @Override
-                public void onChanged(@Nullable List<User> notes) {
-                    //update RecyclerView
-                    Toast.makeText(getApplicationContext(), "Local", Toast.LENGTH_SHORT).show();
-                }
-            });
-        }
     }
 
     private boolean isNetworkAvailable() {

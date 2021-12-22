@@ -14,13 +14,13 @@
 
         <TextView
             android:id="@+id/textView"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:fontFamily="@font/bungee"
             android:text="@string/welcome_worker"
-            android:textSize="64dp"
-            android:textStyle="bold"
             android:textColor="@color/purple_500"
+            android:textSize="32dp"
+            android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
