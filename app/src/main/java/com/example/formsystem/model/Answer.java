@@ -1,7 +1,10 @@
 package com.example.formsystem.model;
 
+import androidx.room.Entity;
+
 import com.google.gson.annotations.SerializedName;
 
+@Entity(tableName = "answer_table")
 public class Answer {
     @SerializedName("id")
     private String id;

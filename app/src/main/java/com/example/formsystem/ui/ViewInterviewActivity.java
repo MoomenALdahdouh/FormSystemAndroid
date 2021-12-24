@@ -20,6 +20,8 @@ import android.graphics.Bitmap;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.LocationManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -40,6 +42,7 @@ import com.example.formsystem.adapter.QuestionsAdapter;
 import com.example.formsystem.databinding.ActivityViewInterviewBinding;
 import com.example.formsystem.model.Answer;
 import com.example.formsystem.model.AnswersResults;
+import com.example.formsystem.model.Form;
 import com.example.formsystem.model.Interview;
 import com.example.formsystem.model.PostAnswersList;
 import com.example.formsystem.model.Questions;
@@ -47,6 +50,8 @@ import com.example.formsystem.model.QuestionsResults;
 import com.example.formsystem.model.ResponseSuccess;
 import com.example.formsystem.utils.PreferenceUtils;
 import com.example.formsystem.viewmodel.FormSystemViewModel;
+import com.example.formsystem.viewmodel.local.InterviewsViewModel;
+import com.example.formsystem.viewmodel.local.QuestionsViewModel;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.LocationCallback;
@@ -64,16 +69,21 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.theartofdev.edmodo.cropper.CropImage;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Random;
 
 import id.zelory.compressor.Compressor;
+import io.reactivex.annotations.Nullable;
 
 public class ViewInterviewActivity extends AppCompatActivity implements OnMapReadyCallback {
 
@@ -104,6 +114,17 @@ public class ViewInterviewActivity extends AppCompatActivity implements OnMapRea
     private GoogleMap googleMap;
     private View viewMap;
 
+    public String questionId;
+    private ArrayList<Answer> imageAnswersList = new ArrayList<>();
+    private String imageName;
+    private Bitmap compressor;
+    private String downloadUri = null;
+    private Uri imageUri = null;
+    private static final int MAX_LENGTH = 100;
+    private String imageUrl = "";
+
+    private QuestionsViewModel questionsViewModel;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -122,6 +143,7 @@ public class ViewInterviewActivity extends AppCompatActivity implements OnMapRea
         postAnswerSystemViewModel = new ViewModelProvider(this).get(FormSystemViewModel.class);
         updateAnswerSystemViewModel = new ViewModelProvider(this).get(FormSystemViewModel.class);
         deleteInterviewSystemViewModel = new ViewModelProvider(this).get(FormSystemViewModel.class);
+        questionsViewModel = new ViewModelProvider(this).get(QuestionsViewModel.class);
         recyclerView = binding.recyclerView;
         questionAnswersArrayList = new ArrayList<>();
         answersArrayList = new ArrayList<>();
@@ -139,7 +161,7 @@ public class ViewInterviewActivity extends AppCompatActivity implements OnMapRea
         binding.editTextInterviewTitle.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(getApplicationContext(), "Update interview tile not available", Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), "Edit interview not available!", Toast.LENGTH_LONG).show();
             }
         });
         Intent intent = getIntent();
@@ -151,15 +173,87 @@ public class ViewInterviewActivity extends AppCompatActivity implements OnMapRea
                 interviewLocation = intent.getStringExtra(InterviewsAdapter.INTERVIEW_LOCATION);
                 latitude = Double.parseDouble(intent.getStringExtra(InterviewsAdapter.INTERVIEW_LATITUDE));
                 longitude = Double.parseDouble(intent.getStringExtra(InterviewsAdapter.INTERVIEW_LONGITUDE));
-                getFormQuestions();
+                if (isNetworkAvailable()) {
+                    getFormQuestions();
+                    getCurrentLocation();
+                    fetchInterviewData();
+                    deleteInterview();
+                } else {
+                    getFormQuestionsNoNet();
+                    //getCurrentLocationNoNet();
+                    //fetchInterviewDataNoNet();
+                    //deleteInterviewNoNet();
+                }
+                /*getFormQuestions();
                 //updateInterview();
                 getCurrentLocation();
                 fetchInterviewData();
-                deleteInterview();
+                deleteInterview();*/
             } catch (Exception e) {
 
             }
         }
+    }
+
+    private void getFormQuestions() {
+        binding.loadingDataConstraint.setVisibility(View.VISIBLE);
+        questionsSystemViewModel.getQuestions(token, formId);
+        questionsSystemViewModel.questionsMutableLiveData.observe(this, new Observer<QuestionsResults>() {
+            @SuppressLint("NotifyDataSetChanged")
+            @Override
+            public void onChanged(QuestionsResults questionsResults) {
+                try {
+                    binding.loadingDataConstraint.setVisibility(View.GONE);
+                    questionsArrayList = questionsResults.getQuestions();
+                    if (!questionsArrayList.isEmpty()) {
+                        binding.constraintLayoutEmptyData.setVisibility(View.GONE);
+                        /*Delete All question old from local*/
+                        questionsViewModel.deleteAllQuestions();
+                        /*Save questions in local */
+                        for (int i = 0; i < questionsArrayList.size(); i++) {
+                            questionsViewModel.insert(questionsArrayList.get(i));
+                        }
+                        /*Fetch in recycle*/
+                        questionsAdapter.setList(questionsArrayList);
+                        questionsAdapter.notifyDataSetChanged();
+                        getInterviewsAnswers();
+                    } else
+                        binding.constraintLayoutEmptyData.setVisibility(View.VISIBLE);
+                } catch (Exception e) {
+                }
+            }
+        });
+    }
+
+    private void getFormQuestionsNoNet() {
+        binding.loadingDataConstraint.setVisibility(View.VISIBLE);
+        questionsViewModel.getAllQuestions().observe(this, new Observer<List<Questions>>() {
+            @SuppressLint("NotifyDataSetChanged")
+            @Override
+            public void onChanged(@Nullable List<Questions> questions) {
+                questionsArrayList = new ArrayList<>();
+                for (int i = 0; i < questions.size(); i++) {
+                    binding.loadingDataConstraint.setVisibility(View.GONE);
+                    if (questions.get(i).getForm_fk_id().equals(formId)) {
+                        Questions question = questions.get(i);
+                        questionsArrayList.add(question);
+                    }
+                }
+                if (questionsArrayList.isEmpty())
+                    binding.constraintLayoutEmptyData.setVisibility(View.VISIBLE);
+                else
+                    binding.constraintLayoutEmptyData.setVisibility(View.GONE);
+                questionsAdapter.setList(questionsArrayList);
+                questionsAdapter.notifyDataSetChanged();
+            }
+        });
+    }
+
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 
     private void deleteInterview() {
@@ -281,11 +375,20 @@ public class ViewInterviewActivity extends AppCompatActivity implements OnMapRea
         dialog.show();
     }
 
+    public Answer getObjectFromString(String jsonString) {
+
+        Type ansType = new TypeToken<Answer>() {
+        }.getType();
+        Answer answer = new Gson().fromJson(jsonString, ansType);
+        return answer;
+
+    }
+
     private void updateAnswerInterview() {
         questionAnswersArrayList = questionsAdapter.getAnswerArrayList();
         for (int i = 0; i < questionAnswersArrayList.size(); i++) {
             Questions questions = questionAnswersArrayList.get(i);
-            Answer answer = questions.getAnswer();
+            Answer answer = getObjectFromString(questions.getAnswer());
             answer.setInterview_fk_id(interviewId);
             for (int j = 0; j < imageAnswersList.size(); j++) {
                 if (imageAnswersList.get(j).getQuestions_fk_id().equals(questions.getId()))
@@ -319,29 +422,6 @@ public class ViewInterviewActivity extends AppCompatActivity implements OnMapRea
                         imageView.setImageResource(R.drawable.ic_baseline_error_outline_24);
                         textView.setText(R.string.failed_save_answers);
                     }
-                } catch (Exception e) {
-                }
-            }
-        });
-    }
-
-    private void getFormQuestions() {
-        binding.loadingDataConstraint.setVisibility(View.VISIBLE);
-        questionsSystemViewModel.getQuestions(token, formId);
-        questionsSystemViewModel.questionsMutableLiveData.observe(this, new Observer<QuestionsResults>() {
-            @SuppressLint("NotifyDataSetChanged")
-            @Override
-            public void onChanged(QuestionsResults questionsResults) {
-                try {
-                    binding.loadingDataConstraint.setVisibility(View.GONE);
-                    questionsArrayList = questionsResults.getQuestions();
-                    if (!questionsArrayList.isEmpty()) {
-                        binding.constraintLayoutEmptyData.setVisibility(View.GONE);
-                        questionsAdapter.setList(questionsArrayList);
-                        questionsAdapter.notifyDataSetChanged();
-                        getInterviewsAnswers();
-                    } else
-                        binding.constraintLayoutEmptyData.setVisibility(View.VISIBLE);
                 } catch (Exception e) {
                 }
             }
@@ -523,15 +603,6 @@ public class ViewInterviewActivity extends AppCompatActivity implements OnMapRea
 
     }
 
-    public String questionId;
-    private ArrayList<Answer> imageAnswersList = new ArrayList<>();
-    private String imageName;
-    private Bitmap compressor;
-    private String downloadUri = null;
-    private Uri imageUri = null;
-    private static final int MAX_LENGTH = 100;
-    private String imageUrl = "";
-
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -594,4 +665,6 @@ public class ViewInterviewActivity extends AppCompatActivity implements OnMapRea
         }
         return randomStringBuilder.toString();
     }
+
+
 }

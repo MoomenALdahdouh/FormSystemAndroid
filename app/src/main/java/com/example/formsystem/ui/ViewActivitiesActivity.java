@@ -54,6 +54,8 @@ public class ViewActivitiesActivity extends AppCompatActivity {
     private InterviewsAdapter interviewsAdapter;
     private ArrayList<Interview> interviewsArrayList;
     private ArrayList<Interview> interviewArrayList;
+    private ArrayList<Interview> interviewArrayListLocal;
+    private Form form;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,7 +96,7 @@ public class ViewActivitiesActivity extends AppCompatActivity {
             @Override
             public void onChanged(FormResults formResults) {
                 try {
-                    Form form = formResults.getForm();
+                    form = formResults.getForm();
                     formViewModel.delete(form);
                     //Save new user in local
                     formViewModel.insert(form);
@@ -115,7 +117,7 @@ public class ViewActivitiesActivity extends AppCompatActivity {
             public void onChanged(@Nullable List<Form> forms) {
                 for (int i = 0; i < forms.size(); i++) {
                     if (forms.get(i).getActivity_fk_id().equals(activityId)) {
-                        Form form = forms.get(i);
+                        form = forms.get(i);
                         formId = String.valueOf(form.getId());
                         getInterviewsNoNet(formId);
                         interviewsAdapter.setForm(form);
@@ -136,7 +138,7 @@ public class ViewActivitiesActivity extends AppCompatActivity {
                     binding.loadingDataConstraint.setVisibility(View.GONE);
                     interviewArrayList = interviewResults.getInterviews();
                     if (!interviewArrayList.isEmpty()) {
-                        interviewArrayList = new ArrayList<>();
+                        //interviewArrayList = new ArrayList<>();
                         //Delete All local interviews and replace it with new
                         interviewsViewModel.deleteAllInterviews();
                         //Save All interviews in local
@@ -147,17 +149,14 @@ public class ViewActivitiesActivity extends AppCompatActivity {
                         binding.constraintLayoutEmptyData.setVisibility(View.GONE);
                         interviewsAdapter.setList(interviewArrayList);
                         interviewsAdapter.notifyDataSetChanged();
-                        // interviewsAdapter.setFormId(formId);
+                        interviewsAdapter.setForm(form);
                     } else
                         binding.constraintLayoutEmptyData.setVisibility(View.VISIBLE);
                 } catch (Exception e) {
                 }
-
             }
         });
     }
-
-    ArrayList<Interview> interviewArrayListLocal;
 
     private void getInterviewsNoNet(String formId) {
         binding.loadingDataConstraint.setVisibility(View.VISIBLE);
@@ -178,6 +177,7 @@ public class ViewActivitiesActivity extends AppCompatActivity {
                     interviewArrayListLocal.addAll(interviewArrayList);
                     interviewsAdapter.setList(interviewArrayList);
                     interviewsAdapter.notifyDataSetChanged();
+                    interviewsAdapter.setForm(form);
                 } else
                     binding.constraintLayoutEmptyData.setVisibility(View.VISIBLE);
             }

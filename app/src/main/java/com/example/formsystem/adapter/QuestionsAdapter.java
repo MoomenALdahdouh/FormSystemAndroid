@@ -35,6 +35,7 @@ import com.example.formsystem.ui.MakeInterviewActivity;
 import com.example.formsystem.ui.ViewImageActivity;
 import com.example.formsystem.ui.ViewInterviewActivity;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.gson.Gson;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
@@ -84,17 +85,24 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.View
         return new ViewHolder(view);
     }
 
+    public String stringFromObject(Answer answer) {
+        Gson gson = new Gson();
+        String jsonString = gson.toJson(answer);
+        return jsonString;
+    }
+
     @SuppressLint({"SetTextI18n", "ClickableViewAccessibility"})
     @Override
     public void onBindViewHolder(@NonNull QuestionsAdapter.ViewHolder holder, @SuppressLint("RecyclerView") int position) {
         try {
             Questions questions = questionsArrayList.get(position);
             holder.textViewQuestionTitle.setText(questions.getTitle());
-
+            String questionId = String.valueOf(questions.getId());
             if (updateInterview) {//If update interview fill answer
                 for (int i = 0; i < answersFromDbArrayList.size(); i++) {
                     Answer answer = answersFromDbArrayList.get(position);
-                    if (answer.getQuestions_fk_id().equals(questions.getId())) {
+                    String question_fk_id = answer.getQuestions_fk_id();
+                    if (questionId.equals(question_fk_id)) {
                         holder.editTextQuestion.setText(answer.getAnswer().toString());
                     }
                 }
@@ -134,8 +142,8 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.View
                                     DatePickerDialog mDatePicker = new DatePickerDialog(context, new DatePickerDialog.OnDateSetListener() {
                                         public void onDateSet(DatePicker datepicker, int selectedyear, int selectedmonth, int selectedday) {
                                             String selectedDate = selectedyear + "/" + selectedmonth + "/" + selectedday;
-                                            Answer answer = new Answer(questions.getId(), "", selectedDate, questions.getType());
-                                            answerArrayList.get(position).setAnswer(answer);
+                                            Answer answer = new Answer(String.valueOf(questions.getId()), "", selectedDate, questions.getType());
+                                            answerArrayList.get(position).setAnswer(stringFromObject(answer));
                                             holder.editTextQuestion.setText(selectedDate);
                                         }
                                     }, mYear, mMonth, mDay);
@@ -176,9 +184,9 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.View
                                         intent.putExtra(IMAGE_NAME, holder.editTextQuestion.getText().toString());
                                         context.startActivity(intent);
                                     } else {/*Upload image*/
-                                        Answer answer = new Answer(questions.getId(), "", "UploadImage.jpg", questions.getType());
-                                        answerArrayList.get(position).setAnswer(answer);
-                                        ((MakeInterviewActivity) context).setQuestionId(questions.getId());
+                                        Answer answer = new Answer(String.valueOf(questions.getId()), "", "UploadImage.jpg", questions.getType());
+                                        answerArrayList.get(position).setAnswer(stringFromObject(answer));
+                                        ((MakeInterviewActivity) context).setQuestionId(String.valueOf(questions.getId()));
                                         holder.editTextQuestion.setText("UploadImage.jpg");
                                         cropImage();
                                     }
@@ -213,10 +221,10 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.View
                     String questionAnswer = holder.editTextQuestion.getText().toString();
                     if (updateInterview) {
                         Answer answer = answersFromDbArrayList.get(position);
-                        answerArrayList.get(position).setAnswer(answer);
+                        answerArrayList.get(position).setAnswer(stringFromObject(answer));
                     } else {
-                        Answer answer = new Answer(questions.getId(), "", questionAnswer, questions.getType());
-                        answerArrayList.get(position).setAnswer(answer);
+                        Answer answer = new Answer(String.valueOf(questions.getId()), "", questionAnswer, questions.getType());
+                        answerArrayList.get(position).setAnswer(stringFromObject(answer));
                     }
 
                 }

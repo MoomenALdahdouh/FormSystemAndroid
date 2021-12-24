@@ -27,9 +27,9 @@ public class Interview {
     @SerializedName("interview_id")
     private String interview_id;
     @SerializedName("latitude")
-    private String 	latitude;
+    private String latitude;
     @SerializedName("longitude")
-    private String 	longitude;
+    private String longitude;
 
     public Interview() {
     }

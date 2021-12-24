@@ -63,12 +63,15 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Random;
@@ -201,26 +204,39 @@ public class MakeInterviewActivity extends AppCompatActivity implements OnMapRea
         });
     }
 
+    public Answer getObjectFromString(String jsonString) {
+
+        Type ansType = new TypeToken<Answer>() {
+        }.getType();
+        Answer answer = new Gson().fromJson(jsonString, ansType);
+        return answer;
+
+    }
+
     private void adapterQuestionAnswers(String interviewId) {
         questionAnswersArrayList = questionsAdapter.getAnswerArrayList();
         for (int i = 0; i < questionAnswersArrayList.size(); i++) {
             Questions questions = questionAnswersArrayList.get(i);
-            Answer answer = questions.getAnswer();
+            String questionsId = String.valueOf(questions.getId());
+            Answer answer = getObjectFromString(questions.getAnswer());
             answer.setInterview_fk_id(interviewId);
             /*Get image answer if not empty*/
             for (int j = 0; j < imageAnswersList.size(); j++) {
-                if (imageAnswersList.get(j).getQuestions_fk_id().equals(questions.getId()))
+                String question_fk_id = imageAnswersList.get(j).getQuestions_fk_id();
+                if (question_fk_id.equals(questionsId))
                     answer.setAnswer(imageAnswersList.get(j).getAnswer());
             }
             answersArrayList.add(answer);
+            Log.d("onResponse", "answersArrayList" + answersArrayList.get(i).getAnswer());
             //postAnswer(answer);
         }
+        Log.d("onResponse", "answersArrayList" + answersArrayList.size());
         PostAnswersList postAnswersList = new PostAnswersList(answersArrayList);
         postAnswer(postAnswersList);
     }
 
     private void postAnswer(PostAnswersList answer) {
-        Log.d("onResponse", "Answer step 2 post : " + answer.getAnswersList().get(4).getAnswer());
+        //Log.d("onResponse", "Answer step 2 post : " + answer.getAnswersList().get(4).getAnswer());
         postAnswerSystemViewModel.postAnswer(answer);
         postAnswerSystemViewModel.postAnswerMutableLiveData.observe(this, new Observer<PostAnswersList>() {
             @SuppressLint("NotifyDataSetChanged")

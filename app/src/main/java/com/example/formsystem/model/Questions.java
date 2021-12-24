@@ -1,12 +1,19 @@
 package com.example.formsystem.model;
 
+import androidx.room.Entity;
+import androidx.room.Ignore;
+import androidx.room.PrimaryKey;
+
+import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.ArrayList;
 
+@Entity(tableName = "questions_table")
 public class Questions {
+    @PrimaryKey(autoGenerate = false)
     @SerializedName("id")
-    private String id;
+    private int id;
     @SerializedName("form_fk_id")
     private String form_fk_id;
     @SerializedName("questions_key")
@@ -18,13 +25,20 @@ public class Questions {
     @SerializedName("type")
     private String type;
     /*User answer field to save question answer in adapter*/
+    //@Ignore
     @SerializedName("answer")
-    private Answer answer = new Answer("","","","");
+    private String answer = stringFromObject();
 
     public Questions() {
     }
 
-    public Questions(String id, String form_fk_id, String questions_key, String title, String body, String type) {
+    public String stringFromObject() {
+        Answer answer = new Answer("", "", "", "");
+        Gson gson = new Gson();
+        return gson.toJson(answer);
+    }
+
+    public Questions(int id, String form_fk_id, String questions_key, String title, String body, String type) {
         this.id = id;
         this.form_fk_id = form_fk_id;
         this.questions_key = questions_key;
@@ -33,11 +47,11 @@ public class Questions {
         this.type = type;
     }
 
-    public String getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(int id) {
         this.id = id;
     }
 
@@ -81,11 +95,11 @@ public class Questions {
         this.type = type;
     }
 
-    public Answer getAnswer() {
+    public String getAnswer() {
         return answer;
     }
 
-    public void setAnswer(Answer answer) {
+    public void setAnswer(String answer) {
         this.answer = answer;
     }
 }

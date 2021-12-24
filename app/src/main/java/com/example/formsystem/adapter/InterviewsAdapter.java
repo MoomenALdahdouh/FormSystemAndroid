@@ -85,16 +85,17 @@ public class InterviewsAdapter extends RecyclerView.Adapter<InterviewsAdapter.Vi
                     Interview interviewClicked = interviewsArrayList.get(adapterPosition);
                     String interviewId = String.valueOf(interviewClicked.getId());
                     String interviewTitle = interviewClicked.getTitle();
-                    String interviewLocation = String.valueOf(interviewClicked.getId());
+                    String interviewLocation = String.valueOf(interviewClicked.getCustomer_location());
                     String interviewLatitude = interviewClicked.getLatitude();
                     String interviewLongitude = interviewClicked.getLongitude();
+                    String formId = String.valueOf(form.getId());
                     Intent intent = new Intent(context, ViewInterviewActivity.class);
                     intent.putExtra(INTERVIEW_ID, interviewId);
                     intent.putExtra(INTERVIEW_TITLE, interviewTitle);
                     intent.putExtra(INTERVIEW_LOCATION, interviewLocation);
                     intent.putExtra(INTERVIEW_LATITUDE, interviewLatitude);
                     intent.putExtra(INTERVIEW_LONGITUDE, interviewLongitude);
-                    intent.putExtra(FORM_ID, form.getId());
+                    intent.putExtra(FORM_ID, formId);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     context.startActivity(intent);
                 }
