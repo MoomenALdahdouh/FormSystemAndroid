@@ -50,7 +50,7 @@ public class LoginActivity extends AppCompatActivity {
                             PreferenceUtils.saveToken(tokenResponse, getApplicationContext());
                             PreferenceUtils.saveUserId(String.valueOf(user.getId()), getApplicationContext());
                             Toast.makeText(getApplicationContext(), "Successfully login", Toast.LENGTH_SHORT).show();
-                            startActivity(new Intent(LoginActivity.this, ActivitiesActivity.class));
+                            startActivity(new Intent(LoginActivity.this, WorkerFormsActivity.class));
                             finish();
                         } else {
                             Toast.makeText(getApplicationContext(), "Failed login! try again", Toast.LENGTH_SHORT).show();

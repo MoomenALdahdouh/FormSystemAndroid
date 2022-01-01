@@ -1,12 +1,5 @@
 package com.example.formsystem.ui;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.ViewModelProviders;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
@@ -16,18 +9,24 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.example.formsystem.R;
-import com.example.formsystem.adapter.ActivitiesAdapter;
+import com.example.formsystem.adapter.FormsAdapter;
 import com.example.formsystem.databinding.ActivityActivitiesBinding;
+import com.example.formsystem.databinding.ActivityWorkerFormsBinding;
 import com.example.formsystem.model.Activity;
-import com.example.formsystem.model.ActivityResults;
 import com.example.formsystem.model.Form;
+import com.example.formsystem.model.FormResults;
 import com.example.formsystem.model.User;
 import com.example.formsystem.model.UserResults;
 import com.example.formsystem.utils.PreferenceUtils;
@@ -42,45 +41,48 @@ import java.util.Locale;
 import io.reactivex.annotations.NonNull;
 import io.reactivex.annotations.Nullable;
 
-public class ActivitiesActivity extends AppCompatActivity {
+public class WorkerFormsActivity extends AppCompatActivity {
 
-    private ActivityActivitiesBinding binding;
+    private ActivityWorkerFormsBinding binding;
     private FormSystemViewModel activitiesSystemViewModel;
+    private FormSystemViewModel workerFormsSystemViewModel;
     private FormSystemViewModel userSystemViewModel;
     private UserViewModel userViewModel;
     private ActivitiesViewModel activitiesViewModel;
     private RecyclerView recyclerView;
-    private ActivitiesAdapter activitiesAdapter;
-    private ArrayList<Activity> activityArrayList;
+    private FormsAdapter formsAdapter;
+    private ArrayList<Form> formsArrayList;
     private String token;
     private String userId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        binding = ActivityActivitiesBinding.inflate(getLayoutInflater());
+        binding = ActivityWorkerFormsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        token = PreferenceUtils.getToken(ActivitiesActivity.this);
-        userId = PreferenceUtils.getUserId(ActivitiesActivity.this);
+        token = PreferenceUtils.getToken(WorkerFormsActivity.this);
+        userId = PreferenceUtils.getUserId(WorkerFormsActivity.this);
         activitiesSystemViewModel = new ViewModelProvider(this).get(FormSystemViewModel.class);
+        workerFormsSystemViewModel = new ViewModelProvider(this).get(FormSystemViewModel.class);
         userSystemViewModel = new ViewModelProvider(this).get(FormSystemViewModel.class);
         userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
         activitiesViewModel = new ViewModelProvider(this).get(ActivitiesViewModel.class);
         recyclerView = binding.recyclerView;
-        activitiesAdapter = new ActivitiesAdapter(ActivitiesActivity.this);
-        activityArrayList = new ArrayList<>();
+        formsAdapter = new FormsAdapter(WorkerFormsActivity.this);
+        formsArrayList = new ArrayList<>();
         recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
-        activitiesAdapter.setList(activityArrayList);
-        recyclerView.setAdapter(activitiesAdapter);
+        formsAdapter.setList(formsArrayList);
+        recyclerView.setAdapter(formsAdapter);
         recyclerView.setHasFixedSize(true);
         binding.constraintLayoutEmptyData.setVisibility(View.GONE);
         binding.loadingDataConstraint.setVisibility(View.GONE);
         if (isNetworkAvailable()) {
             getUserDetailsNet();
-            getActivitiesNet();
+            getFormsNet();
+            //getActivitiesNet();
         } else {
             getUserDetailsNoNet();
-            getActivitiesNoNet();
+            //getActivitiesNoNet();
         }
         //getActivities();
         //getUserDetailsNet();
@@ -125,30 +127,33 @@ public class ActivitiesActivity extends AppCompatActivity {
         });
     }
 
-    private void getActivitiesNet() {
+
+    private void getFormsNet() {
         binding.loadingDataConstraint.setVisibility(View.VISIBLE);
-        activitiesSystemViewModel.getAllActivities(token, userId);
-        activitiesSystemViewModel.activitiesMutableLiveData.observe(this, new Observer<ActivityResults>() {
+        workerFormsSystemViewModel.getAllWorkerForms(token, userId);
+        workerFormsSystemViewModel.workerFormsMutableLiveData.observe(this, new Observer<FormResults>() {
             @SuppressLint("NotifyDataSetChanged")
             @Override
-            public void onChanged(ActivityResults activityResults) {
+            public void onChanged(FormResults formResults) {
                 binding.loadingDataConstraint.setVisibility(View.GONE);
-                activityArrayList = activityResults.getResults();
-                activitiesViewModel.deleteAllActivities();
-                for (int i = 0; i < activityArrayList.size(); i++) {
-                    activitiesViewModel.insert(activityArrayList.get(i));
-                }
-                if (!activityArrayList.isEmpty()) {
+                formsArrayList = formResults.getResults();
+                //Store data in room
+                /*activitiesViewModel.deleteAllActivities();
+                for (int i = 0; i < formsArrayList.size(); i++) {
+                    activitiesViewModel.insert(formsArrayList.get(i));
+                }*/
+                if (!formsArrayList.isEmpty()) {
                     binding.constraintLayoutEmptyData.setVisibility(View.GONE);
-                    activitiesAdapter.setList(activityArrayList);
-                    activitiesAdapter.notifyDataSetChanged();
+                    formsAdapter.setList(formsArrayList);
+                    formsAdapter.notifyDataSetChanged();
                 } else
                     binding.constraintLayoutEmptyData.setVisibility(View.VISIBLE);
             }
         });
     }
 
-    private void getActivitiesNoNet() {
+
+    /*private void getActivitiesNoNet() {
         binding.loadingDataConstraint.setVisibility(View.VISIBLE);
         activitiesViewModel.getAllActivities().observe(this, new Observer<List<Activity>>() {
             @SuppressLint("NotifyDataSetChanged")
@@ -158,14 +163,14 @@ public class ActivitiesActivity extends AppCompatActivity {
                 assert activities != null;
                 if (!activities.isEmpty()) {
                     binding.constraintLayoutEmptyData.setVisibility(View.GONE);
-                    activityArrayList.addAll(activities);
-                    activitiesAdapter.setList(activityArrayList);
-                    activitiesAdapter.notifyDataSetChanged();
+                    formsArrayList.addAll(activities);
+                    formsAdapter.setList(formsArrayList);
+                    formsAdapter.notifyDataSetChanged();
                 } else
                     binding.constraintLayoutEmptyData.setVisibility(View.VISIBLE);
             }
         });
-    }
+    }*/
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

@@ -33,6 +33,7 @@ import retrofit2.Response;
 public class FormSystemViewModel extends ViewModel {
     public MutableLiveData<Token> tokenMutableLiveData = new MutableLiveData<>();
     public MutableLiveData<ActivityResults> activitiesMutableLiveData = new MutableLiveData<>();
+    public MutableLiveData<FormResults> workerFormsMutableLiveData = new MutableLiveData<>();
     public MutableLiveData<UserResults> userMutableLiveData = new MutableLiveData<>();
     public MutableLiveData<FormResults> formMutableLiveData = new MutableLiveData<>();
     public MutableLiveData<InterviewResults> interviewsMutableLiveData = new MutableLiveData<>();
@@ -70,6 +71,22 @@ public class FormSystemViewModel extends ViewModel {
 
             @Override
             public void onFailure(@NonNull Call<ActivityResults> call, @NonNull Throwable t) {
+                t.printStackTrace();
+                Log.d("onFailure", t.getMessage());
+            }
+        });
+    }
+
+    public void getAllWorkerForms(String authToken, String id) {
+        FormSystemClient.getINSTANCE().getAllWorkerForms(authToken, id).enqueue(new Callback<FormResults>() {
+            @Override
+            public void onResponse(@NonNull Call<FormResults> call, @NonNull Response<FormResults> response) {
+                Log.d("onResponse", response.toString());
+                workerFormsMutableLiveData.setValue(response.body());
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<FormResults> call, @NonNull Throwable t) {
                 t.printStackTrace();
                 Log.d("onFailure", t.getMessage());
             }

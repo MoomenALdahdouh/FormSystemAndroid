@@ -19,6 +19,7 @@ import com.example.formsystem.model.Form;
 import com.example.formsystem.model.Login;
 import com.example.formsystem.model.Token;
 import com.example.formsystem.ui.ActivitiesActivity;
+import com.example.formsystem.ui.WorkerFormsActivity;
 import com.example.formsystem.utils.PreferenceUtils;
 import com.example.formsystem.viewmodel.FormSystemViewModel;
 
@@ -70,7 +71,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void buttonClick(View view) {
         Toast.makeText(getApplicationContext(), "TOKEN IS:" + PreferenceUtils.getToken(getApplicationContext()) + "  ID " + PreferenceUtils.getUserId(getApplicationContext()), Toast.LENGTH_SHORT).show();
-        startActivity(new Intent(getApplicationContext(), ActivitiesActivity.class));
+        startActivity(new Intent(getApplicationContext(), WorkerFormsActivity.class));
     }
 
 

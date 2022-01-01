@@ -84,6 +84,9 @@ public class FormSystemClient {
     public Call<ActivityResults> getAllActivities(String authToken, String id) {
         return formSystemInterface.getAllActivities("Bearer " + authToken, id);
     }
+    public Call<FormResults> getAllWorkerForms(String authToken, String id) {
+        return formSystemInterface.getAllWorkerForms("Bearer " + authToken, id);
+    }
 
     public Call<UserResults> getUser(String authToken, String id) {
         return formSystemInterface.getUser("Bearer " + authToken, id);

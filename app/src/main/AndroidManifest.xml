@@ -42,6 +42,9 @@
             android:name=".ui.ActivitiesActivity"
             android:exported="true" />
         <activity
+            android:name=".ui.WorkerFormsActivity"
+            android:exported="true" />
+        <activity
             android:name=".ui.SplashActivity"
             android:exported="true"
             android:theme="@style/Theme.FormSystem.NoActionBar">

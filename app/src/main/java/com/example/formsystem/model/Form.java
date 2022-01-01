@@ -27,6 +27,9 @@ public class Form {
     @SerializedName("name")
     @Expose
     private String name;
+    @SerializedName("type")
+    @Expose
+    private String type;
     @SerializedName("describtion")
     @Expose
     private String describtion;
@@ -107,6 +110,14 @@ public class Form {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 
     public String getDescribtion() {
