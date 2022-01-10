@@ -268,7 +268,7 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.View
                     .setGuidelines(CropImageView.Guidelines.ON)
                     //.setMinCropResultSize(512,512)
                     .setBackgroundColor(Color.parseColor("#00000000"))
-                    .setAspectRatio(4, 4)
+                    .setAspectRatio(4, 3)
                     .start((Activity) context);
         }
     }

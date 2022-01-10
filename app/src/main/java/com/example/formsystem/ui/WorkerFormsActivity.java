@@ -32,6 +32,7 @@ import com.example.formsystem.model.UserResults;
 import com.example.formsystem.utils.PreferenceUtils;
 import com.example.formsystem.viewmodel.FormSystemViewModel;
 import com.example.formsystem.viewmodel.local.ActivitiesViewModel;
+import com.example.formsystem.viewmodel.local.FormViewModel;
 import com.example.formsystem.viewmodel.local.UserViewModel;
 
 import java.util.ArrayList;
@@ -47,6 +48,7 @@ public class WorkerFormsActivity extends AppCompatActivity {
     private FormSystemViewModel activitiesSystemViewModel;
     private FormSystemViewModel workerFormsSystemViewModel;
     private FormSystemViewModel userSystemViewModel;
+    private FormViewModel formViewModel;
     private UserViewModel userViewModel;
     private ActivitiesViewModel activitiesViewModel;
     private RecyclerView recyclerView;
@@ -66,6 +68,7 @@ public class WorkerFormsActivity extends AppCompatActivity {
         workerFormsSystemViewModel = new ViewModelProvider(this).get(FormSystemViewModel.class);
         userSystemViewModel = new ViewModelProvider(this).get(FormSystemViewModel.class);
         userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
+        formViewModel = new ViewModelProvider(this).get(FormViewModel.class);
         activitiesViewModel = new ViewModelProvider(this).get(ActivitiesViewModel.class);
         recyclerView = binding.recyclerView;
         formsAdapter = new FormsAdapter(WorkerFormsActivity.this);
@@ -79,15 +82,11 @@ public class WorkerFormsActivity extends AppCompatActivity {
         if (isNetworkAvailable()) {
             getUserDetailsNet();
             getFormsNet();
-            //getActivitiesNet();
         } else {
             getUserDetailsNoNet();
-            //getActivitiesNoNet();
+            getFormsNoNet();
         }
-        //getActivities();
-        //getUserDetailsNet();
         setUpLanguage(PreferenceUtils.getLanguage(getApplicationContext()));
-        // checkInternet();
     }
 
     private void getUserDetailsNet() {
@@ -127,21 +126,41 @@ public class WorkerFormsActivity extends AppCompatActivity {
         });
     }
 
+    private ArrayList<Form> formsRoom = new ArrayList<>();
+    private ArrayList<Form> newFormsRoom = new ArrayList<>();
 
     private void getFormsNet() {
         binding.loadingDataConstraint.setVisibility(View.VISIBLE);
         workerFormsSystemViewModel.getAllWorkerForms(token, userId);
+        //getFormsRoom();
         workerFormsSystemViewModel.workerFormsMutableLiveData.observe(this, new Observer<FormResults>() {
             @SuppressLint("NotifyDataSetChanged")
             @Override
             public void onChanged(FormResults formResults) {
                 binding.loadingDataConstraint.setVisibility(View.GONE);
                 formsArrayList = formResults.getResults();
-                //Store data in room
-                /*activitiesViewModel.deleteAllActivities();
-                for (int i = 0; i < formsArrayList.size(); i++) {
-                    activitiesViewModel.insert(formsArrayList.get(i));
+                //Replace old data form in room
+                //Old code
+                /*for (int i = 0; i < formsArrayList.size(); i++) {
+                    for (int j = 0; j < formsRoom.size(); j++) {
+                        if (formsRoom.get(j).getId() == formsArrayList.get(i).getId()) {
+                            //remove then insert again mean (update item)
+                            formViewModel.delete(formsRoom.get(j));
+                        }
+                    }
+                    //insert
+                    formViewModel.insert(formsArrayList.get(i));
+                    //formViewModel.insert(formsArrayList.get(i));
                 }*/
+                //New Code to replace
+                if (newFormsRoom.size() != formsArrayList.size()) {
+                    formViewModel.deleteAllForms();
+                    for (int i = 0; i < formsArrayList.size(); i++) {
+                        newFormsRoom.add(formsArrayList.get(i));
+                        formViewModel.insert(formsArrayList.get(i));
+                    }
+                }
+                //Fill recycle
                 if (!formsArrayList.isEmpty()) {
                     binding.constraintLayoutEmptyData.setVisibility(View.GONE);
                     formsAdapter.setList(formsArrayList);
@@ -152,25 +171,35 @@ public class WorkerFormsActivity extends AppCompatActivity {
         });
     }
 
+    private void getFormsRoom() {
+        formViewModel.getAllForms().observe(this, new Observer<List<Form>>() {
+            @Override
+            public void onChanged(List<Form> forms) {
+                formsRoom = new ArrayList<>();
+                formsRoom.addAll(forms);
+            }
+        });
+    }
 
-    /*private void getActivitiesNoNet() {
+
+    private void getFormsNoNet() {
         binding.loadingDataConstraint.setVisibility(View.VISIBLE);
-        activitiesViewModel.getAllActivities().observe(this, new Observer<List<Activity>>() {
+        formViewModel.getAllForms().observe(this, new Observer<List<Form>>() {
             @SuppressLint("NotifyDataSetChanged")
             @Override
-            public void onChanged(@Nullable List<Activity> activities) {
+            public void onChanged(@Nullable List<Form> forms) {
                 binding.loadingDataConstraint.setVisibility(View.GONE);
-                assert activities != null;
-                if (!activities.isEmpty()) {
+                assert forms != null;
+                if (!forms.isEmpty()) {
                     binding.constraintLayoutEmptyData.setVisibility(View.GONE);
-                    formsArrayList.addAll(activities);
+                    formsArrayList.addAll(forms);
                     formsAdapter.setList(formsArrayList);
                     formsAdapter.notifyDataSetChanged();
                 } else
                     binding.constraintLayoutEmptyData.setVisibility(View.VISIBLE);
             }
         });
-    }*/
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

@@ -20,7 +20,7 @@ import com.example.formsystem.ui.ViewActivitiesActivity;
 import java.util.ArrayList;
 
 public class FormsAdapter extends RecyclerView.Adapter<FormsAdapter.ViewHolder> {
-    public static final String ACTIVITY_ID = "ACTIVITY_ID";
+    public static final String FORM_ID = "FORM_ID";
     private Context context;
     private ArrayList<Form> formsArrayList;
 
@@ -70,9 +70,9 @@ public class FormsAdapter extends RecyclerView.Adapter<FormsAdapter.ViewHolder> 
                 public void onClick(View view) {
                     int adapterPosition = getAdapterPosition();
                     Form formClicked = formsArrayList.get(adapterPosition);
-                    String activityId = String.valueOf(formClicked.getId());
+                    String formId = String.valueOf(formClicked.getId());
                     Intent intent = new Intent(context, ViewActivitiesActivity.class);
-                    intent.putExtra(ACTIVITY_ID, activityId);
+                    intent.putExtra(FORM_ID, formId);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     context.startActivity(intent);
                 }

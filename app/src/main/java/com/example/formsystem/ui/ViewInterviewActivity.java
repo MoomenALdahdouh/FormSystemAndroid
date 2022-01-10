@@ -332,7 +332,7 @@ public class ViewInterviewActivity extends AppCompatActivity implements OnMapRea
                     binding.textViewErrorLocation.setTextColor(getColor(R.color.danger));
                     return;
                 }
-                Interview interview = new Interview(formId, interviewTitle, interviewLocation, latitude + "", longitude + "");
+                Interview interview = new Interview(formId, interviewTitle, interviewLocation, latitude + "", longitude + "", PreferenceUtils.getUserId(getApplicationContext()));
                 showDialog();
                 updateAnswerInterview();
             }

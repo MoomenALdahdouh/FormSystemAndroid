@@ -12,11 +12,13 @@ import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
 import com.example.formsystem.R;
 import com.example.formsystem.adapter.ActivitiesAdapter;
+import com.example.formsystem.adapter.FormsAdapter;
 import com.example.formsystem.adapter.InterviewsAdapter;
 import com.example.formsystem.databinding.ActivityViewActivitiesBinding;
 import com.example.formsystem.model.Activity;
@@ -78,13 +80,15 @@ public class ViewActivitiesActivity extends AppCompatActivity {
         binding.constraintLayoutEmptyData.setVisibility(View.GONE);
         binding.loadingDataConstraint.setVisibility(View.GONE);
         Intent intent = getIntent();
-        if (intent != null && intent.hasExtra(ActivitiesAdapter.ACTIVITY_ID)) {
-            activityId = intent.getStringExtra(ActivitiesAdapter.ACTIVITY_ID);
+        if (intent != null && intent.hasExtra(FormsAdapter.FORM_ID)) {
+            //activityId = intent.getStringExtra(FormsAdapter.FORM_ID);
+            formId = intent.getStringExtra(FormsAdapter.FORM_ID);
             makeInterviewClick();
             if (isNetworkAvailable()) {
-                getFormNet();
+                //getInterviewsRoom();
+                getInterviews(formId);
             } else {
-                getFormNoNet();
+                getInterviewsNoNet(formId);
             }
         }
     }
@@ -98,7 +102,7 @@ public class ViewActivitiesActivity extends AppCompatActivity {
                 try {
                     form = formResults.getForm();
                     formViewModel.delete(form);
-                    //Save new user in local
+                    //Save new form in local
                     formViewModel.insert(form);
                     formId = String.valueOf(form.getId());
                     getInterviews(formId);
@@ -127,6 +131,38 @@ public class ViewActivitiesActivity extends AppCompatActivity {
         });
     }
 
+
+    private ArrayList<Interview> interviewsRoom = new ArrayList<>();
+    private ArrayList<Interview> newInterviewsRoom = new ArrayList<>();
+
+    private void getInterviewsRoom() {
+        interviewsViewModel.getAllInterviews().observe(this, new Observer<List<Interview>>() {
+            @Override
+            public void onChanged(List<Interview> interviews) {
+                if (newInterviewsRoom.size() != interviewArrayList.size()) {
+                    interviewsRoom = new ArrayList<>();
+                    newInterviewsRoom = new ArrayList<>();
+                    interviewsRoom.addAll(interviews);
+                    for (int i = 0; i < interviewArrayList.size(); i++) {
+                        for (int j = 0; j < interviewsRoom.size(); j++) {
+                            if (interviewsRoom.get(j).getId() == interviewArrayList.get(i).getId()) {
+                                //remove then insert again mean (update item)
+                                interviewsViewModel.delete(interviewsRoom.get(j));
+                            }
+                        }
+                        //insert
+                        newInterviewsRoom.add(interviewArrayList.get(i));
+                        interviewsViewModel.insert(interviewArrayList.get(i));
+                    }
+                    /*for (int i = 0; i < newInterviewsRoom.size(); i++) {
+                        //Log.d("Item itemmmm ", "" + newInterviewsRoom.get(i).getId());
+                        interviewsViewModel.insert(newInterviewsRoom.get(i));
+                    }*/
+                }
+            }
+        });
+    }
+
     private void getInterviews(String formId) {
         binding.loadingDataConstraint.setVisibility(View.VISIBLE);
         interviewsSystemViewModel.getInterviews(token, formId);
@@ -137,19 +173,17 @@ public class ViewActivitiesActivity extends AppCompatActivity {
                 try {
                     binding.loadingDataConstraint.setVisibility(View.GONE);
                     interviewArrayList = interviewResults.getInterviews();
+                    //Replace old data in room
                     if (!interviewArrayList.isEmpty()) {
-                        //interviewArrayList = new ArrayList<>();
-                        //Delete All local interviews and replace it with new
-                        interviewsViewModel.deleteAllInterviews();
-                        //Save All interviews in local
-                        for (int i = 0; i < interviewArrayList.size(); i++) {
-                            interviewsViewModel.insert(interviewArrayList.get(i));
-                        }
                         //Fill adapter with interviews from api
                         binding.constraintLayoutEmptyData.setVisibility(View.GONE);
                         interviewsAdapter.setList(interviewArrayList);
                         interviewsAdapter.notifyDataSetChanged();
-                        interviewsAdapter.setForm(form);
+                        interviewsAdapter.setFormId(formId);
+
+                        if (newInterviewsRoom.size() != interviewArrayList.size())
+                            getInterviewsRoom();
+
                     } else
                         binding.constraintLayoutEmptyData.setVisibility(View.VISIBLE);
                 } catch (Exception e) {
@@ -184,21 +218,6 @@ public class ViewActivitiesActivity extends AppCompatActivity {
         });
     }
 
-    private void getInterviewsLocal() {
-        interviewsViewModel.getAllInterviews().observe(this, new Observer<List<Interview>>() {
-            @SuppressLint("NotifyDataSetChanged")
-            @Override
-            public void onChanged(@Nullable List<Interview> interviews) {
-                assert interviews != null;
-                if (!interviews.isEmpty()) {
-                    interviewArrayListLocal = new ArrayList<>();
-                    interviewArrayListLocal.addAll(interviewArrayList);
-                }
-            }
-        });
-    }
-
-
     private void makeInterviewClick() {
         binding.buttonMakeInterview.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -214,6 +233,7 @@ public class ViewActivitiesActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         if (isNetworkAvailable()) {
+            //getInterviewsRoom();
             getInterviews(formId);
         } else {
             getInterviewsNoNet(formId);

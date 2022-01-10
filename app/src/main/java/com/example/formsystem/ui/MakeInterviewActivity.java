@@ -158,7 +158,7 @@ public class MakeInterviewActivity extends AppCompatActivity implements OnMapRea
                     binding.textViewErrorLocation.setTextColor(getColor(R.color.danger));
                     return;
                 }
-                Interview interview = new Interview(formId, interviewTitle, interviewLocation, latitude + "", longitude + "");
+                Interview interview = new Interview(formId, interviewTitle, interviewLocation, latitude + "", longitude + "",PreferenceUtils.getUserId(getApplicationContext()));
                 showDialog();
                 postInterview(interview);
             }
@@ -230,7 +230,6 @@ public class MakeInterviewActivity extends AppCompatActivity implements OnMapRea
             Log.d("onResponse", "answersArrayList" + answersArrayList.get(i).getAnswer());
             //postAnswer(answer);
         }
-        Log.d("onResponse", "answersArrayList" + answersArrayList.size());
         PostAnswersList postAnswersList = new PostAnswersList(answersArrayList);
         postAnswer(postAnswersList);
     }

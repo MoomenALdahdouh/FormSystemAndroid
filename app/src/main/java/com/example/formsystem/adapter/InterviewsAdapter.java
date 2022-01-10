@@ -31,6 +31,7 @@ public class InterviewsAdapter extends RecyclerView.Adapter<InterviewsAdapter.Vi
     private Context context;
     private ArrayList<Interview> interviewsArrayList;
     private Form form;
+    private String formId;
 
     public InterviewsAdapter(Context context) {
         this.context = context;
@@ -42,6 +43,10 @@ public class InterviewsAdapter extends RecyclerView.Adapter<InterviewsAdapter.Vi
 
     public void setForm(Form form) {
         this.form = form;
+    }
+
+    public void setFormId(String formId) {
+        this.formId = formId;
     }
 
     @NonNull
@@ -88,7 +93,7 @@ public class InterviewsAdapter extends RecyclerView.Adapter<InterviewsAdapter.Vi
                     String interviewLocation = String.valueOf(interviewClicked.getCustomer_location());
                     String interviewLatitude = interviewClicked.getLatitude();
                     String interviewLongitude = interviewClicked.getLongitude();
-                    String formId = String.valueOf(form.getId());
+                    //String formId = String.valueOf(form.getId());
                     Intent intent = new Intent(context, ViewInterviewActivity.class);
                     intent.putExtra(INTERVIEW_ID, interviewId);
                     intent.putExtra(INTERVIEW_TITLE, interviewTitle);
