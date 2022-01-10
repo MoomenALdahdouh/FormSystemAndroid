@@ -37,7 +37,7 @@ public class FormRepository {
     }
 
     public void deleteAllForms() {
-        new DeleteAllUsersAsyncTask(formDao).execute();
+        new DeleteAllFormsAsyncTask(formDao).execute();
     }
 
     public LiveData<List<Form>> getAllForms() {
@@ -86,16 +86,16 @@ public class FormRepository {
         }
     }
 
-    private static class DeleteAllUsersAsyncTask extends AsyncTask<Void, Void, Void> {
+    private static class DeleteAllFormsAsyncTask extends AsyncTask<Void, Void, Void> {
         private FormDao formDao;
 
-        private DeleteAllUsersAsyncTask(FormDao formDao) {
+        private DeleteAllFormsAsyncTask(FormDao formDao) {
             this.formDao = formDao;
         }
 
         @Override
         protected Void doInBackground(Void... voids) {
-            formDao.getAllForms();
+            formDao.deleteAllForms();
             return null;
         }
     }

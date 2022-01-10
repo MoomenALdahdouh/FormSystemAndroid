@@ -9,6 +9,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -140,14 +141,14 @@ public class WorkerFormsActivity extends AppCompatActivity {
                 binding.loadingDataConstraint.setVisibility(View.GONE);
                 formsArrayList = formResults.getResults();
                 //Replace old data form in room
-                /*if (newFormsRoom.size() != formsArrayList.size()) {
+                if (newFormsRoom.size() != formsArrayList.size()) {
                     newFormsRoom = new ArrayList<>();
                     formViewModel.deleteAllForms();
                     for (int i = 0; i < formsArrayList.size(); i++) {
                         newFormsRoom.add(formsArrayList.get(i));
                         formViewModel.insert(formsArrayList.get(i));
                     }
-                }*/
+                }
                 //Fill recycle
                 if (!formsArrayList.isEmpty()) {
                     binding.constraintLayoutEmptyData.setVisibility(View.GONE);
@@ -160,11 +161,20 @@ public class WorkerFormsActivity extends AppCompatActivity {
     }
 
     private void getFormsRoom() {
+        formViewModel.deleteAllForms();
         formViewModel.getAllForms().observe(this, new Observer<List<Form>>() {
             @Override
             public void onChanged(List<Form> forms) {
+                Log.d("sizeForms", forms.size() + "");
                 formsRoom = new ArrayList<>();
                 formsRoom.addAll(forms);
+                newFormsRoom = new ArrayList<>();
+                for (int i = 0; i < formsArrayList.size(); i++) {
+                    newFormsRoom.add(formsArrayList.get(i));
+                    Log.d("siezzzz", i + "");
+                    //formViewModel.insert(formsArrayList.get(i));
+                }
+                Log.d("sieznewFormsRoom", newFormsRoom.size() + "");
             }
         });
     }
