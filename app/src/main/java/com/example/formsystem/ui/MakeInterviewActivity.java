@@ -10,6 +10,12 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.location.Criteria;
+import android.location.Location;
+import android.location.LocationListener;
+import android.media.Image;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.util.Base64;
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -101,13 +107,15 @@ public class MakeInterviewActivity extends AppCompatActivity implements OnMapRea
     private LocationRequest locationRequest;
     private GoogleMap googleMap;
     private View viewMap;
+    private LocationManager locationManager;
+    private String provider;
+    private Location location;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityMakeInterviewBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-
         locationRequest = LocationRequest.create();
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         locationRequest.setInterval(5000);
@@ -133,10 +141,27 @@ public class MakeInterviewActivity extends AppCompatActivity implements OnMapRea
         Intent intent = getIntent();
         if (intent != null && intent.hasExtra(ViewActivitiesActivity.FORM_ID)) {
             formId = intent.getStringExtra(ViewActivitiesActivity.FORM_ID);
-            getFormQuestions();
-            submitInterview();
-            getCurrentLocation();
+            if (isNetworkAvailable()) {
+                getFormQuestions();
+                submitInterview();
+                //getCurrentLocation();
+            } else {
+                //getCurrentLocationNoNet();
+            }
+            getLocation();
         }
+    }
+
+    private void getLocation() {
+        binding.constraintLayoutLocation.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (isNetworkAvailable())
+                    getCurrentLocation();
+                else
+                    getCurrentLocationNoNet();
+            }
+        });
     }
 
     private void submitInterview() {
@@ -158,7 +183,7 @@ public class MakeInterviewActivity extends AppCompatActivity implements OnMapRea
                     binding.textViewErrorLocation.setTextColor(getColor(R.color.danger));
                     return;
                 }
-                Interview interview = new Interview(formId, interviewTitle, interviewLocation, latitude + "", longitude + "",PreferenceUtils.getUserId(getApplicationContext()));
+                Interview interview = new Interview(formId, interviewTitle, interviewLocation, latitude + "", longitude + "", PreferenceUtils.getUserId(getApplicationContext()));
                 showDialog();
                 postInterview(interview);
             }
@@ -286,83 +311,98 @@ public class MakeInterviewActivity extends AppCompatActivity implements OnMapRea
         });
     }
 
+
     /*Map section*/
     private void getCurrentLocation() {
-        binding.constraintLayoutLocation.setOnClickListener(new View.OnClickListener() {
+
+        if (ActivityCompat.checkSelfPermission(MakeInterviewActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+
+            if (isGPSEnabled()) {
+
+                LocationServices.getFusedLocationProviderClient(MakeInterviewActivity.this)
+                        .requestLocationUpdates(locationRequest, new LocationCallback() {
+                            @SuppressLint({"SetTextI18n", "ResourceAsColor"})
+                            @Override
+                            public void onLocationResult(@NonNull LocationResult locationResult) {
+                                super.onLocationResult(locationResult);
+
+                                LocationServices.getFusedLocationProviderClient(MakeInterviewActivity.this)
+                                        .removeLocationUpdates(this);
+
+                                if (locationResult != null && locationResult.getLocations().size() > 0) {
+
+                                    int index = locationResult.getLocations().size() - 1;
+                                    latitude = locationResult.getLocations().get(index).getLatitude();
+                                    longitude = locationResult.getLocations().get(index).getLongitude();
+                                    Geocoder geocoder;
+                                    ArrayList<Address> addresses = new ArrayList<>();
+                                    geocoder = new Geocoder(MakeInterviewActivity.this, Locale.getDefault());
+                                    try {
+                                        addresses = (ArrayList<Address>) geocoder.getFromLocation(latitude, longitude, 1); // Here 1 represent max location result to returned, by documents it recommended 1 to 5
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                    }
+                                    if (addresses.size() > 0) {
+                                        interviewLocation = addresses.get(0).getAddressLine(0); // If any additional address line present than only, check with max available address lines by getMaxAddressLineIndex()
+                                    }
+                                    String city = addresses.get(0).getLocality();
+                                    String state = addresses.get(0).getAdminArea();
+                                    String country = addresses.get(0).getCountryName();
+                                    String postalCode = addresses.get(0).getPostalCode();
+                                    String knownName = addresses.get(0).getFeatureName();
+
+                                    binding.textViewErrorLocation.setVisibility(View.VISIBLE);
+                                    binding.textViewErrorLocation.setText("Current Location: " + interviewLocation + ", " + latitude + ", " + longitude);
+                                    binding.textViewErrorLocation.setTextColor(getColor(R.color.teal_700));
+
+                                    showLocationInMap();
+                                }
+                            }
+                        }, Looper.getMainLooper());
+
+            } else {
+                turnOnGPS();
+            }
+
+        } else {
+            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+        }
+
+    }
+
+    private AlertDialog alertDialog;
+
+    @SuppressLint("SetTextI18n")
+    private void showLocationInMap() {
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+        //AlertDialog.Builder alertDialog = new AlertDialog.Builder(MakeInterviewActivity.this);
+        LayoutInflater factory = LayoutInflater.from(MakeInterviewActivity.this);
+        if (viewMap != null) {
+            ViewGroup parent = (ViewGroup) viewMap.getParent();
+            if (parent != null)
+                parent.removeView(viewMap);
+        }
+        try {
+            viewMap = factory.inflate(R.layout.map_dialog, null);
+        } catch (InflateException e) {
+            /* map is already there, just return view as it is */
+        }
+        dialogBuilder.setView(viewMap);
+        TextView textView = viewMap.findViewById(R.id.textViewLocation);
+        textView.setText(interviewLocation + ", " + latitude + ", " + longitude);
+        ImageView imageViewClose = viewMap.findViewById(R.id.imageView6);
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.mapView);
+        mapFragment.getMapAsync(MakeInterviewActivity.this);
+        imageViewClose.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (ActivityCompat.checkSelfPermission(MakeInterviewActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-
-                    if (isGPSEnabled()) {
-
-                        LocationServices.getFusedLocationProviderClient(MakeInterviewActivity.this)
-                                .requestLocationUpdates(locationRequest, new LocationCallback() {
-                                    @SuppressLint({"SetTextI18n", "ResourceAsColor"})
-                                    @Override
-                                    public void onLocationResult(@NonNull LocationResult locationResult) {
-                                        super.onLocationResult(locationResult);
-
-                                        LocationServices.getFusedLocationProviderClient(MakeInterviewActivity.this)
-                                                .removeLocationUpdates(this);
-
-                                        if (locationResult != null && locationResult.getLocations().size() > 0) {
-
-                                            int index = locationResult.getLocations().size() - 1;
-                                            latitude = locationResult.getLocations().get(index).getLatitude();
-                                            longitude = locationResult.getLocations().get(index).getLongitude();
-                                            Geocoder geocoder;
-                                            ArrayList<Address> addresses = new ArrayList<>();
-                                            geocoder = new Geocoder(MakeInterviewActivity.this, Locale.getDefault());
-                                            try {
-                                                addresses = (ArrayList<Address>) geocoder.getFromLocation(latitude, longitude, 1); // Here 1 represent max location result to returned, by documents it recommended 1 to 5
-                                            } catch (IOException e) {
-                                                e.printStackTrace();
-                                            }
-                                            interviewLocation = addresses.get(0).getAddressLine(0); // If any additional address line present than only, check with max available address lines by getMaxAddressLineIndex()
-                                            String city = addresses.get(0).getLocality();
-                                            String state = addresses.get(0).getAdminArea();
-                                            String country = addresses.get(0).getCountryName();
-                                            String postalCode = addresses.get(0).getPostalCode();
-                                            String knownName = addresses.get(0).getFeatureName();
-
-                                            binding.textViewErrorLocation.setVisibility(View.VISIBLE);
-                                            binding.textViewErrorLocation.setText("Current Location: " + interviewLocation + ", " + latitude + ", " + longitude);
-                                            binding.textViewErrorLocation.setTextColor(getColor(R.color.teal_700));
-
-                                            AlertDialog.Builder alertDialog = new AlertDialog.Builder(MakeInterviewActivity.this);
-                                            LayoutInflater factory = LayoutInflater.from(MakeInterviewActivity.this);
-                                            if (viewMap != null) {
-                                                ViewGroup parent = (ViewGroup) viewMap.getParent();
-                                                if (parent != null)
-                                                    parent.removeView(viewMap);
-                                            }
-                                            try {
-                                                viewMap = factory.inflate(R.layout.map_dialog, null);
-                                            } catch (InflateException e) {
-                                                /* map is already there, just return view as it is */
-                                            }
-                                            //viewMap = factory.inflate(R.layout.map_dialog, null);
-                                            TextView textView = viewMap.findViewById(R.id.textViewLocation);
-                                            textView.setText(interviewLocation + ", " + latitude + ", " + longitude);
-                                            //MapView mapView = view.findViewById(R.id.mapView);
-                                            SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                                                    .findFragmentById(R.id.mapView);
-                                            mapFragment.getMapAsync(MakeInterviewActivity.this);
-                                            alertDialog.setView(viewMap);
-                                            alertDialog.show();
-                                        }
-                                    }
-                                }, Looper.getMainLooper());
-
-                    } else {
-                        turnOnGPS();
-                    }
-
-                } else {
-                    requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
-                }
+                alertDialog.dismiss();
             }
         });
+        //alertDialog.setView(viewMap);
+        alertDialog = dialogBuilder.create();
+        alertDialog.show();
     }
 
     private void turnOnGPS() {
@@ -515,5 +555,80 @@ public class MakeInterviewActivity extends AppCompatActivity implements OnMapRea
         }
         return randomStringBuilder.toString();
     }
+
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+    }
+
+    @SuppressLint({"MissingPermission", "SetTextI18n"})
+    private void getCurrentLocationNoNet() {
+        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        LocationListener mlocListener = new MyLocationListener();
+        Criteria criteria = new Criteria();
+        criteria.setAccuracy(Criteria.ACCURACY_COARSE);
+        criteria.setAccuracy(Criteria.ACCURACY_FINE);
+        provider = locationManager.getBestProvider(criteria, true);
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, mlocListener);
+        if (locationManager != null) {
+            location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            if (location != null) {
+                latitude = location.getLatitude();
+                longitude = location.getLongitude();
+                Geocoder geocoder;
+                ArrayList<Address> addresses = new ArrayList<>();
+                geocoder = new Geocoder(MakeInterviewActivity.this, Locale.getDefault());
+                try {
+                    addresses = (ArrayList<Address>) geocoder.getFromLocation(latitude, longitude, 1); // Here 1 represent max location result to returned, by documents it recommended 1 to 5
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                if (addresses.size() > 0) {
+                    interviewLocation = addresses.get(0).getAddressLine(0); // If any additional address line present than only, check with max available address lines by getMaxAddressLineIndex()
+                }
+                binding.textViewErrorLocation.setVisibility(View.VISIBLE);
+                binding.textViewErrorLocation.setTextColor(getColor(R.color.teal_700));
+                binding.textViewErrorLocation.setText("Current Location: " + interviewLocation + ", " + latitude + ", " + longitude);
+                showLocationInMap();
+            } else {
+                binding.textViewErrorLocation.setVisibility(View.VISIBLE);
+                binding.textViewErrorLocation.setTextColor(getColor(R.color.danger));
+                binding.textViewErrorLocation.setText("No Location!");
+            }
+        }
+    }
+
+    public class MyLocationListener implements LocationListener {
+        @Override
+        public void onLocationChanged(Location loc) {
+            loc.getLatitude();
+            loc.getLongitude();
+            String Text = "My current location is: " + "Latitude = "
+                    + loc.getLatitude() + "Longitude = " + loc.getLongitude();
+            Toast.makeText(getApplicationContext(), Text, Toast.LENGTH_SHORT)
+                    .show();
+            Log.d("TAG", "Starting..");
+        }
+
+        @Override
+        public void onProviderDisabled(String provider) {
+            Toast.makeText(getApplicationContext(), "Gps Disabled",
+                    Toast.LENGTH_SHORT).show();
+        }
+
+        @Override
+        public void onProviderEnabled(String provider) {
+            Toast.makeText(getApplicationContext(), "Gps Enabled",
+                    Toast.LENGTH_SHORT).show();
+        }
+
+        @Override
+        public void onStatusChanged(String provider, int status, Bundle extras) {
+        }
+    }
+    /* End of Class MyLocationListener */
+    /* End of UseGps Activity */
 
 }

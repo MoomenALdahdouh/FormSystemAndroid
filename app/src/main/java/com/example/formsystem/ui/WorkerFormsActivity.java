@@ -140,14 +140,14 @@ public class WorkerFormsActivity extends AppCompatActivity {
                 binding.loadingDataConstraint.setVisibility(View.GONE);
                 formsArrayList = formResults.getResults();
                 //Replace old data form in room
-                if (newFormsRoom.size() != formsArrayList.size()) {
+                /*if (newFormsRoom.size() != formsArrayList.size()) {
                     newFormsRoom = new ArrayList<>();
                     formViewModel.deleteAllForms();
                     for (int i = 0; i < formsArrayList.size(); i++) {
                         newFormsRoom.add(formsArrayList.get(i));
                         formViewModel.insert(formsArrayList.get(i));
                     }
-                }
+                }*/
                 //Fill recycle
                 if (!formsArrayList.isEmpty()) {
                     binding.constraintLayoutEmptyData.setVisibility(View.GONE);
