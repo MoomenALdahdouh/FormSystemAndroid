@@ -125,8 +125,8 @@ public class FormSystemViewModel extends ViewModel {
         });
     }
 
-    public void getInterviews(String authToken, String id) {
-        FormSystemClient.getINSTANCE().getInterviews(authToken, id).enqueue(new Callback<InterviewResults>() {
+    public void getInterviews(String authToken, String id,String worker_id) {
+        FormSystemClient.getINSTANCE().getInterviews(authToken, id,worker_id).enqueue(new Callback<InterviewResults>() {
             @Override
             public void onResponse(@NonNull Call<InterviewResults> call, @NonNull Response<InterviewResults> response) {
                 Log.d("onResponse", response.toString());

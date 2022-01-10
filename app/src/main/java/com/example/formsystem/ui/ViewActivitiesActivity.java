@@ -58,6 +58,7 @@ public class ViewActivitiesActivity extends AppCompatActivity {
     private ArrayList<Interview> interviewArrayList;
     private ArrayList<Interview> interviewArrayListLocal;
     private Form form;
+    private String worker_id;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,6 +66,7 @@ public class ViewActivitiesActivity extends AppCompatActivity {
         binding = ActivityViewActivitiesBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         token = PreferenceUtils.getToken(ViewActivitiesActivity.this);
+        worker_id = PreferenceUtils.getUserId(getApplicationContext());
         formSystemViewModel = new ViewModelProvider(this).get(FormSystemViewModel.class);
         interviewsSystemViewModel = new ViewModelProvider(this).get(FormSystemViewModel.class);
         interviewsViewModel = new ViewModelProvider(this).get(InterviewsViewModel.class);
@@ -86,7 +88,7 @@ public class ViewActivitiesActivity extends AppCompatActivity {
             makeInterviewClick();
             if (isNetworkAvailable()) {
                 //getInterviewsRoom();
-                getInterviews(formId);
+                getInterviews(formId, worker_id);
             } else {
                 getInterviewsNoNet(formId);
             }
@@ -105,7 +107,8 @@ public class ViewActivitiesActivity extends AppCompatActivity {
                     //Save new form in local
                     formViewModel.insert(form);
                     formId = String.valueOf(form.getId());
-                    getInterviews(formId);
+
+                    getInterviews(formId, worker_id);
                     interviewsAdapter.setForm(form);
                 } catch (Exception e) {
 
@@ -163,9 +166,9 @@ public class ViewActivitiesActivity extends AppCompatActivity {
         });
     }
 
-    private void getInterviews(String formId) {
+    private void getInterviews(String formId, String worker_id) {
         binding.loadingDataConstraint.setVisibility(View.VISIBLE);
-        interviewsSystemViewModel.getInterviews(token, formId);
+        interviewsSystemViewModel.getInterviews(token, formId, worker_id);
         interviewsSystemViewModel.interviewsMutableLiveData.observe(this, new Observer<InterviewResults>() {
             @SuppressLint("NotifyDataSetChanged")
             @Override
@@ -234,7 +237,7 @@ public class ViewActivitiesActivity extends AppCompatActivity {
         super.onResume();
         if (isNetworkAvailable()) {
             //getInterviewsRoom();
-            getInterviews(formId);
+            getInterviews(formId,worker_id);
         } else {
             getInterviewsNoNet(formId);
         }

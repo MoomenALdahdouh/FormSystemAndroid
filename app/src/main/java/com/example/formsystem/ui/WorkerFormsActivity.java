@@ -140,20 +140,8 @@ public class WorkerFormsActivity extends AppCompatActivity {
                 binding.loadingDataConstraint.setVisibility(View.GONE);
                 formsArrayList = formResults.getResults();
                 //Replace old data form in room
-                //Old code
-                /*for (int i = 0; i < formsArrayList.size(); i++) {
-                    for (int j = 0; j < formsRoom.size(); j++) {
-                        if (formsRoom.get(j).getId() == formsArrayList.get(i).getId()) {
-                            //remove then insert again mean (update item)
-                            formViewModel.delete(formsRoom.get(j));
-                        }
-                    }
-                    //insert
-                    formViewModel.insert(formsArrayList.get(i));
-                    //formViewModel.insert(formsArrayList.get(i));
-                }*/
-                //New Code to replace
                 if (newFormsRoom.size() != formsArrayList.size()) {
+                    newFormsRoom = new ArrayList<>();
                     formViewModel.deleteAllForms();
                     for (int i = 0; i < formsArrayList.size(); i++) {
                         newFormsRoom.add(formsArrayList.get(i));

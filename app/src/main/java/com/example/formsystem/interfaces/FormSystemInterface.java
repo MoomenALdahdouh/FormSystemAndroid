@@ -60,8 +60,8 @@ public interface FormSystemInterface {
             "Content-Type: application/json",
             "Accept: application/json"
     })
-    @GET("forms/{id}/interviews")
-    Call<InterviewResults> getInterviews(@Header("authorization") String authToken, @Path("id") String id);
+    @GET("forms/{id}/interviews/worker/{worker_id}")
+    Call<InterviewResults> getInterviews(@Header("authorization") String authToken, @Path("id") String id, @Path("worker_id") String worker_id);
 
     @POST("interviews/create")
     Call<Interview> postInterview(@Body Interview interview);
