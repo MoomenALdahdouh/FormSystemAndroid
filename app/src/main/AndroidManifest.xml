@@ -28,7 +28,8 @@
         android:usesCleartextTraffic="true">
         <activity
             android:name=".ui.ViewImageActivity"
-            android:exported="true" />
+            android:exported="true"
+            android:theme="@style/Theme.FormSystem.NoActionBar"/>
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"

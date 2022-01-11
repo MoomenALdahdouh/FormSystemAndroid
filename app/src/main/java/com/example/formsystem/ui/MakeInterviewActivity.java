@@ -52,6 +52,9 @@ import com.example.formsystem.model.Questions;
 import com.example.formsystem.model.QuestionsResults;
 import com.example.formsystem.utils.PreferenceUtils;
 import com.example.formsystem.viewmodel.FormSystemViewModel;
+import com.example.formsystem.viewmodel.local.FormViewModel;
+import com.example.formsystem.viewmodel.local.InterviewsViewModel;
+import com.example.formsystem.viewmodel.local.QuestionsViewModel;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.LocationCallback;
@@ -79,10 +82,12 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Random;
 
 import id.zelory.compressor.Compressor;
+import io.reactivex.annotations.Nullable;
 
 public class MakeInterviewActivity extends AppCompatActivity implements OnMapReadyCallback {
 
@@ -91,6 +96,8 @@ public class MakeInterviewActivity extends AppCompatActivity implements OnMapRea
     private FormSystemViewModel questionsSystemViewModel;
     private FormSystemViewModel postInterviewSystemViewModel;
     private FormSystemViewModel postAnswerSystemViewModel;
+    private QuestionsViewModel questionsViewModel;
+    private InterviewsViewModel interviewsViewModel;
     private String token;
     private String userId;
     private RecyclerView recyclerView;
@@ -125,6 +132,8 @@ public class MakeInterviewActivity extends AppCompatActivity implements OnMapRea
         questionsSystemViewModel = new ViewModelProvider(this).get(FormSystemViewModel.class);
         postInterviewSystemViewModel = new ViewModelProvider(this).get(FormSystemViewModel.class);
         postAnswerSystemViewModel = new ViewModelProvider(this).get(FormSystemViewModel.class);
+        questionsViewModel = new ViewModelProvider(this).get(QuestionsViewModel.class);
+        interviewsViewModel = new ViewModelProvider(this).get(InterviewsViewModel.class);
         recyclerView = binding.recyclerView;
         questionAnswersArrayList = new ArrayList<>();
         answersArrayList = new ArrayList<>();
@@ -143,13 +152,21 @@ public class MakeInterviewActivity extends AppCompatActivity implements OnMapRea
             formId = intent.getStringExtra(ViewActivitiesActivity.FORM_ID);
             if (isNetworkAvailable()) {
                 getFormQuestions();
-                submitInterview();
+                //submitInterview();
                 //getCurrentLocation();
             } else {
-                //getCurrentLocationNoNet();
+                getFormQuestionsNoNet();
             }
+            submitInterview();
             getLocation();
         }
+        /*binding.buttonSubmitInterview.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                int time1 = (int) System.currentTimeMillis();
+                Toast.makeText(getApplicationContext(), time1,Toast.LENGTH_SHORT).show();
+            }
+        });*/
     }
 
     private void getLocation() {
@@ -177,15 +194,22 @@ public class MakeInterviewActivity extends AppCompatActivity implements OnMapRea
                     return;
                 }
                 //Check location
-                if (interviewLocation.isEmpty() || (Double.toString(latitude).isEmpty() && Double.toString(longitude).isEmpty())) {
+                //interviewLocation.isEmpty() ||
+                if ((Double.toString(latitude).isEmpty() && Double.toString(longitude).isEmpty())) {
                     binding.textViewErrorLocation.setVisibility(View.VISIBLE);
                     binding.textViewErrorLocation.setText(getString(R.string.the_location_required));
                     binding.textViewErrorLocation.setTextColor(getColor(R.color.danger));
                     return;
                 }
-                Interview interview = new Interview(formId, interviewTitle, interviewLocation, latitude + "", longitude + "", PreferenceUtils.getUserId(getApplicationContext()));
+                int id = (int) System.currentTimeMillis();
+                Interview interview = new Interview(id, formId, interviewTitle, interviewLocation, latitude + "", longitude + "", PreferenceUtils.getUserId(getApplicationContext()));
                 showDialog();
-                postInterview(interview);
+                if (isNetworkAvailable())
+                    postInterview(interview);
+                else {
+                    Toast.makeText(getApplicationContext(), "getInterviewTitle::" + interviewTitle, Toast.LENGTH_LONG).show();
+                    postInterviewNoNet(interview);
+                }
             }
         });
     }
@@ -227,6 +251,13 @@ public class MakeInterviewActivity extends AppCompatActivity implements OnMapRea
                 }
             }
         });
+    }
+
+    private void postInterviewNoNet(Interview interview) {
+        interviewsViewModel.insert(interview);
+        Toast.makeText(getApplicationContext(), "getInterview_id::" + interview.getId(), Toast.LENGTH_LONG).show();
+        //Log.d("getInterview_id::", interview.getInterview_id());
+        adapterQuestionAnswers(interview.getId()+"");
     }
 
     public Answer getObjectFromString(String jsonString) {
@@ -289,6 +320,10 @@ public class MakeInterviewActivity extends AppCompatActivity implements OnMapRea
         });
     }
 
+    private ArrayList<Questions> questionsRoom = new ArrayList<>();
+    private ArrayList<Questions> newQuestionsForm = new ArrayList<>();
+
+
     private void getFormQuestions() {
         binding.loadingDataConstraint.setVisibility(View.VISIBLE);
         questionsSystemViewModel.getQuestions(token, formId);
@@ -303,10 +338,65 @@ public class MakeInterviewActivity extends AppCompatActivity implements OnMapRea
                         binding.constraintLayoutEmptyData.setVisibility(View.GONE);
                         questionsAdapter.setList(questionsArrayList);
                         questionsAdapter.notifyDataSetChanged();
+                        //Replace old data in room
+                        if (newQuestionsForm.size() != questionsArrayList.size())
+                            getFormQuestionsRoom();
                     } else
                         binding.constraintLayoutEmptyData.setVisibility(View.VISIBLE);
                 } catch (Exception e) {
+
                 }
+            }
+        });
+    }
+
+    private void getFormQuestionsRoom() {
+        questionsViewModel.getAllQuestions().observe(this, new Observer<List<Questions>>() {
+            @Override
+            public void onChanged(List<Questions> questions) {
+                if (newQuestionsForm.size() != questionsArrayList.size()) {
+                    questionsRoom = new ArrayList<>();
+                    newQuestionsForm = new ArrayList<>();
+                    questionsRoom.addAll(questions);
+                    for (int i = 0; i < questionsArrayList.size(); i++) {
+                        for (int j = 0; j < questionsRoom.size(); j++) {
+                            if (questionsRoom.get(j).getId() == questionsArrayList.get(i).getId()) {
+                                //remove then insert again mean (update item)
+                                questionsViewModel.delete(questionsRoom.get(j));
+                            }
+                        }
+                        //insert
+                        newQuestionsForm.add(questionsArrayList.get(i));
+                        questionsViewModel.insert(questionsArrayList.get(i));
+                    }
+                }
+            }
+        });
+    }
+
+    private ArrayList<Questions> questionsArrayListLocal;
+
+    private void getFormQuestionsNoNet() {
+        binding.loadingDataConstraint.setVisibility(View.VISIBLE);
+        questionsViewModel.getAllQuestions().observe(this, new Observer<List<Questions>>() {
+            @SuppressLint("NotifyDataSetChanged")
+            @Override
+            public void onChanged(@Nullable List<Questions> questions) {
+                binding.loadingDataConstraint.setVisibility(View.GONE);
+                assert questions != null;
+                if (!questions.isEmpty()) {
+                    binding.constraintLayoutEmptyData.setVisibility(View.GONE);
+                    questionsArrayList = new ArrayList<>();
+                    for (int i = 0; i < questions.size(); i++) {
+                        if (questions.get(i).getForm_fk_id().equals(formId))
+                            questionsArrayList.add(questions.get(i));
+                    }
+                    questionsArrayListLocal = new ArrayList<>();
+                    questionsArrayListLocal.addAll(questionsArrayList);
+                    questionsAdapter.setList(questionsArrayList);
+                    questionsAdapter.notifyDataSetChanged();
+                } else
+                    binding.constraintLayoutEmptyData.setVisibility(View.VISIBLE);
             }
         });
     }
@@ -607,9 +697,8 @@ public class MakeInterviewActivity extends AppCompatActivity implements OnMapRea
             loc.getLongitude();
             String Text = "My current location is: " + "Latitude = "
                     + loc.getLatitude() + "Longitude = " + loc.getLongitude();
-            Toast.makeText(getApplicationContext(), Text, Toast.LENGTH_SHORT)
-                    .show();
-            Log.d("TAG", "Starting..");
+            //Toast.makeText(getApplicationContext(), Text, Toast.LENGTH_SHORT).show();
+            //Log.d("TAG", "Starting..");
         }
 
         @Override

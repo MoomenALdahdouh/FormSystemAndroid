@@ -33,7 +33,7 @@ public class Questions {
     }
 
     public String stringFromObject() {
-        Answer answer = new Answer("", "", "", "");
+        Answer answer = new Answer("", "", "", "","");
         Gson gson = new Gson();
         return gson.toJson(answer);
     }

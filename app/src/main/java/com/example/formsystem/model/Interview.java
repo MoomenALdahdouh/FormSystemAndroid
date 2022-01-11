@@ -45,13 +45,23 @@ public class Interview {
         this.worker_fk_id = worker_fk_id;
     }
 
+    public Interview(int id,String form_fk_id, String title, String customer_location, String latitude, String longitude, String worker_fk_id) {
+        this.id = id;
+        this.form_fk_id = form_fk_id;
+        this.title = title;
+        this.customer_location = customer_location;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.worker_fk_id = worker_fk_id;
+    }
+
     public Interview(String form_fk_id, String title, String customer_location) {
         this.form_fk_id = form_fk_id;
         this.title = title;
         this.customer_location = customer_location;
     }
 
-    public Interview(int id, String form_fk_id, String title, String created_at, String updated_at, String status, String customer_location) {
+    /*public Interview(int id, String form_fk_id, String title, String created_at, String updated_at, String status, String customer_location) {
         this.id = id;
         this.form_fk_id = form_fk_id;
         this.title = title;
@@ -59,7 +69,7 @@ public class Interview {
         this.updated_at = updated_at;
         this.status = status;
         this.customer_location = customer_location;
-    }
+    }*/
 
     public int getId() {
         return id;

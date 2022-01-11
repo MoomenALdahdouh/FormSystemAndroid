@@ -176,17 +176,15 @@ public class ViewActivitiesActivity extends AppCompatActivity {
                 try {
                     binding.loadingDataConstraint.setVisibility(View.GONE);
                     interviewArrayList = interviewResults.getInterviews();
-                    //Replace old data in room
                     if (!interviewArrayList.isEmpty()) {
                         //Fill adapter with interviews from api
                         binding.constraintLayoutEmptyData.setVisibility(View.GONE);
                         interviewsAdapter.setList(interviewArrayList);
                         interviewsAdapter.notifyDataSetChanged();
                         interviewsAdapter.setFormId(formId);
-
+                        //Replace old data in room
                         if (newInterviewsRoom.size() != interviewArrayList.size())
                             getInterviewsRoom();
-
                     } else
                         binding.constraintLayoutEmptyData.setVisibility(View.VISIBLE);
                 } catch (Exception e) {
