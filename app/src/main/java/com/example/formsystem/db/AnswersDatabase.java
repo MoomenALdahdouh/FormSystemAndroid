@@ -9,21 +9,20 @@ import androidx.room.Room;
 import androidx.room.RoomDatabase;
 import androidx.sqlite.db.SupportSQLiteDatabase;
 
-import com.example.formsystem.model.Questions;
-import com.example.formsystem.model.User;
+import com.example.formsystem.model.Answer;
 
 import io.reactivex.annotations.NonNull;
 
-@Database(entities = {Questions.class}, version = 5)
-public abstract class QuestionsDatabase extends RoomDatabase {
-    private static QuestionsDatabase instance;
+@Database(entities = {Answer.class}, version = 2)
+public abstract class AnswersDatabase extends RoomDatabase {
+    private static AnswersDatabase instance;
 
-    public abstract QuestionsDao questionsDao();
+    public abstract AnswersDao answersDao();
 
-    public static synchronized QuestionsDatabase getInstance(Context context) {
+    public static synchronized AnswersDatabase getInstance(Context context) {
         if (instance == null) {
             instance = Room.databaseBuilder(context.getApplicationContext(),
-                    QuestionsDatabase.class, "questions_database")
+                    AnswersDatabase.class, "answers_table")
                     .fallbackToDestructiveMigration()
                     .addCallback(roomCallback)
                     .build();
@@ -40,10 +39,10 @@ public abstract class QuestionsDatabase extends RoomDatabase {
     };
 
     private static class PopulateDbAsyncTask extends AsyncTask<Void, Void, Void> {
-        private QuestionsDao questionsDao;
+        private AnswersDao answersDao;
 
-        private PopulateDbAsyncTask(QuestionsDatabase db) {
-            questionsDao = db.questionsDao();
+        private PopulateDbAsyncTask(AnswersDatabase db) {
+            answersDao = db.answersDao();
         }
 
         @Override

@@ -244,6 +244,7 @@ public class MakeInterviewActivity extends AppCompatActivity implements OnMapRea
             public void onChanged(Interview interview) {
                 try {
                     /* Success*/
+                    Log.d("interview.getInterview_id()",interview.getInterview_id());
                     questionAnswersArrayList.clear();
                     answersArrayList.clear();
                     adapterQuestionAnswers(interview.getInterview_id());
@@ -257,7 +258,7 @@ public class MakeInterviewActivity extends AppCompatActivity implements OnMapRea
         interviewsViewModel.insert(interview);
         Toast.makeText(getApplicationContext(), "getInterview_id::" + interview.getId(), Toast.LENGTH_LONG).show();
         //Log.d("getInterview_id::", interview.getInterview_id());
-        adapterQuestionAnswers(interview.getId()+"");
+        adapterQuestionAnswers(interview.getId() + "");
     }
 
     public Answer getObjectFromString(String jsonString) {

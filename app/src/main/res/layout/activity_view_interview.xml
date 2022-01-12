@@ -218,14 +218,27 @@
             android:layout_width="wrap_content"
             android:layout_height="?actionBarSize"
             android:background="@drawable/corner_left_pup"
-            android:drawableEnd="@drawable/ic_baseline_delete_outline_24"
+            android:drawableEnd="@drawable/ic_baseline_save_24"
             android:drawablePadding="8dp"
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
-            android:text="@string/delete_interview"
+            android:text="@string/update_interview"
             android:textColor="@color/white"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
+
+        <ImageView
+            android:id="@+id/buttonDeleteInterview"
+            android:layout_width="wrap_content"
+            android:layout_height="?actionBarSize"
+            android:background="@drawable/corner_full_w"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:src="@drawable/ic_baseline_delete_outline_24"
+            android:textColor="@color/white"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout

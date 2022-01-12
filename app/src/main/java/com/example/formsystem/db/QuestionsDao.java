@@ -26,6 +26,6 @@ public interface QuestionsDao {
     @Query("DELETE FROM questions_table")
     void deleteAllQuestions();
 
-    @Query("SELECT * FROM questions_table ORDER BY id")
+    @Query("SELECT * FROM questions_table ORDER BY created_at DESC")
     LiveData<List<Questions>> getAllQuestions();
 }

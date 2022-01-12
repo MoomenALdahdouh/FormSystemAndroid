@@ -65,7 +65,8 @@ dependencies {
     //round image
     implementation 'com.makeramen:roundedimageview:2.2.1'
     //crop image to upload
-    implementation 'com.theartofdev.edmodo:android-image-cropper:2.8.+'
+    implementation 'com.theartofdev.edmodo:android-image-cropper:2.8.0'
+    //implementation 'com.theartofdev.edmodo:android-image-cropper:2.8.+'
     //compressor image
     //implementation 'id.zelory:compressor:2.1.0'
     implementation 'id.zelory:compressor:2.1.1'

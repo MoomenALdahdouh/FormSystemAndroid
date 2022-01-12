@@ -44,5 +44,6 @@
     <string name="sign_out">Sign out</string>
     <string name="english">English</string>
     <string name="worker">Worker</string>
+    <string name="update_interview">Update Interview</string>
 
 </resources>

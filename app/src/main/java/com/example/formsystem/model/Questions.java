@@ -24,6 +24,8 @@ public class Questions {
     private String body;
     @SerializedName("type")
     private String type;
+    @SerializedName("created_at")
+    private String created_at;
     /*User answer field to save question answer in adapter*/
     //@Ignore
     @SerializedName("answer")
@@ -33,7 +35,8 @@ public class Questions {
     }
 
     public String stringFromObject() {
-        Answer answer = new Answer("", "", "", "","");
+        int id = (int) System.currentTimeMillis();
+        Answer answer = new Answer(id, "", "", "", "");
         Gson gson = new Gson();
         return gson.toJson(answer);
     }
@@ -101,5 +104,13 @@ public class Questions {
 
     public void setAnswer(String answer) {
         this.answer = answer;
+    }
+
+    public String getCreated_at() {
+        return created_at;
+    }
+
+    public void setCreated_at(String created_at) {
+        this.created_at = created_at;
     }
 }

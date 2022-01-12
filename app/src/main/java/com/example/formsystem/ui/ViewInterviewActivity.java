@@ -257,7 +257,7 @@ public class ViewInterviewActivity extends AppCompatActivity implements OnMapRea
     }
 
     private void deleteInterview() {
-        binding.buttonUpdateInterview.setOnClickListener(new View.OnClickListener() {
+        binding.buttonDeleteInterview.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 AlertDialog.Builder dialog = new AlertDialog.Builder(ViewInterviewActivity.this);
@@ -276,8 +276,7 @@ public class ViewInterviewActivity extends AppCompatActivity implements OnMapRea
     }
 
     private void deleteInterviewAction() {
-        int id = Integer.parseInt(interviewId);
-        deleteInterviewSystemViewModel.deleteInterview(id);
+        deleteInterviewSystemViewModel.deleteInterview(Integer.parseInt(interviewId));
         deleteInterviewSystemViewModel.deleteInterviewMutableLiveData.observe(this, new Observer<ResponseSuccess>() {
             @SuppressLint("NotifyDataSetChanged")
             @Override
@@ -429,7 +428,7 @@ public class ViewInterviewActivity extends AppCompatActivity implements OnMapRea
     }
 
     private void getInterviewsAnswers() {
-        questionsSystemViewModel.getAnswers(token, interviewId);
+        questionsSystemViewModel.getAnswers(token, String.valueOf(interviewId));
         answersSystemViewModel.answersMutableLiveData.observe(this, new Observer<AnswersResults>() {
             @SuppressLint("NotifyDataSetChanged")
             @Override

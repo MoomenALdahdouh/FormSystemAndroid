@@ -1,13 +1,15 @@
 package com.example.formsystem.model;
 
 import androidx.room.Entity;
+import androidx.room.PrimaryKey;
 
 import com.google.gson.annotations.SerializedName;
 
-@Entity(tableName = "answer_table")
+@Entity(tableName = "answers_table")
 public class Answer {
+    @PrimaryKey(autoGenerate = true)
     @SerializedName("id")
-    private String id;
+    private int id;
     @SerializedName("questions_fk_id")
     private String questions_fk_id;
     @SerializedName("interview_fk_id")
@@ -16,6 +18,9 @@ public class Answer {
     private String answer;
     @SerializedName("type")
     private String type;
+    @SerializedName("created_at")
+    private String created_at;
+
 
 
     public Answer() {
@@ -28,7 +33,7 @@ public class Answer {
         this.type = type;
     }
 
-    public Answer(String id, String questions_fk_id, String interview_fk_id, String answer, String type) {
+    public Answer(int id, String questions_fk_id, String interview_fk_id, String answer, String type) {
         this.id = id;
         this.questions_fk_id = questions_fk_id;
         this.interview_fk_id = interview_fk_id;
@@ -36,11 +41,11 @@ public class Answer {
         this.type = type;
     }
 
-    public String getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(int id) {
         this.id = id;
     }
 
@@ -74,5 +79,13 @@ public class Answer {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public String getCreated_at() {
+        return created_at;
+    }
+
+    public void setCreated_at(String created_at) {
+        this.created_at = created_at;
     }
 }
