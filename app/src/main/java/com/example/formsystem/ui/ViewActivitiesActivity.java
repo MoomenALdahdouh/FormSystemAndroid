@@ -148,10 +148,17 @@ public class ViewActivitiesActivity extends AppCompatActivity {
                     interviewsRoom.addAll(interviews);
                     for (int i = 0; i < interviewArrayList.size(); i++) {
                         for (int j = 0; j < interviewsRoom.size(); j++) {
-                            if (interviewsRoom.get(j).getId() == interviewArrayList.get(i).getId()) {
+                            if (interviewsRoom.get(j).getForm_fk_id().equals(formId))
+                                interviewsViewModel.delete(interviewsRoom.get(j));
+                            /*if (interviewsRoom.get(j).getId() == interviewArrayList.get(i).getId()) {
                                 //remove then insert again mean (update item)
                                 interviewsViewModel.delete(interviewsRoom.get(j));
-                            }
+                            } else {
+                                //Remove removed interviews from room (remove interview from room was deleted when connect internet)
+                                if (interviewsRoom.get(j).getForm_fk_id().equals(formId))
+                                    interviewsViewModel.delete(interviewsRoom.get(j));
+                            }*/
+
                         }
                         //insert
                         newInterviewsRoom.add(interviewArrayList.get(i));
@@ -235,7 +242,7 @@ public class ViewActivitiesActivity extends AppCompatActivity {
         super.onResume();
         if (isNetworkAvailable()) {
             //getInterviewsRoom();
-            getInterviews(formId,worker_id);
+            getInterviews(formId, worker_id);
         } else {
             getInterviewsNoNet(formId);
         }

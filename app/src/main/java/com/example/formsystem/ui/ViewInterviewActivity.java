@@ -50,6 +50,7 @@ import com.example.formsystem.model.QuestionsResults;
 import com.example.formsystem.model.ResponseSuccess;
 import com.example.formsystem.utils.PreferenceUtils;
 import com.example.formsystem.viewmodel.FormSystemViewModel;
+import com.example.formsystem.viewmodel.local.AnswersViewModel;
 import com.example.formsystem.viewmodel.local.InterviewsViewModel;
 import com.example.formsystem.viewmodel.local.QuestionsViewModel;
 import com.google.android.gms.common.api.ApiException;
@@ -124,6 +125,7 @@ public class ViewInterviewActivity extends AppCompatActivity implements OnMapRea
     private String imageUrl = "";
 
     private QuestionsViewModel questionsViewModel;
+    private AnswersViewModel answersViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -144,6 +146,7 @@ public class ViewInterviewActivity extends AppCompatActivity implements OnMapRea
         updateAnswerSystemViewModel = new ViewModelProvider(this).get(FormSystemViewModel.class);
         deleteInterviewSystemViewModel = new ViewModelProvider(this).get(FormSystemViewModel.class);
         questionsViewModel = new ViewModelProvider(this).get(QuestionsViewModel.class);
+        answersViewModel = new ViewModelProvider(this).get(AnswersViewModel.class);
         recyclerView = binding.recyclerView;
         questionAnswersArrayList = new ArrayList<>();
         answersArrayList = new ArrayList<>();
@@ -207,12 +210,12 @@ public class ViewInterviewActivity extends AppCompatActivity implements OnMapRea
                     questionsArrayList = questionsResults.getQuestions();
                     if (!questionsArrayList.isEmpty()) {
                         binding.constraintLayoutEmptyData.setVisibility(View.GONE);
-                        /*Delete All question old from local*/
+                        /*Delete All question old from local*//*
                         questionsViewModel.deleteAllQuestions();
-                        /*Save questions in local */
+                        *//*Save questions in local *//*
                         for (int i = 0; i < questionsArrayList.size(); i++) {
                             questionsViewModel.insert(questionsArrayList.get(i));
-                        }
+                        }*/
                         /*Fetch in recycle*/
                         questionsAdapter.setList(questionsArrayList);
                         questionsAdapter.notifyDataSetChanged();
@@ -245,6 +248,7 @@ public class ViewInterviewActivity extends AppCompatActivity implements OnMapRea
                     binding.constraintLayoutEmptyData.setVisibility(View.GONE);
                 questionsAdapter.setList(questionsArrayList);
                 questionsAdapter.notifyDataSetChanged();
+                getInterviewsAnswersNoNet();
             }
         });
     }
@@ -435,13 +439,48 @@ public class ViewInterviewActivity extends AppCompatActivity implements OnMapRea
             public void onChanged(AnswersResults answersResults) {
                 try {
                     answersFromDbArrayList = answersResults.getAnswers();
-                    questionsAdapter.setAnswersFromDbList(answersFromDbArrayList);
-                    questionsAdapter.notifyDataSetChanged();
+                    if (!answersFromDbArrayList.isEmpty()) {
+                        answersViewModel.deleteAllAnswers();
+                        //*Save questions in local *//*
+                        for (int i = 0; i < answersFromDbArrayList.size(); i++) {
+                            answersViewModel.insert(answersFromDbArrayList.get(i));
+                        }
+                        questionsAdapter.setAnswersFromDbList(answersFromDbArrayList);
+                        questionsAdapter.notifyDataSetChanged();
+                    }
                 } catch (Exception e) {
                 }
             }
         });
     }
+
+    private ArrayList<Answer> answersArrayListLocal;
+
+    private void getInterviewsAnswersNoNet() {
+        binding.loadingDataConstraint.setVisibility(View.VISIBLE);
+        answersViewModel.getAllAnswers().observe(this, new Observer<List<Answer>>() {
+            @SuppressLint("NotifyDataSetChanged")
+            @Override
+            public void onChanged(@Nullable List<Answer> answers) {
+                binding.loadingDataConstraint.setVisibility(View.GONE);
+                assert answers != null;
+                if (!answers.isEmpty()) {
+                    binding.constraintLayoutEmptyData.setVisibility(View.GONE);
+                    answersFromDbArrayList = new ArrayList<>();
+                    for (int i = 0; i < answers.size(); i++) {
+                        if (answers.get(i).getInterview_fk_id().equals(interviewId))
+                            answersFromDbArrayList.add(answers.get(i));
+                    }
+                    answersArrayListLocal = new ArrayList<>();
+                    answersArrayListLocal.addAll(answersFromDbArrayList);
+                    questionsAdapter.setAnswersFromDbList(answersFromDbArrayList);
+                    questionsAdapter.notifyDataSetChanged();
+                } else
+                    binding.constraintLayoutEmptyData.setVisibility(View.VISIBLE);
+            }
+        });
+    }
+
 
     /*Map section*/
     private void getCurrentLocation() {

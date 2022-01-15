@@ -222,7 +222,7 @@
             android:drawablePadding="8dp"
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
-            android:text="@string/update_interview"
+            android:text="@string/save_changes"
             android:textColor="@color/white"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
@@ -231,13 +231,15 @@
             android:id="@+id/buttonDeleteInterview"
             android:layout_width="wrap_content"
             android:layout_height="?actionBarSize"
-            android:background="@drawable/corner_full_w"
+            android:layout_marginEnd="8dp"
+            android:background="@drawable/corner_full_r"
+            android:foreground="?android:attr/selectableItemBackground"
             android:paddingStart="12dp"
             android:paddingEnd="12dp"
             android:src="@drawable/ic_baseline_delete_outline_24"
             android:textColor="@color/white"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/buttonUpdateInterview"
             app:layout_constraintTop_toTopOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
