@@ -219,7 +219,8 @@ public class ViewActivitiesActivity extends AppCompatActivity {
                     interviewArrayListLocal.addAll(interviewArrayList);
                     interviewsAdapter.setList(interviewArrayList);
                     interviewsAdapter.notifyDataSetChanged();
-                    interviewsAdapter.setForm(form);
+                    //interviewsAdapter.setForm(form);
+                    interviewsAdapter.setFormId(formId);
                 } else
                     binding.constraintLayoutEmptyData.setVisibility(View.VISIBLE);
             }

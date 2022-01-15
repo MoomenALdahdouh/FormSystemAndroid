@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
@@ -45,6 +46,7 @@ public class LoginActivity extends AppCompatActivity {
                     public void onChanged(Token token) {
                         String tokenResponse = token.getToken();
                         User user = token.getUser();
+                        //Log.d("user.getId","User Id::"+user.getId());
                         binding.linearProgressLogin.setVisibility(View.GONE);
                         if (tokenResponse != null) {
                             PreferenceUtils.saveToken(tokenResponse, getApplicationContext());

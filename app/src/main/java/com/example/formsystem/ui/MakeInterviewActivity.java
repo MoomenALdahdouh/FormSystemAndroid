@@ -244,7 +244,7 @@ public class MakeInterviewActivity extends AppCompatActivity implements OnMapRea
             public void onChanged(Interview interview) {
                 try {
                     /* Success*/
-                    Log.d("interview.getInterview_id()",interview.getInterview_id());
+                    Log.d("interview.getInterview_id()", interview.getInterview_id());
                     questionAnswersArrayList.clear();
                     answersArrayList.clear();
                     adapterQuestionAnswers(interview.getInterview_id());
@@ -276,15 +276,19 @@ public class MakeInterviewActivity extends AppCompatActivity implements OnMapRea
             Questions questions = questionAnswersArrayList.get(i);
             String questionsId = String.valueOf(questions.getId());
             Answer answer = getObjectFromString(questions.getAnswer());
+            //Log.d("answer_id", answer.getId() + "::" + answer.getAnswer() + "::" + answer.getInterview_fk_id());
             answer.setInterview_fk_id(interviewId);
             /*Get image answer if not empty*/
             for (int j = 0; j < imageAnswersList.size(); j++) {
                 String question_fk_id = imageAnswersList.get(j).getQuestions_fk_id();
-                if (question_fk_id.equals(questionsId))
+                //Log.d("answersArrayList", "size"+imageAnswersList.size()+"answersArrayList" + imageAnswersList.get(j).getAnswer());
+                if (question_fk_id.equals(questionsId)) {
                     answer.setAnswer(imageAnswersList.get(j).getAnswer());
+                    //Log.d("answersArrayList", "answersArrayList" + imageAnswersList.get(j).getAnswer());
+                }
             }
             answersArrayList.add(answer);
-            Log.d("onResponse", "answersArrayList" + answersArrayList.get(i).getAnswer());
+            //Log.d("onResponse", "answersArrayList" + answersArrayList.get(i).getAnswer());
             //postAnswer(answer);
         }
         PostAnswersList postAnswersList = new PostAnswersList(answersArrayList);
@@ -292,8 +296,9 @@ public class MakeInterviewActivity extends AppCompatActivity implements OnMapRea
     }
 
     private void postAnswer(PostAnswersList answer) {
-        //Log.d("onResponse", "Answer step 2 post : " + answer.getAnswersList().get(4).getAnswer());
+        //Log.d("answer_id", "::"+answer.getAnswersList().get(0).getId());
         postAnswerSystemViewModel.postAnswer(answer);
+        //Log.d("answersArrayList", "answersArrayList" + answer.getAnswersList().get(4).getAnswer()+"::"+ answer.getAnswersList().get(5).getAnswer());
         postAnswerSystemViewModel.postAnswerMutableLiveData.observe(this, new Observer<PostAnswersList>() {
             @SuppressLint("NotifyDataSetChanged")
             @Override

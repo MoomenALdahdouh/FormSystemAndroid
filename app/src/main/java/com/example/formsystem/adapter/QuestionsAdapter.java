@@ -13,6 +13,7 @@ import android.net.Uri;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -36,10 +37,12 @@ import com.example.formsystem.ui.ViewImageActivity;
 import com.example.formsystem.ui.ViewInterviewActivity;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
 import java.io.File;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Random;
@@ -91,6 +94,13 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.View
         return jsonString;
     }
 
+    public Answer getObjectFromString(String jsonString) {
+        Type ansType = new TypeToken<Answer>() {
+        }.getType();
+        Answer answer = new Gson().fromJson(jsonString, ansType);
+        return answer;
+    }
+
     @SuppressLint({"SetTextI18n", "ClickableViewAccessibility"})
     @Override
     public void onBindViewHolder(@NonNull QuestionsAdapter.ViewHolder holder, @SuppressLint("RecyclerView") int position) {
@@ -98,14 +108,17 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.View
             Questions questions = questionsArrayList.get(position);
             holder.textViewQuestionTitle.setText(questions.getTitle());
             String questionId = String.valueOf(questions.getId());
+
             if (updateInterview) {//If update interview fill answer
-                for (int i = 0; i < answersFromDbArrayList.size(); i++) {
+
+                /*for (int i = 0; i < answersFromDbArrayList.size(); i++) {
                     Answer answer = answersFromDbArrayList.get(position);
                     String question_fk_id = answer.getQuestions_fk_id();
                     if (questionId.equals(question_fk_id)) {
+                        Log.d("postionQuestion","answer.getAnswer()"+answer.getAnswer());
                         holder.editTextQuestion.setText(answer.getAnswer().toString());
                     }
-                }
+                }*/
                 //Disable edit text
                 //holder.editTextQuestion.setEnabled(false);
                 holder.editTextQuestion.setClickable(false);
@@ -142,7 +155,8 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.View
                                     DatePickerDialog mDatePicker = new DatePickerDialog(context, new DatePickerDialog.OnDateSetListener() {
                                         public void onDateSet(DatePicker datepicker, int selectedyear, int selectedmonth, int selectedday) {
                                             String selectedDate = selectedyear + "/" + selectedmonth + "/" + selectedday;
-                                            Answer answer = new Answer(String.valueOf(questions.getId()), "", selectedDate, questions.getType());
+                                            int id = (int) System.currentTimeMillis();
+                                            Answer answer = new Answer(id, String.valueOf(questions.getId()), "", selectedDate, questions.getType());
                                             answerArrayList.get(position).setAnswer(stringFromObject(answer));
                                             holder.editTextQuestion.setText(selectedDate);
                                         }
@@ -184,10 +198,12 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.View
                                         intent.putExtra(IMAGE_NAME, holder.editTextQuestion.getText().toString());
                                         context.startActivity(intent);
                                     } else {/*Upload image*/
-                                        Answer answer = new Answer(String.valueOf(questions.getId()), "", "UploadImage.jpg", questions.getType());
+                                        int id = (int) System.currentTimeMillis();
+                                        Answer answer = new Answer(id, String.valueOf(questions.getId()), "", "UploadImage.jpg", questions.getType());
                                         answerArrayList.get(position).setAnswer(stringFromObject(answer));
                                         ((MakeInterviewActivity) context).setQuestionId(String.valueOf(questions.getId()));
-                                        holder.editTextQuestion.setText("UploadImage.jpg");
+                                        //holder.editTextQuestion.setText("UploadImage.jpg");
+                                        Log.d("postionQuestion", "postionQuestion" + position);
                                         cropImage();
                                     }
                                     /**/
@@ -223,7 +239,8 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.View
                         Answer answer = answersFromDbArrayList.get(position);
                         answerArrayList.get(position).setAnswer(stringFromObject(answer));
                     } else {
-                        Answer answer = new Answer(String.valueOf(questions.getId()), "", questionAnswer, questions.getType());
+                        int id = (int) System.currentTimeMillis();
+                        Answer answer = new Answer(id, String.valueOf(questions.getId()), "", questionAnswer, questions.getType());
                         answerArrayList.get(position).setAnswer(stringFromObject(answer));
                     }
 
@@ -235,7 +252,10 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.View
                 }
             };
             holder.editTextQuestion.addTextChangedListener(textWatcher);
-
+            if (updateInterview) {
+                Answer answer = getObjectFromString(questions.getAnswer());
+                holder.editTextQuestion.setText(answer.getAnswer());
+            }
 
         } catch (Exception exception) {
 

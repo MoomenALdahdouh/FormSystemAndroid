@@ -3,6 +3,7 @@ package com.example.formsystem.adapter;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -101,6 +102,7 @@ public class InterviewsAdapter extends RecyclerView.Adapter<InterviewsAdapter.Vi
                     intent.putExtra(INTERVIEW_LATITUDE, interviewLatitude);
                     intent.putExtra(INTERVIEW_LONGITUDE, interviewLongitude);
                     intent.putExtra(FORM_ID, formId);
+                    Log.d("interviewTitle", "::" + interviewTitle+"::"+interviewLocation);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     context.startActivity(intent);
                 }
