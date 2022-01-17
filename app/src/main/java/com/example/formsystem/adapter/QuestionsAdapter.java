@@ -164,7 +164,7 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.View
                                         public void onDateSet(DatePicker datepicker, int selectedyear, int selectedmonth, int selectedday) {
                                             String selectedDate = selectedyear + "/" + selectedmonth + "/" + selectedday;
                                             int id = (int) System.currentTimeMillis();
-                                            Answer answer = new Answer(id, String.valueOf(questions.getId()), "", selectedDate, questions.getType());
+                                            Answer answer = new Answer(id, String.valueOf(questions.getId()), "", selectedDate, questions.getType(),isLocal);
                                             answerArrayList.get(position).setAnswer(stringFromObject(answer));
                                             holder.editTextQuestion.setText(selectedDate);
                                         }
@@ -217,7 +217,7 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.View
                                         context.startActivity(intent);
                                     } else {/*Upload image*/
                                         int id = (int) System.currentTimeMillis();
-                                        Answer answer = new Answer(id, String.valueOf(questions.getId()), "", "UploadImage.jpg", questions.getType());
+                                        Answer answer = new Answer(id, String.valueOf(questions.getId()), "", "UploadImage.jpg", questions.getType(),isLocal);
                                         answerArrayList.get(position).setAnswer(stringFromObject(answer));
                                         ((MakeInterviewActivity) context).setQuestionId(String.valueOf(questions.getId()));
                                         //holder.editTextQuestion.setText("UploadImage.jpg");
@@ -258,7 +258,7 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.View
                         answerArrayList.get(position).setAnswer(stringFromObject(answer));
                     } else {
                         int id = (int) System.currentTimeMillis();
-                        Answer answer = new Answer(id, String.valueOf(questions.getId()), "", questionAnswer, questions.getType());
+                        Answer answer = new Answer(id, String.valueOf(questions.getId()), "", questionAnswer, questions.getType(),isLocal);
                         answerArrayList.get(position).setAnswer(stringFromObject(answer));
                     }
 

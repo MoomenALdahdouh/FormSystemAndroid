@@ -13,7 +13,7 @@ import com.example.formsystem.model.Answer;
 
 import io.reactivex.annotations.NonNull;
 
-@Database(entities = {Answer.class}, version = 2)
+@Database(entities = {Answer.class}, version = 3)
 public abstract class AnswersDatabase extends RoomDatabase {
     private static AnswersDatabase instance;
 

@@ -20,6 +20,8 @@ public class Answer {
     private String type;
     @SerializedName("created_at")
     private String created_at;
+    @SerializedName("created_in_local")
+    private boolean created_in_local;
 
 
 
@@ -33,12 +35,13 @@ public class Answer {
         this.type = type;
     }
 
-    public Answer(int id, String questions_fk_id, String interview_fk_id, String answer, String type) {
+    public Answer(int id, String questions_fk_id, String interview_fk_id, String answer, String type, boolean created_in_local) {
         this.id = id;
         this.questions_fk_id = questions_fk_id;
         this.interview_fk_id = interview_fk_id;
         this.answer = answer;
         this.type = type;
+        this.created_in_local = created_in_local;
     }
 
     public int getId() {
@@ -87,5 +90,13 @@ public class Answer {
 
     public void setCreated_at(String created_at) {
         this.created_at = created_at;
+    }
+
+    public boolean isCreated_in_local() {
+        return created_in_local;
+    }
+
+    public void setCreated_in_local(boolean created_in_local) {
+        this.created_in_local = created_in_local;
     }
 }

@@ -123,6 +123,7 @@ public class MakeInterviewActivity extends AppCompatActivity implements OnMapRea
     private String provider;
     private Location location;
     private AnswersViewModel answersViewModel;
+    private boolean isLocal=false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -159,10 +160,14 @@ public class MakeInterviewActivity extends AppCompatActivity implements OnMapRea
             formId = intent.getStringExtra(ViewActivitiesActivity.FORM_ID);
             if (isNetworkAvailable()) {
                 getFormQuestions();
+                isLocal = false;
+                questionsAdapter.setLocal(isLocal);
                 //submitInterview();
                 //getCurrentLocation();
             } else {
                 getFormQuestionsNoNet();
+                isLocal = true;
+                questionsAdapter.setLocal(isLocal);
             }
             submitInterview();
             getLocation();
@@ -218,7 +223,7 @@ public class MakeInterviewActivity extends AppCompatActivity implements OnMapRea
                 @SuppressLint("SimpleDateFormat") SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                 Date currenTimeZone = (Date) calendar.getTime();
                 String created_at =  sdf.format(currenTimeZone);
-                Interview interview = new Interview(id, formId, interviewTitle, interviewLocation, latitude + "", longitude + "", PreferenceUtils.getUserId(getApplicationContext()),created_at);
+                Interview interview = new Interview(id, formId, interviewTitle, interviewLocation, latitude + "", longitude + "", PreferenceUtils.getUserId(getApplicationContext()),created_at,isLocal);
                 showDialog();
                 if (isNetworkAvailable())
                     postInterview(interview);

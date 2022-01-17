@@ -14,7 +14,7 @@ import com.example.formsystem.model.User;
 
 import io.reactivex.annotations.NonNull;
 
-@Database(entities = {Interview.class}, version = 6)
+@Database(entities = {Interview.class}, version = 7)
 public abstract class InterviewsDatabase extends RoomDatabase {
     private static InterviewsDatabase instance;
 
