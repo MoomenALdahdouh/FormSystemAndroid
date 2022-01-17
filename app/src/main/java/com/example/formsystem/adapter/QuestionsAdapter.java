@@ -8,11 +8,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.net.Uri;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
+import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -35,6 +37,7 @@ import com.example.formsystem.model.Questions;
 import com.example.formsystem.ui.MakeInterviewActivity;
 import com.example.formsystem.ui.ViewImageActivity;
 import com.example.formsystem.ui.ViewInterviewActivity;
+import com.example.formsystem.utils.PreferenceUtils;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -57,6 +60,7 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.View
     private ArrayList<Questions> answerArrayList;
     private ArrayList<Answer> answersFromDbArrayList;
     private boolean updateInterview = false;
+    private boolean isLocal = false;
     //Upload image
 
     public QuestionsAdapter(Context context) {
@@ -74,6 +78,10 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.View
 
     public void isUpdateInterview(boolean updateInterview) {
         this.updateInterview = updateInterview;
+    }
+
+    public void setLocal(boolean local) {
+        isLocal = local;
     }
 
     public ArrayList<Questions> getAnswerArrayList() {
@@ -109,21 +117,21 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.View
             holder.textViewQuestionTitle.setText(questions.getTitle());
             String questionId = String.valueOf(questions.getId());
 
-            if (updateInterview) {//If update interview fill answer
+            /*if (updateInterview) {//If update interview fill answer
 
-                /*for (int i = 0; i < answersFromDbArrayList.size(); i++) {
+             *//*for (int i = 0; i < answersFromDbArrayList.size(); i++) {
                     Answer answer = answersFromDbArrayList.get(position);
                     String question_fk_id = answer.getQuestions_fk_id();
                     if (questionId.equals(question_fk_id)) {
                         Log.d("postionQuestion","answer.getAnswer()"+answer.getAnswer());
                         holder.editTextQuestion.setText(answer.getAnswer().toString());
                     }
-                }*/
+                }*//*
                 //Disable edit text
                 //holder.editTextQuestion.setEnabled(false);
                 holder.editTextQuestion.setClickable(false);
                 holder.editTextQuestion.setFocusable(false);
-            }
+            }*/
             switch (questions.getType()) {//Custom design edit text with question type
                 case "0"://Text
                     break;
@@ -194,8 +202,18 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.View
                             if (event.getAction() == MotionEvent.ACTION_UP) {
                                 if (event.getRawX() >= (holder.editTextQuestion.getRight() - holder.editTextQuestion.getCompoundDrawables()[DRAWABLE_RIGHT].getBounds().width())) {
                                     if (updateInterview) {//View Image
+                                        String answerString = questionsArrayList.get(position).getAnswer();
+                                        Answer answer = getObjectFromString(answerString);
                                         Intent intent = new Intent(context, ViewImageActivity.class);
-                                        intent.putExtra(IMAGE_NAME, holder.editTextQuestion.getText().toString());
+                                        intent.putExtra(IMAGE_NAME, "image");
+                                        PreferenceUtils.saveImage(answer.getAnswer().toString(), context);
+                                        Log.d("imageName",PreferenceUtils.getImage(context));
+                                        /*if (isLocal) {
+                                            intent.putExtra(IMAGE_NAME, questions.getAnswer().toString());
+                                            *//**//*
+                                        } else {
+                                            intent.putExtra(IMAGE_NAME, holder.editTextQuestion.getText().toString());
+                                        }*/
                                         context.startActivity(intent);
                                     } else {/*Upload image*/
                                         int id = (int) System.currentTimeMillis();
@@ -254,7 +272,16 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.View
             holder.editTextQuestion.addTextChangedListener(textWatcher);
             if (updateInterview) {
                 Answer answer = getObjectFromString(questions.getAnswer());
-                holder.editTextQuestion.setText(answer.getAnswer());
+                if (answer.getType().equals("4")) {
+                    if (isLocal) {
+                        int id = (int) System.currentTimeMillis();
+                        holder.editTextQuestion.setText(id + ".jpg");
+                    } else
+                        holder.editTextQuestion.setText(answer.getAnswer());
+                } else
+                    holder.editTextQuestion.setText(answer.getAnswer());
+                /*holder.editTextQuestion.setClickable(false);
+                holder.editTextQuestion.setFocusable(false);*/
             }
 
         } catch (Exception exception) {

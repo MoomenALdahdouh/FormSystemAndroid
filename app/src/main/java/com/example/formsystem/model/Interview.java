@@ -45,7 +45,7 @@ public class Interview {
         this.worker_fk_id = worker_fk_id;
     }
 
-    public Interview(int id,String form_fk_id, String title, String customer_location, String latitude, String longitude, String worker_fk_id) {
+    public Interview(int id,String form_fk_id, String title, String customer_location, String latitude, String longitude, String worker_fk_id,String created_at) {
         this.id = id;
         this.form_fk_id = form_fk_id;
         this.title = title;
@@ -53,6 +53,7 @@ public class Interview {
         this.latitude = latitude;
         this.longitude = longitude;
         this.worker_fk_id = worker_fk_id;
+        this.created_at = created_at;
     }
 
     public Interview(String form_fk_id, String title, String customer_location) {
@@ -158,5 +159,6 @@ public class Interview {
     public void setWorker_fk_id(String worker_fk_id) {
         this.worker_fk_id = worker_fk_id;
     }
+
 
 }

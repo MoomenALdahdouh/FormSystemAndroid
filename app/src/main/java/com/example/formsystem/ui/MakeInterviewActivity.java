@@ -52,6 +52,7 @@ import com.example.formsystem.model.Questions;
 import com.example.formsystem.model.QuestionsResults;
 import com.example.formsystem.utils.PreferenceUtils;
 import com.example.formsystem.viewmodel.FormSystemViewModel;
+import com.example.formsystem.viewmodel.local.AnswersViewModel;
 import com.example.formsystem.viewmodel.local.FormViewModel;
 import com.example.formsystem.viewmodel.local.InterviewsViewModel;
 import com.example.formsystem.viewmodel.local.QuestionsViewModel;
@@ -81,10 +82,14 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Random;
+import java.util.TimeZone;
 
 import id.zelory.compressor.Compressor;
 import io.reactivex.annotations.Nullable;
@@ -117,6 +122,7 @@ public class MakeInterviewActivity extends AppCompatActivity implements OnMapRea
     private LocationManager locationManager;
     private String provider;
     private Location location;
+    private AnswersViewModel answersViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -134,6 +140,7 @@ public class MakeInterviewActivity extends AppCompatActivity implements OnMapRea
         postAnswerSystemViewModel = new ViewModelProvider(this).get(FormSystemViewModel.class);
         questionsViewModel = new ViewModelProvider(this).get(QuestionsViewModel.class);
         interviewsViewModel = new ViewModelProvider(this).get(InterviewsViewModel.class);
+        answersViewModel = new ViewModelProvider(this).get(AnswersViewModel.class);
         recyclerView = binding.recyclerView;
         questionAnswersArrayList = new ArrayList<>();
         answersArrayList = new ArrayList<>();
@@ -202,7 +209,16 @@ public class MakeInterviewActivity extends AppCompatActivity implements OnMapRea
                     return;
                 }
                 int id = (int) System.currentTimeMillis();
-                Interview interview = new Interview(id, formId, interviewTitle, interviewLocation, latitude + "", longitude + "", PreferenceUtils.getUserId(getApplicationContext()));
+
+                Calendar calendar = Calendar.getInstance();
+                TimeZone tz = TimeZone.getDefault();
+                long timestamp = System.currentTimeMillis()/1000;
+                calendar.setTimeInMillis(timestamp * 1000);
+                calendar.add(Calendar.MILLISECOND, tz.getOffset(calendar.getTimeInMillis()));
+                @SuppressLint("SimpleDateFormat") SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                Date currenTimeZone = (Date) calendar.getTime();
+                String created_at =  sdf.format(currenTimeZone);
+                Interview interview = new Interview(id, formId, interviewTitle, interviewLocation, latitude + "", longitude + "", PreferenceUtils.getUserId(getApplicationContext()),created_at);
                 showDialog();
                 if (isNetworkAvailable())
                     postInterview(interview);
@@ -292,8 +308,18 @@ public class MakeInterviewActivity extends AppCompatActivity implements OnMapRea
             //postAnswer(answer);
         }
         PostAnswersList postAnswersList = new PostAnswersList(answersArrayList);
-        postAnswer(postAnswersList);
+        if (isNetworkAvailable())
+            postAnswer(postAnswersList);
+        else
+            postAnswerNoNet(answersArrayList);
     }
+
+    private void postAnswerNoNet(ArrayList<Answer> answersArrayList) {
+        for (int i = 0; i < answersArrayList.size(); i++) {
+            answersViewModel.insert(answersArrayList.get(i));
+        }
+    }
+
 
     private void postAnswer(PostAnswersList answer) {
         //Log.d("answer_id", "::"+answer.getAnswersList().get(0).getId());

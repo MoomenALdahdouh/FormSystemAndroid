@@ -256,8 +256,8 @@ public class ViewInterviewActivity extends AppCompatActivity implements OnMapRea
                     binding.constraintLayoutEmptyData.setVisibility(View.VISIBLE);
                 else
                     binding.constraintLayoutEmptyData.setVisibility(View.GONE);
-                questionsAdapter.setList(questionsArrayList);
-                questionsAdapter.notifyDataSetChanged();
+                // questionsAdapter.setList(questionsArrayList);
+                // questionsAdapter.notifyDataSetChanged();
                 getInterviewsAnswersNoNet();
             }
         });
@@ -470,6 +470,7 @@ public class ViewInterviewActivity extends AppCompatActivity implements OnMapRea
                         }
                         questionsAdapter.setAnswersFromDbList(answersFromDbArrayList);
                         questionsAdapter.setList(questionsArrayList);
+                        questionsAdapter.setLocal(false);
                         questionsAdapter.notifyDataSetChanged();
                         getAnswersRoom();
                     }
@@ -522,10 +523,27 @@ public class ViewInterviewActivity extends AppCompatActivity implements OnMapRea
                         if (answers.get(i).getInterview_fk_id().equals(interviewId))
                             answersFromDbArrayList.add(answers.get(i));
                     }
+                    for (int i = 0; i < answersFromDbArrayList.size(); i++) {
+                        Answer answer = answersFromDbArrayList.get(i);
+                        String question_fk_id = answer.getQuestions_fk_id();
+                        for (int j = 0; j < questionsArrayList.size(); j++) {
+                            String questionId = String.valueOf(questionsArrayList.get(j).getId());
+                            if (questionId.equals(question_fk_id)) {
+                                questionsArrayList.get(j).setAnswer(stringFromObject(answer));
+                                //Log.d("postionQuestion","answer.getAnswer()"+answer.getAnswer());
+                                //holder.editTextQuestion.setText(answer.getAnswer().toString());
+                            }
+                        }
+                    }
+
                     answersArrayListLocal = new ArrayList<>();
                     answersArrayListLocal.addAll(answersFromDbArrayList);
                     questionsAdapter.setAnswersFromDbList(answersFromDbArrayList);
+                    questionsAdapter.setList(questionsArrayList);
+                    questionsAdapter.setLocal(true);
                     questionsAdapter.notifyDataSetChanged();
+                    /*questionsAdapter.setAnswersFromDbList(answersFromDbArrayList);
+                    questionsAdapter.notifyDataSetChanged();*/
                 } else
                     binding.constraintLayoutEmptyData.setVisibility(View.VISIBLE);
             }

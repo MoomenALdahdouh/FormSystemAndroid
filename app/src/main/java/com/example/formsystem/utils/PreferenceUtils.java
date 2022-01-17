@@ -97,4 +97,17 @@ public class PreferenceUtils {
         return preferences.getString(Constants.KEY_LANGUAGE, "es");
     }
 
+    public static boolean saveImage(String image, Context context) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putString(Constants.KEY_IMAGE, image);
+        editor.apply();
+        return true;
+    }
+
+    public static String getImage(Context context) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        return preferences.getString(Constants.KEY_IMAGE, "");
+    }
+
 }
