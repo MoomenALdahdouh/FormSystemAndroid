@@ -102,6 +102,9 @@ public class FormSystemClient {
     public Call<Interview> postInterview(Interview interview) {
         return formSystemInterface.postInterview(interview);
     }
+    public Call<Interview> updateInterview(Interview interview) {
+        return formSystemInterface.updateInterview(interview);
+    }
 
     public Call<QuestionsResults> getQuestions(String authToken, String id) {
         return formSystemInterface.getQuestions("Bearer " + authToken, id);

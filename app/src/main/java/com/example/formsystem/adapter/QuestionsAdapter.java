@@ -256,6 +256,9 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.View
                     if (updateInterview) {
                         Answer answer = answersFromDbArrayList.get(position);
                         answerArrayList.get(position).setAnswer(stringFromObject(answer));
+                        /*Answer answer = getObjectFromString(questions.getAnswer());
+                        answer.setAnswer(questionAnswer);
+                        answerArrayList.get(position).setAnswer(stringFromObject(answer));*/
                     } else {
                         int id = (int) System.currentTimeMillis();
                         Answer answer = new Answer(id, String.valueOf(questions.getId()), "", questionAnswer, questions.getType(),isLocal);

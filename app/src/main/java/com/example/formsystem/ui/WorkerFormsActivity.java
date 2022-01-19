@@ -120,8 +120,13 @@ public class WorkerFormsActivity extends AppCompatActivity {
                     interviewArrayList = new ArrayList<>();
                     for (int i = 0; i < interviews.size(); i++) {
                         if (interviews.get(i).isCreated_in_local()) {
+                            /*Interview old = interviews.get(i);
+                            Interview interview = new Interview(old.getId(), old.getForm_fk_id()
+                                    , old.getTitle(), old.getCustomer_location(), old.getLatitude()
+                                    , old.getLongitude(), old.getWorker_fk_id(), old.getCreated_at());*/
                             interviewArrayList.add(interviews.get(i));
-                            postLocalInterviewsWasCreated(interviewArrayList.get(i));
+                            postLocalInterviewsWasCreated(interviews.get(i));
+                            //postLocalInterviewsWasCreated(new Interview(12514553,"sad","dddddd","","","","","",true));
                         }
                     }
                 }
@@ -155,7 +160,9 @@ public class WorkerFormsActivity extends AppCompatActivity {
             @SuppressLint("NotifyDataSetChanged")
             @Override
             public void onChanged(PostAnswersList response) {
-
+                /*for (int i = 0; i < interviewArrayList.size(); i++) {
+                    postLocalInterviewsWasCreated(interviewArrayList.get(i));
+                }*/
             }
         });
     }

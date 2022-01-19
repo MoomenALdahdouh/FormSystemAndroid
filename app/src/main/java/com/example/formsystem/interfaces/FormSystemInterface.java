@@ -66,6 +66,9 @@ public interface FormSystemInterface {
     @POST("interviews/create")
     Call<Interview> postInterview(@Body Interview interview);
 
+    @POST("interviews/update")
+    Call<Interview> updateInterview(@Body Interview interview);
+
     @Headers({
             "Content-Type: application/json",
             "Accept: application/json"

@@ -38,6 +38,7 @@ public class FormSystemViewModel extends ViewModel {
     public MutableLiveData<FormResults> formMutableLiveData = new MutableLiveData<>();
     public MutableLiveData<InterviewResults> interviewsMutableLiveData = new MutableLiveData<>();
     public MutableLiveData<Interview> postInterviewMutableLiveData = new MutableLiveData<>();
+    public MutableLiveData<Interview> updateInterviewMutableLiveData = new MutableLiveData<>();
     public MutableLiveData<PostAnswersList> postAnswerMutableLiveData = new MutableLiveData<>();
     public MutableLiveData<PostAnswersList> updateAnswerMutableLiveData = new MutableLiveData<>();
     public MutableLiveData<ResponseSuccess> deleteInterviewMutableLiveData = new MutableLiveData<>();
@@ -147,6 +148,22 @@ public class FormSystemViewModel extends ViewModel {
             public void onResponse(@NonNull Call<Interview> call, @NonNull Response<Interview> response) {
                 Log.d("onResponse", response.toString());
                 postInterviewMutableLiveData.setValue(response.body());
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<Interview> call, @NonNull Throwable t) {
+                t.printStackTrace();
+                Log.d("onFailure", t.getMessage());
+            }
+        });
+    }
+
+    public void updateInterview(Interview interview) {
+        FormSystemClient.getINSTANCE().updateInterview(interview).enqueue(new Callback<Interview>() {
+            @Override
+            public void onResponse(@NonNull Call<Interview> call, @NonNull Response<Interview> response) {
+                Log.d("onResponse", response.toString());
+                updateInterviewMutableLiveData.setValue(response.body());
             }
 
             @Override

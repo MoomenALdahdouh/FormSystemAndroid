@@ -123,7 +123,7 @@ public class MakeInterviewActivity extends AppCompatActivity implements OnMapRea
     private String provider;
     private Location location;
     private AnswersViewModel answersViewModel;
-    private boolean isLocal=false;
+    private boolean isLocal = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -217,18 +217,18 @@ public class MakeInterviewActivity extends AppCompatActivity implements OnMapRea
 
                 Calendar calendar = Calendar.getInstance();
                 TimeZone tz = TimeZone.getDefault();
-                long timestamp = System.currentTimeMillis()/1000;
+                long timestamp = System.currentTimeMillis() / 1000;
                 calendar.setTimeInMillis(timestamp * 1000);
                 calendar.add(Calendar.MILLISECOND, tz.getOffset(calendar.getTimeInMillis()));
                 @SuppressLint("SimpleDateFormat") SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                 Date currenTimeZone = (Date) calendar.getTime();
-                String created_at =  sdf.format(currenTimeZone);
-                Interview interview = new Interview(id, formId, interviewTitle, interviewLocation, latitude + "", longitude + "", PreferenceUtils.getUserId(getApplicationContext()),created_at,isLocal);
+                String created_at = sdf.format(currenTimeZone);
+                Interview interview = new Interview(id, formId, interviewTitle, interviewLocation, latitude + "", longitude + "", PreferenceUtils.getUserId(getApplicationContext()), created_at, isLocal);
                 showDialog();
                 if (isNetworkAvailable())
                     postInterview(interview);
                 else {
-                    Toast.makeText(getApplicationContext(), "getInterviewTitle::" + interviewTitle, Toast.LENGTH_LONG).show();
+                    //Toast.makeText(getApplicationContext(), "getInterviewTitle::" + interviewTitle, Toast.LENGTH_LONG).show();
                     postInterviewNoNet(interview);
                 }
             }
@@ -277,8 +277,6 @@ public class MakeInterviewActivity extends AppCompatActivity implements OnMapRea
 
     private void postInterviewNoNet(Interview interview) {
         interviewsViewModel.insert(interview);
-        Toast.makeText(getApplicationContext(), "getInterview_id::" + interview.getId(), Toast.LENGTH_LONG).show();
-        //Log.d("getInterview_id::", interview.getInterview_id());
         adapterQuestionAnswers(interview.getId() + "");
     }
 
@@ -297,20 +295,15 @@ public class MakeInterviewActivity extends AppCompatActivity implements OnMapRea
             Questions questions = questionAnswersArrayList.get(i);
             String questionsId = String.valueOf(questions.getId());
             Answer answer = getObjectFromString(questions.getAnswer());
-            //Log.d("answer_id", answer.getId() + "::" + answer.getAnswer() + "::" + answer.getInterview_fk_id());
             answer.setInterview_fk_id(interviewId);
             /*Get image answer if not empty*/
             for (int j = 0; j < imageAnswersList.size(); j++) {
                 String question_fk_id = imageAnswersList.get(j).getQuestions_fk_id();
-                //Log.d("answersArrayList", "size"+imageAnswersList.size()+"answersArrayList" + imageAnswersList.get(j).getAnswer());
                 if (question_fk_id.equals(questionsId)) {
                     answer.setAnswer(imageAnswersList.get(j).getAnswer());
-                    //Log.d("answersArrayList", "answersArrayList" + imageAnswersList.get(j).getAnswer());
                 }
             }
             answersArrayList.add(answer);
-            //Log.d("onResponse", "answersArrayList" + answersArrayList.get(i).getAnswer());
-            //postAnswer(answer);
         }
         PostAnswersList postAnswersList = new PostAnswersList(answersArrayList);
         if (isNetworkAvailable())
@@ -321,8 +314,18 @@ public class MakeInterviewActivity extends AppCompatActivity implements OnMapRea
 
     private void postAnswerNoNet(ArrayList<Answer> answersArrayList) {
         for (int i = 0; i < answersArrayList.size(); i++) {
-            answersViewModel.insert(answersArrayList.get(i));
+            if (answersArrayList.get(i).isCreated_in_local())
+                answersViewModel.insert(answersArrayList.get(i));
         }
+        imageView.setImageResource(R.drawable.success);
+        textView.setText(R.string.success_submit_interview);
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                //Toast.makeText(getApplicationContext(), "" + response.getSuccess(), Toast.LENGTH_SHORT).show();
+                finish();
+            }
+        }, 1000);
     }
 
 
@@ -610,6 +613,7 @@ public class MakeInterviewActivity extends AppCompatActivity implements OnMapRea
 
     }
 
+    /*End Map */
     private String imageName;
     private Bitmap compressor;
     private String downloadUri = null;
