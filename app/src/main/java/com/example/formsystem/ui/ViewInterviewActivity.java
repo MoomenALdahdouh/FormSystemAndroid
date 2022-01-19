@@ -371,12 +371,113 @@ public class ViewInterviewActivity extends AppCompatActivity implements OnMapRea
                 try {
                     /* Success*/
                     Log.d("interview.getInterview_id()", interview.getInterview_id());
-                    finish();
+                    questionAnswersArrayList.clear();
+                    answersArrayList.clear();
+                    adapterQuestionAnswers(interview.getInterview_id());
                 } catch (Exception e) {
                 }
             }
         });
     }
+    private void adapterQuestionAnswers(String interviewId) {
+        questionAnswersArrayList = questionsAdapter.getAnswerArrayList();
+        for (int i = 0; i < questionAnswersArrayList.size(); i++) {
+            Questions questions = questionAnswersArrayList.get(i);
+            String questionsId = String.valueOf(questions.getId());
+            Answer answer = getObjectFromString(questions.getAnswer());
+            answer.setInterview_fk_id(interviewId);
+            /*Get image answer if not empty*/
+            for (int j = 0; j < imageAnswersList.size(); j++) {
+                String question_fk_id = imageAnswersList.get(j).getQuestions_fk_id();
+                if (question_fk_id.equals(questionsId)) {
+                    answer.setAnswer(imageAnswersList.get(j).getAnswer());
+                }
+            }
+            answersArrayList.add(answer);
+        }
+        PostAnswersList postAnswersList = new PostAnswersList(answersArrayList);
+        if (isNetworkAvailable())
+            postUpdateAnswer(postAnswersList);
+        else
+            postUpdateAnswerNoNet(answersArrayList);
+    }
+
+    private void postUpdateAnswerNoNet(ArrayList<Answer> answersArrayList) {
+        for (int i = 0; i < answersArrayList.size(); i++) {
+            if (answersArrayList.get(i).isCreated_in_local())
+                answersViewModel.insert(answersArrayList.get(i));
+        }
+        imageView.setImageResource(R.drawable.success);
+        textView.setText(R.string.success_submit_interview);
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                //Toast.makeText(getApplicationContext(), "" + response.getSuccess(), Toast.LENGTH_SHORT).show();
+                finish();
+            }
+        }, 1000);
+    }
+
+
+    private void postUpdateAnswer(PostAnswersList answer) {
+        //Log.d("answer_id", "::"+answer.getAnswersList().get(0).getId());
+        updateAnswerSystemViewModel.updateAnswers(answer);
+        //Log.d("answersArrayList", "answersArrayList" + answer.getAnswersList().get(4).getAnswer()+"::"+ answer.getAnswersList().get(5).getAnswer());
+        updateAnswerSystemViewModel.updateAnswerMutableLiveData.observe(this, new Observer<PostAnswersList>() {
+            @SuppressLint("NotifyDataSetChanged")
+            @Override
+            public void onChanged(PostAnswersList response) {
+                try {
+                    Log.d("onResponse", "Answer step 3 response : " + response);
+                    if (response != null) {
+                        imageView.setImageResource(R.drawable.success);
+                        textView.setText(R.string.success_submit_interview);
+                        new Handler().postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                //Toast.makeText(getApplicationContext(), "" + response.getSuccess(), Toast.LENGTH_SHORT).show();
+                                finish();
+                            }
+                        }, 2000);
+                    } else {
+                        imageView.setImageResource(R.drawable.ic_baseline_error_outline_24);
+                        textView.setText(R.string.failed_save_answers);
+                    }
+
+                } catch (Exception e) {
+                }
+            }
+        });
+    }
+
+    private ArrayList<Questions> questionsRoom = new ArrayList<>();
+    private ArrayList<Questions> newQuestionsForm = new ArrayList<>();
+
+    private void getFormQuestionsRoom() {
+        questionsViewModel.getAllQuestions().observe(this, new Observer<List<Questions>>() {
+            @Override
+            public void onChanged(List<Questions> questions) {
+                if (newQuestionsForm.size() != questionsArrayList.size()) {
+                    questionsRoom = new ArrayList<>();
+                    newQuestionsForm = new ArrayList<>();
+                    questionsRoom.addAll(questions);
+                    for (int i = 0; i < questionsArrayList.size(); i++) {
+                        for (int j = 0; j < questionsRoom.size(); j++) {
+                            if (questionsRoom.get(j).getId() == questionsArrayList.get(i).getId()) {
+                                //remove then insert again mean (update item)
+                                questionsViewModel.delete(questionsRoom.get(j));
+                            }
+                        }
+                        //insert
+                        newQuestionsForm.add(questionsArrayList.get(i));
+                        questionsViewModel.insert(questionsArrayList.get(i));
+                    }
+                }
+            }
+        });
+    }
+
+    private ArrayList<Questions> questionsArrayListLocal;
 
     @SuppressLint("UseCompatLoadingForDrawables")
     private void checkInterviewTitle() {

@@ -35,8 +35,8 @@ public class Questions {
     }
 
     public String stringFromObject() {
-        int id = (int) System.currentTimeMillis();
-        Answer answer = new Answer(id, "", "", "", "",false);
+        //int id = (int) System.currentTimeMillis();
+        Answer answer = new Answer(0, "", "", "", "",false);
         Gson gson = new Gson();
         return gson.toJson(answer);
     }
