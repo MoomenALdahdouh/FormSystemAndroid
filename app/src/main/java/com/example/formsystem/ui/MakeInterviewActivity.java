@@ -213,8 +213,7 @@ public class MakeInterviewActivity extends AppCompatActivity implements OnMapRea
                     binding.textViewErrorLocation.setTextColor(getColor(R.color.danger));
                     return;
                 }
-                int id = (int) System.currentTimeMillis();
-
+                int id = (int) System.currentTimeMillis() * -1;
                 Calendar calendar = Calendar.getInstance();
                 TimeZone tz = TimeZone.getDefault();
                 long timestamp = System.currentTimeMillis() / 1000;

@@ -147,7 +147,7 @@ public class FormSystemViewModel extends ViewModel {
             @Override
             public void onResponse(@NonNull Call<Interview> call, @NonNull Response<Interview> response) {
                 Log.d("onResponse", response.toString());
-                postInterviewMutableLiveData.setValue(response.body());
+                postInterviewMutableLiveData.postValue(response.body());
             }
 
             @Override

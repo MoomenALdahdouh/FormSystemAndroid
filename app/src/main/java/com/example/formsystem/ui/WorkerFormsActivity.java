@@ -97,7 +97,7 @@ public class WorkerFormsActivity extends AppCompatActivity {
         if (isNetworkAvailable()) {
             getUserDetailsNet();
             getFormsNet();
-            getAnswersInRoomWasCreatedLocal();
+            //getAnswersInRoomWasCreatedLocal();
             getInterviewInRoomWasCreatedLocal();
         } else {
             getUserDetailsNoNet();

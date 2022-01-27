@@ -190,11 +190,11 @@ public class ViewInterviewActivity extends AppCompatActivity implements OnMapRea
                 if (isNetworkAvailable()) {
                     getFormQuestions();
                     deleteInterview();
-                    updateInterview();
                 } else {
                     getFormQuestionsNoNet();
                 }
                 getLocation();
+                updateInterview();
                 fetchInterviewData();
             } catch (Exception e) {
 
@@ -228,15 +228,6 @@ public class ViewInterviewActivity extends AppCompatActivity implements OnMapRea
                     questionsArrayList = questionsResults.getQuestions();
                     if (!questionsArrayList.isEmpty()) {
                         binding.constraintLayoutEmptyData.setVisibility(View.GONE);
-                        /*Delete All question old from local*//*
-                        questionsViewModel.deleteAllQuestions();
-                        *//*Save questions in local *//*
-                        for (int i = 0; i < questionsArrayList.size(); i++) {
-                            questionsViewModel.insert(questionsArrayList.get(i));
-                        }*/
-                        /*Fetch in recycle*/
-                        //questionsAdapter.setList(questionsArrayList);
-                        //questionsAdapter.notifyDataSetChanged();
                         getInterviewsAnswers();
                     } else
                         binding.constraintLayoutEmptyData.setVisibility(View.VISIBLE);
@@ -356,7 +347,10 @@ public class ViewInterviewActivity extends AppCompatActivity implements OnMapRea
                 }
                 Interview interview = new Interview(Integer.parseInt(interviewId), formId, interviewTitle, interviewLocation, latitude + "", longitude + "", PreferenceUtils.getUserId(getApplicationContext()), "", false);
                 showDialog();
-                postUpdateInterview(interview);
+                if (isNetworkAvailable())
+                    postUpdateInterview(interview);
+                else
+                    postUpdateInterviewNoNet(interview);
                 //updateAnswerInterview();
             }
         });
@@ -379,6 +373,22 @@ public class ViewInterviewActivity extends AppCompatActivity implements OnMapRea
             }
         });
     }
+
+    private void postUpdateInterviewNoNet(Interview interview) {
+        interviewsViewModel.getAllInterviews().observe(this, new Observer<List<Interview>>() {
+            @Override
+            public void onChanged(List<Interview> interviews) {
+                for (int i = 0; i < interviews.size(); i++) {
+                    if (interviewId.equals(interviews.get(i).getId() + "")) {
+                        interviewsViewModel.delete(interviews.get(i));
+                        interviewsViewModel.insert(interview);
+                        finish();
+                    }
+                }
+            }
+        });
+    }
+
     private void adapterQuestionAnswers(String interviewId) {
         questionAnswersArrayList = questionsAdapter.getAnswerArrayList();
         for (int i = 0; i < questionAnswersArrayList.size(); i++) {
@@ -590,8 +600,6 @@ public class ViewInterviewActivity extends AppCompatActivity implements OnMapRea
                                 String questionId = String.valueOf(questionsArrayList.get(j).getId());
                                 if (questionId.equals(question_fk_id)) {
                                     questionsArrayList.get(j).setAnswer(stringFromObject(answer));
-                                    //Log.d("postionQuestion","answer.getAnswer()"+answer.getAnswer());
-                                    //holder.editTextQuestion.setText(answer.getAnswer().toString());
                                 }
                             }
                         }

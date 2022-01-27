@@ -144,7 +144,7 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.View
                 case "3"://Calender
                     Calendar mcurrentDate = Calendar.getInstance();
                     int mYear = mcurrentDate.get(Calendar.YEAR);
-                    int mMonth = mcurrentDate.get(Calendar.MONTH);
+                    int mMonth = mcurrentDate.get(Calendar.MONTH) + 1;
                     int mDay = mcurrentDate.get(Calendar.DAY_OF_MONTH);
                     holder.editTextQuestion.setText(mYear + "/" + mMonth + "/" + mDay);
 
@@ -158,16 +158,17 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.View
                             final int DRAWABLE_BOTTOM = 3;
                             if (event.getAction() == MotionEvent.ACTION_UP) {
                                 if (event.getRawX() >= (holder.editTextQuestion.getRight() - holder.editTextQuestion.getCompoundDrawables()[DRAWABLE_RIGHT].getBounds().width())) {
-                                    Answer old_answer = getObjectFromString(questions.getAnswer());
+
                                     DatePickerDialog mDatePicker = new DatePickerDialog(context, new DatePickerDialog.OnDateSetListener() {
                                         public void onDateSet(DatePicker datepicker, int selectedyear, int selectedmonth, int selectedday) {
+                                            Answer old_answer = getObjectFromString(questions.getAnswer());
                                             String selectedDate = selectedyear + "/" + selectedmonth + "/" + selectedday;
                                             String old_id = String.valueOf(old_answer.getId());
                                             int id;
-                                            if (updateInterview && (!old_id.isEmpty() || !old_id.equals("0")))
+                                            if (updateInterview && !old_id.equals("0"))
                                                 id = old_answer.getId();
                                             else
-                                                id = (int) System.currentTimeMillis();
+                                                id = (int) System.currentTimeMillis() * -1;
 
                                             Answer answer = new Answer(id, String.valueOf(questions.getId()), "", selectedDate, questions.getType(), isLocal);
                                             answerArrayList.get(position).setAnswer(stringFromObject(answer));
@@ -211,11 +212,11 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.View
                                     int id;
                                     /*Upload image*/
                                     String old_id = String.valueOf(old_answer.getId());
-                                    if (updateInterview && (!old_id.isEmpty() || !old_id.equals("0"))) {
+                                    if (updateInterview && !old_id.equals("0")) {
                                         id = old_answer.getId();
                                         answer = new Answer(id, String.valueOf(questions.getId()), "", old_answer.getAnswer(), questions.getType(), isLocal);
                                     } else {
-                                        id = (int) System.currentTimeMillis();
+                                        id = (int) System.currentTimeMillis() * -1;
                                         answer = new Answer(id, String.valueOf(questions.getId()), "", "UploadImage.jpg", questions.getType(), isLocal);
                                     }
                                     answerArrayList.get(position).setAnswer(stringFromObject(answer));
@@ -227,15 +228,18 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.View
                                     cropImage();
                                     /**/
                                     return true;
-                                } else if (event.getRawX() >= (holder.editTextQuestion.getLeft() + holder.editTextQuestion.getCompoundDrawables()[DRAWABLE_LEFT].getBounds().width())) {
-                                    //View Image
-                                    String answerString = questionsArrayList.get(position).getAnswer();
-                                    Answer answer = getObjectFromString(answerString);
-                                    Intent intent = new Intent(context, ViewImageActivity.class);
-                                    intent.putExtra(IMAGE_NAME, "image");
-                                    PreferenceUtils.saveImage(answer.getAnswer().toString(), context);
-                                    Log.d("imageName", PreferenceUtils.getImage(context));
-                                    context.startActivity(intent);
+                                } else {
+                                    if (updateInterview)
+                                        if (event.getRawX() >= (holder.editTextQuestion.getLeft() + holder.editTextQuestion.getCompoundDrawables()[DRAWABLE_LEFT].getBounds().width())) {
+                                            //View Image
+                                            String answerString = questionsArrayList.get(position).getAnswer();
+                                            Answer answer = getObjectFromString(answerString);
+                                            Intent intent = new Intent(context, ViewImageActivity.class);
+                                            intent.putExtra(IMAGE_NAME, "image");
+                                            PreferenceUtils.saveImage(answer.getAnswer().toString(), context);
+                                            Log.d("imageName", PreferenceUtils.getImage(context));
+                                            context.startActivity(intent);
+                                        }
                                 }
                             }
                             return false;
@@ -264,14 +268,14 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.View
                     //TODO:: Action when change text in edit text
                     String questionAnswer = holder.editTextQuestion.getText().toString();
                     if (updateInterview) {
-                        Answer answer = answersFromDbArrayList.get(position);
+                        Answer answer = getObjectFromString(questions.getAnswer());
                         answer.setAnswer(questionAnswer);
                         answerArrayList.get(position).setAnswer(stringFromObject(answer));
                         /*Answer answer = getObjectFromString(questions.getAnswer());
                         answer.setAnswer(questionAnswer);
                         answerArrayList.get(position).setAnswer(stringFromObject(answer));*/
                     } else {
-                        int id = (int) System.currentTimeMillis();
+                        int id = (int) System.currentTimeMillis() * -1;
                         Answer answer = new Answer(id, String.valueOf(questions.getId()), "", questionAnswer, questions.getType(), isLocal);
                         answerArrayList.get(position).setAnswer(stringFromObject(answer));
                     }
@@ -288,14 +292,12 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.View
                 Answer answer = getObjectFromString(questions.getAnswer());
                 if (answer.getType().equals("4")) {
                     if (isLocal) {
-                        int id = (int) System.currentTimeMillis();
+                        int id = (int) System.currentTimeMillis() * -1;
                         holder.editTextQuestion.setText(id + ".jpg");
                     } else
                         holder.editTextQuestion.setText(answer.getAnswer());
                 } else
                     holder.editTextQuestion.setText(answer.getAnswer());
-                /*holder.editTextQuestion.setClickable(false);
-                holder.editTextQuestion.setFocusable(false);*/
             }
 
         } catch (Exception exception) {
