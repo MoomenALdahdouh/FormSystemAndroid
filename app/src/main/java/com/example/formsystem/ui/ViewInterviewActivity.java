@@ -15,6 +15,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.location.Address;
@@ -111,6 +112,7 @@ public class ViewInterviewActivity extends AppCompatActivity implements OnMapRea
     private TextView textView;
     private String interviewTitle = "";
     private String interviewLocation = "";
+    private String interviewCreatedAt = "";
     private String formId;
     private String interviewId = "";
     private double latitude;
@@ -161,6 +163,7 @@ public class ViewInterviewActivity extends AppCompatActivity implements OnMapRea
         questionAnswersArrayList = new ArrayList<>();
         answersArrayList = new ArrayList<>();
         answersFromDbArrayList = new ArrayList<>();
+        interviewDeleted = new ArrayList<>();
         questionsAdapter = new QuestionsAdapter(ViewInterviewActivity.this);
         questionsArrayList = new ArrayList<>();
         recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
@@ -185,17 +188,19 @@ public class ViewInterviewActivity extends AppCompatActivity implements OnMapRea
                 interviewId = intent.getStringExtra(InterviewsAdapter.INTERVIEW_ID);
                 interviewTitle = intent.getStringExtra(InterviewsAdapter.INTERVIEW_TITLE);
                 interviewLocation = intent.getStringExtra(InterviewsAdapter.INTERVIEW_LOCATION);
+                interviewCreatedAt = intent.getStringExtra(InterviewsAdapter.INTERVIEW_CREATED_AT);
                 latitude = Double.parseDouble(intent.getStringExtra(InterviewsAdapter.INTERVIEW_LATITUDE));
                 longitude = Double.parseDouble(intent.getStringExtra(InterviewsAdapter.INTERVIEW_LONGITUDE));
                 if (isNetworkAvailable()) {
                     getFormQuestions();
-                    deleteInterview();
                 } else {
                     getFormQuestionsNoNet();
                 }
+                deleteInterview();
                 getLocation();
                 updateInterview();
                 fetchInterviewData();
+                loadInterviewDeletedFromLocal();
             } catch (Exception e) {
 
             }
@@ -284,7 +289,10 @@ public class ViewInterviewActivity extends AppCompatActivity implements OnMapRea
                 textView.setText(R.string.delete_interview_running);
                 dialog.setView(viewDialog);
                 dialog.show();
-                deleteInterviewAction();
+                if (isNetworkAvailable())
+                    deleteInterviewAction();
+                else
+                    deleteInterviewActionNoNet();
             }
         });
     }
@@ -317,6 +325,61 @@ public class ViewInterviewActivity extends AppCompatActivity implements OnMapRea
         });
     }
 
+    private void deleteInterviewActionNoNet() {
+        interviewsViewModel.getAllInterviews().observe(this, new Observer<List<Interview>>() {
+            @Override
+            public void onChanged(List<Interview> interviews) {
+                for (int i = 0; i < interviews.size(); i++) {
+                    if (interviewId.equals(interviews.get(i).getId() + "")) {
+                        interviewsViewModel.delete(interviews.get(i));
+                        saveInterviewDeletedInLocal(Integer.parseInt(interviewId));
+                        deleteInterviewAnswers();
+                    }
+                }
+            }
+        });
+    }
+
+    private void saveInterviewDeletedInLocal(int interviewId) {
+        Interview interview = new Interview();
+        interview.setId(interviewId);
+        interviewDeleted.add(interview);
+        SharedPreferences sharedPreferences = getSharedPreferences("shared preferences", MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        Gson gson = new Gson();
+        String json = gson.toJson(interviewDeleted);
+        editor.putString("task list", json);
+        editor.apply();
+    }
+
+    private ArrayList<Interview> interviewDeleted;
+
+    private void loadInterviewDeletedFromLocal() {
+        SharedPreferences sharedPreferences = getSharedPreferences("shared preferences", MODE_PRIVATE);
+        Gson gson = new Gson();
+        String json = sharedPreferences.getString("task list", null);
+        Type type = new TypeToken<ArrayList<Interview>>() {
+        }.getType();
+        interviewDeleted = gson.fromJson(json, type);
+        if (interviewDeleted == null) {
+            interviewDeleted = new ArrayList<>();
+        }
+    }
+
+    private void deleteInterviewAnswers() {
+        answersViewModel.getAllAnswers().observe(this, new Observer<List<Answer>>() {
+            @Override
+            public void onChanged(List<Answer> answers) {
+                for (int i = 0; i < answers.size(); i++) {
+                    if (interviewId.equals(answers.get(i).getInterview_fk_id() + "")) {
+                        answersViewModel.delete(answers.get(i));
+                    }
+                }
+                finish();
+            }
+        });
+    }
+
     @SuppressLint("SetTextI18n")
     private void fetchInterviewData() {
         binding.textViewErrorLocation.setVisibility(View.VISIBLE);
@@ -345,7 +408,7 @@ public class ViewInterviewActivity extends AppCompatActivity implements OnMapRea
                     binding.textViewErrorLocation.setTextColor(getColor(R.color.danger));
                     return;
                 }
-                Interview interview = new Interview(Integer.parseInt(interviewId), formId, interviewTitle, interviewLocation, latitude + "", longitude + "", PreferenceUtils.getUserId(getApplicationContext()), "", false);
+                Interview interview = new Interview(Integer.parseInt(interviewId), formId, interviewTitle, interviewLocation, latitude + "", longitude + "", PreferenceUtils.getUserId(getApplicationContext()), interviewCreatedAt, false);
                 showDialog();
                 if (isNetworkAvailable())
                     postUpdateInterview(interview);
@@ -382,7 +445,7 @@ public class ViewInterviewActivity extends AppCompatActivity implements OnMapRea
                     if (interviewId.equals(interviews.get(i).getId() + "")) {
                         interviewsViewModel.delete(interviews.get(i));
                         interviewsViewModel.insert(interview);
-                        finish();
+                        adapterQuestionAnswers(interviewId);
                     }
                 }
             }

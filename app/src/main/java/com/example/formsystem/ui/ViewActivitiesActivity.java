@@ -26,6 +26,8 @@ import com.example.formsystem.model.Form;
 import com.example.formsystem.model.FormResults;
 import com.example.formsystem.model.Interview;
 import com.example.formsystem.model.InterviewResults;
+import com.example.formsystem.model.Questions;
+import com.example.formsystem.model.QuestionsResults;
 import com.example.formsystem.model.User;
 import com.example.formsystem.model.UserResults;
 import com.example.formsystem.utils.PreferenceUtils;
@@ -33,6 +35,7 @@ import com.example.formsystem.viewmodel.FormSystemViewModel;
 import com.example.formsystem.viewmodel.local.ActivitiesViewModel;
 import com.example.formsystem.viewmodel.local.FormViewModel;
 import com.example.formsystem.viewmodel.local.InterviewsViewModel;
+import com.example.formsystem.viewmodel.local.QuestionsViewModel;
 import com.example.formsystem.viewmodel.local.UserViewModel;
 
 import java.util.ArrayList;
@@ -46,10 +49,12 @@ public class ViewActivitiesActivity extends AppCompatActivity {
     private ActivityViewActivitiesBinding binding;
     private String activityId;
     private String formId;
+    private FormSystemViewModel questionsSystemViewModel;
     private FormSystemViewModel formSystemViewModel;
     private FormSystemViewModel interviewsSystemViewModel;
     private FormViewModel formViewModel;
     private InterviewsViewModel interviewsViewModel;
+    private QuestionsViewModel questionsViewModel;
     private String token;
     private String userId;
     private RecyclerView recyclerView;
@@ -57,6 +62,9 @@ public class ViewActivitiesActivity extends AppCompatActivity {
     private ArrayList<Interview> interviewsArrayList;
     private ArrayList<Interview> interviewArrayList;
     private ArrayList<Interview> interviewArrayListLocal;
+    private ArrayList<Questions> questionsArrayList;
+    private ArrayList<Questions> questionsRoom;
+    private ArrayList<Questions> newQuestionsForm;
     private Form form;
     private String worker_id;
 
@@ -67,12 +75,17 @@ public class ViewActivitiesActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
         token = PreferenceUtils.getToken(ViewActivitiesActivity.this);
         worker_id = PreferenceUtils.getUserId(getApplicationContext());
+        questionsSystemViewModel = new ViewModelProvider(this).get(FormSystemViewModel.class);
         formSystemViewModel = new ViewModelProvider(this).get(FormSystemViewModel.class);
         interviewsSystemViewModel = new ViewModelProvider(this).get(FormSystemViewModel.class);
         interviewsViewModel = new ViewModelProvider(this).get(InterviewsViewModel.class);
+        questionsViewModel = new ViewModelProvider(this).get(QuestionsViewModel.class);
         formViewModel = new ViewModelProvider(this).get(FormViewModel.class);
         userId = PreferenceUtils.getUserId(ViewActivitiesActivity.this);
         interviewArrayList = new ArrayList<>();
+        questionsArrayList = new ArrayList<>();
+        newQuestionsForm = new ArrayList<>();
+        questionsRoom = new ArrayList<>();
         recyclerView = binding.recyclerView;
         interviewsAdapter = new InterviewsAdapter(ViewActivitiesActivity.this);
         recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
@@ -89,11 +102,63 @@ public class ViewActivitiesActivity extends AppCompatActivity {
             if (isNetworkAvailable()) {
                 //getInterviewsRoom();
                 getInterviews(formId, worker_id);
+                getFormQuestions();
             } else {
                 getInterviewsNoNet(formId);
             }
         }
     }
+
+    private void getFormQuestions() {
+        binding.loadingDataConstraint.setVisibility(View.VISIBLE);
+        questionsSystemViewModel.getQuestions(token, formId);
+        questionsSystemViewModel.questionsMutableLiveData.observe(this, new Observer<QuestionsResults>() {
+            @SuppressLint("NotifyDataSetChanged")
+            @Override
+            public void onChanged(QuestionsResults questionsResults) {
+                try {
+                    binding.loadingDataConstraint.setVisibility(View.GONE);
+                    questionsArrayList = questionsResults.getQuestions();
+                    if (!questionsArrayList.isEmpty()) {
+                        binding.constraintLayoutEmptyData.setVisibility(View.GONE);
+                        //Replace old data in room
+                        if (newQuestionsForm.size() != questionsArrayList.size())
+                            getFormQuestionsRoom();
+                    } else
+                        binding.constraintLayoutEmptyData.setVisibility(View.VISIBLE);
+                } catch (Exception e) {
+
+                }
+            }
+        });
+    }
+
+    private void getFormQuestionsRoom() {
+        questionsViewModel.getAllQuestions().observe(this, new Observer<List<Questions>>() {
+            @Override
+            public void onChanged(List<Questions> questions) {
+                if (newQuestionsForm.size() != questionsArrayList.size()) {
+                    questionsRoom = new ArrayList<>();
+                    newQuestionsForm = new ArrayList<>();
+                    questionsRoom.addAll(questions);
+                    for (int i = 0; i < questionsArrayList.size(); i++) {
+                        for (int j = 0; j < questionsRoom.size(); j++) {
+                            //if (questionsRoom.get(j).getForm_fk_id().equals(formId)) {
+                                if (questionsRoom.get(j).getId() == questionsArrayList.get(i).getId()) {
+                                    //remove then insert again mean (update item)
+                                    questionsViewModel.delete(questionsRoom.get(j));
+                                }
+                            //}
+                        }
+                        //insert
+                        newQuestionsForm.add(questionsArrayList.get(i));
+                        questionsViewModel.insert(questionsArrayList.get(i));
+                    }
+                }
+            }
+        });
+    }
+
 
     private void getFormNet() {
         formSystemViewModel.getForm(token, activityId);

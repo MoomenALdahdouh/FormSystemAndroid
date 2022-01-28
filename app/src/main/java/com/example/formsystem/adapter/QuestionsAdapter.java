@@ -142,6 +142,7 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.View
                     holder.editTextQuestion.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
                     break;
                 case "3"://Calender
+                    holder.editTextQuestion.setInputType(InputType.TYPE_CLASS_NUMBER);
                     Calendar mcurrentDate = Calendar.getInstance();
                     int mYear = mcurrentDate.get(Calendar.YEAR);
                     int mMonth = mcurrentDate.get(Calendar.MONTH) + 1;
@@ -162,7 +163,7 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.View
                                     DatePickerDialog mDatePicker = new DatePickerDialog(context, new DatePickerDialog.OnDateSetListener() {
                                         public void onDateSet(DatePicker datepicker, int selectedyear, int selectedmonth, int selectedday) {
                                             Answer old_answer = getObjectFromString(questions.getAnswer());
-                                            String selectedDate = selectedyear + "/" + selectedmonth + "/" + selectedday;
+                                            String selectedDate = selectedyear + "/" + (selectedmonth + 1) + "/" + selectedday;
                                             String old_id = String.valueOf(old_answer.getId());
                                             int id;
                                             if (updateInterview && !old_id.equals("0"))
@@ -174,7 +175,7 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.View
                                             answerArrayList.get(position).setAnswer(stringFromObject(answer));
                                             holder.editTextQuestion.setText(selectedDate);
                                         }
-                                    }, mYear, mMonth, mDay);
+                                    }, mYear, mMonth - 1, mDay);
                                     mDatePicker.show();
                                 }
                             }

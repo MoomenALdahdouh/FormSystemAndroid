@@ -102,6 +102,9 @@ public class FormSystemClient {
     public Call<Interview> postInterview(Interview interview) {
         return formSystemInterface.postInterview(interview);
     }
+    public Call<InterviewResults> postInterviews(InterviewResults interviewResults) {
+        return formSystemInterface.postInterviews(interviewResults);
+    }
     public Call<Interview> updateInterview(Interview interview) {
         return formSystemInterface.updateInterview(interview);
     }

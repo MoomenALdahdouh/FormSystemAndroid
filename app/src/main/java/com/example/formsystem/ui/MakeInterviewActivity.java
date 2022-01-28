@@ -161,14 +161,13 @@ public class MakeInterviewActivity extends AppCompatActivity implements OnMapRea
             if (isNetworkAvailable()) {
                 getFormQuestions();
                 isLocal = false;
-                questionsAdapter.setLocal(isLocal);
                 //submitInterview();
                 //getCurrentLocation();
             } else {
                 getFormQuestionsNoNet();
                 isLocal = true;
-                questionsAdapter.setLocal(isLocal);
             }
+            questionsAdapter.setLocal(isLocal);
             submitInterview();
             getLocation();
         }
@@ -198,6 +197,7 @@ public class MakeInterviewActivity extends AppCompatActivity implements OnMapRea
             @SuppressLint("ResourceAsColor")
             @Override
             public void onClick(View view) {
+                showDialog();
                 //checkInterviewTitle();
                 interviewTitle = binding.editTextInterviewTitle.getText().toString();
                 if (interviewTitle.isEmpty()) {
@@ -223,7 +223,6 @@ public class MakeInterviewActivity extends AppCompatActivity implements OnMapRea
                 Date currenTimeZone = (Date) calendar.getTime();
                 String created_at = sdf.format(currenTimeZone);
                 Interview interview = new Interview(id, formId, interviewTitle, interviewLocation, latitude + "", longitude + "", PreferenceUtils.getUserId(getApplicationContext()), created_at, isLocal);
-                showDialog();
                 if (isNetworkAvailable())
                     postInterview(interview);
                 else {
@@ -378,8 +377,9 @@ public class MakeInterviewActivity extends AppCompatActivity implements OnMapRea
                         questionsAdapter.setList(questionsArrayList);
                         questionsAdapter.notifyDataSetChanged();
                         //Replace old data in room
-                        if (newQuestionsForm.size() != questionsArrayList.size())
-                            getFormQuestionsRoom();
+                        //TODO::
+                        /*if (newQuestionsForm.size() != questionsArrayList.size())
+                            getFormQuestionsRoom();*/
                     } else
                         binding.constraintLayoutEmptyData.setVisibility(View.VISIBLE);
                 } catch (Exception e) {

@@ -66,6 +66,9 @@ public interface FormSystemInterface {
     @POST("interviews/create")
     Call<Interview> postInterview(@Body Interview interview);
 
+    @POST("interviews/create/list")
+    Call<InterviewResults> postInterviews(@Body InterviewResults interviewResults);
+
     @POST("interviews/update")
     Call<Interview> updateInterview(@Body Interview interview);
 

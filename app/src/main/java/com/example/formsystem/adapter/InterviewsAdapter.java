@@ -29,6 +29,7 @@ public class InterviewsAdapter extends RecyclerView.Adapter<InterviewsAdapter.Vi
     public static final String INTERVIEW_LOCATION = "INTERVIEW_LOCATION";
     public static final String INTERVIEW_LATITUDE = "INTERVIEW_LATITUDE";
     public static final String INTERVIEW_LONGITUDE = "INTERVIEW_LONGITUDE";
+    public static final String INTERVIEW_CREATED_AT = "INTERVIEW_CREATED_AT";
     private Context context;
     private ArrayList<Interview> interviewsArrayList;
     private Form form;
@@ -91,6 +92,7 @@ public class InterviewsAdapter extends RecyclerView.Adapter<InterviewsAdapter.Vi
                     Interview interviewClicked = interviewsArrayList.get(adapterPosition);
                     String interviewId = String.valueOf(interviewClicked.getId());
                     String interviewTitle = interviewClicked.getTitle();
+                    String interviewCreatedAt = interviewClicked.getCreated_at();
                     String interviewLocation = String.valueOf(interviewClicked.getCustomer_location());
                     String interviewLatitude = interviewClicked.getLatitude();
                     String interviewLongitude = interviewClicked.getLongitude();
@@ -99,6 +101,7 @@ public class InterviewsAdapter extends RecyclerView.Adapter<InterviewsAdapter.Vi
                     intent.putExtra(INTERVIEW_ID, interviewId);
                     intent.putExtra(INTERVIEW_TITLE, interviewTitle);
                     intent.putExtra(INTERVIEW_LOCATION, interviewLocation);
+                    intent.putExtra(INTERVIEW_CREATED_AT, interviewCreatedAt);
                     intent.putExtra(INTERVIEW_LATITUDE, interviewLatitude);
                     intent.putExtra(INTERVIEW_LONGITUDE, interviewLongitude);
                     intent.putExtra(FORM_ID, formId);

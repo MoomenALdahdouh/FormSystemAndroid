@@ -6,8 +6,9 @@ import java.util.ArrayList;
 
 public class InterviewResults {
     @SerializedName("interviews")
-    //@Expose
     private ArrayList<Interview> interviews;
+    @SerializedName("success")
+    private String success;
 
     public InterviewResults() {
     }
@@ -22,5 +23,13 @@ public class InterviewResults {
 
     public void setInterviews(ArrayList<Interview> interviews) {
         this.interviews = interviews;
+    }
+
+    public String getSuccess() {
+        return success;
+    }
+
+    public void setSuccess(String success) {
+        this.success = success;
     }
 }

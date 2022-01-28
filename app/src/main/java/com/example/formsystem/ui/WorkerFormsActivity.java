@@ -3,6 +3,7 @@ package com.example.formsystem.ui;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.net.ConnectivityManager;
@@ -31,7 +32,9 @@ import com.example.formsystem.model.Answer;
 import com.example.formsystem.model.Form;
 import com.example.formsystem.model.FormResults;
 import com.example.formsystem.model.Interview;
+import com.example.formsystem.model.InterviewResults;
 import com.example.formsystem.model.PostAnswersList;
+import com.example.formsystem.model.ResponseSuccess;
 import com.example.formsystem.model.User;
 import com.example.formsystem.model.UserResults;
 import com.example.formsystem.utils.PreferenceUtils;
@@ -41,7 +44,10 @@ import com.example.formsystem.viewmodel.local.AnswersViewModel;
 import com.example.formsystem.viewmodel.local.FormViewModel;
 import com.example.formsystem.viewmodel.local.InterviewsViewModel;
 import com.example.formsystem.viewmodel.local.UserViewModel;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -52,11 +58,13 @@ import io.reactivex.annotations.Nullable;
 public class WorkerFormsActivity extends AppCompatActivity {
 
     private ActivityWorkerFormsBinding binding;
-    private FormSystemViewModel activitiesSystemViewModel;
+    private FormSystemViewModel formSystemViewModel;
+    /*private FormSystemViewModel activitiesSystemViewModel;
     private FormSystemViewModel workerFormsSystemViewModel;
     private FormSystemViewModel userSystemViewModel;
     private FormSystemViewModel postInterviewSystemViewModel;
     private FormSystemViewModel postAnswerSystemViewModel;
+    private FormSystemViewModel deleteInterviewSystemViewModel;*/
     private AnswersViewModel answersViewModel;
     private InterviewsViewModel interviewsViewModel;
     private FormViewModel formViewModel;
@@ -65,6 +73,9 @@ public class WorkerFormsActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private FormsAdapter formsAdapter;
     private ArrayList<Form> formsArrayList;
+    private ArrayList<Interview> interviewArrayList;
+    private ArrayList<Answer> answersArrayList;
+    private ArrayList<Interview> interviewDeleted;
     private String token;
     private String userId;
 
@@ -75,11 +86,13 @@ public class WorkerFormsActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
         token = PreferenceUtils.getToken(WorkerFormsActivity.this);
         userId = PreferenceUtils.getUserId(WorkerFormsActivity.this);
-        activitiesSystemViewModel = new ViewModelProvider(this).get(FormSystemViewModel.class);
-        workerFormsSystemViewModel = new ViewModelProvider(this).get(FormSystemViewModel.class);
-        userSystemViewModel = new ViewModelProvider(this).get(FormSystemViewModel.class);
-        postInterviewSystemViewModel = new ViewModelProvider(this).get(FormSystemViewModel.class);
-        postAnswerSystemViewModel = new ViewModelProvider(this).get(FormSystemViewModel.class);
+        formSystemViewModel = new ViewModelProvider(this).get(FormSystemViewModel.class);
+        // activitiesSystemViewModel = new ViewModelProvider(this).get(FormSystemViewModel.class);
+        // workerFormsSystemViewModel = new ViewModelProvider(this).get(FormSystemViewModel.class);
+        // userSystemViewModel = new ViewModelProvider(this).get(FormSystemViewModel.class);
+        //postInterviewSystemViewModel = new ViewModelProvider(this).get(FormSystemViewModel.class);
+        //postAnswerSystemViewModel = new ViewModelProvider(this).get(FormSystemViewModel.class);
+        //deleteInterviewSystemViewModel = new ViewModelProvider(this).get(FormSystemViewModel.class);
         answersViewModel = new ViewModelProvider(this).get(AnswersViewModel.class);
         interviewsViewModel = new ViewModelProvider(this).get(InterviewsViewModel.class);
         userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
@@ -88,6 +101,7 @@ public class WorkerFormsActivity extends AppCompatActivity {
         recyclerView = binding.recyclerView;
         formsAdapter = new FormsAdapter(WorkerFormsActivity.this);
         formsArrayList = new ArrayList<>();
+        interviewDeleted = new ArrayList<>();
         recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
         formsAdapter.setList(formsArrayList);
         recyclerView.setAdapter(formsAdapter);
@@ -97,8 +111,9 @@ public class WorkerFormsActivity extends AppCompatActivity {
         if (isNetworkAvailable()) {
             getUserDetailsNet();
             getFormsNet();
-            //getAnswersInRoomWasCreatedLocal();
+            getAnswersInRoomWasCreatedLocal();
             getInterviewInRoomWasCreatedLocal();
+            loadInterviewDeletedFromLocal();
         } else {
             getUserDetailsNoNet();
             getFormsNoNet();
@@ -106,8 +121,47 @@ public class WorkerFormsActivity extends AppCompatActivity {
         setUpLanguage(PreferenceUtils.getLanguage(getApplicationContext()));
     }
 
-    private ArrayList<Interview> interviewArrayList;
-    private ArrayList<Answer> answersArrayList;
+    private void loadInterviewDeletedFromLocal() {
+        SharedPreferences sharedPreferences = getSharedPreferences("shared preferences", MODE_PRIVATE);
+        Gson gson = new Gson();
+        String json = sharedPreferences.getString("task list", null);
+        Type type = new TypeToken<ArrayList<Interview>>() {
+        }.getType();
+        interviewDeleted = gson.fromJson(json, type);
+        if (interviewDeleted == null) {
+            interviewDeleted = new ArrayList<>();
+        }
+        //Delete interview post api
+        for (int i = 0; i < interviewDeleted.size(); i++) {
+            Log.d("savedInterviewDeleted", i + "::" + interviewDeleted.get(i).getId());
+            deleteInterview(interviewDeleted.get(i).getId(), i);
+        }
+    }
+
+    private void deleteInterview(int interviewId, int i) {
+        formSystemViewModel.deleteInterview(interviewId);
+        formSystemViewModel.deleteInterviewMutableLiveData.observe(this, new Observer<ResponseSuccess>() {
+            @SuppressLint("NotifyDataSetChanged")
+            @Override
+            public void onChanged(ResponseSuccess response) {
+                Log.d("interviewDeleted", i + "::");
+                if (i < interviewDeleted.size()) {
+                    interviewDeleted.remove(i);
+                }
+                if (i == interviewDeleted.size() - 1)
+                    saveInterviewDeletedInLocal();
+            }
+        });
+    }
+
+    private void saveInterviewDeletedInLocal() {
+        SharedPreferences sharedPreferences = getSharedPreferences("shared preferences", MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        Gson gson = new Gson();
+        String json = gson.toJson(interviewDeleted);
+        editor.putString("task list", json);
+        editor.apply();
+    }
 
     // private ArrayList<PostAnswersList> answersResultArrayList ;
     private void getInterviewInRoomWasCreatedLocal() {
@@ -116,8 +170,8 @@ public class WorkerFormsActivity extends AppCompatActivity {
             @Override
             public void onChanged(@Nullable List<Interview> interviews) {
                 assert interviews != null;
+                interviewArrayList = new ArrayList<>();
                 if (!interviews.isEmpty()) {
-                    interviewArrayList = new ArrayList<>();
                     for (int i = 0; i < interviews.size(); i++) {
                         if (interviews.get(i).isCreated_in_local()) {
                             /*Interview old = interviews.get(i);
@@ -125,10 +179,12 @@ public class WorkerFormsActivity extends AppCompatActivity {
                                     , old.getTitle(), old.getCustomer_location(), old.getLatitude()
                                     , old.getLongitude(), old.getWorker_fk_id(), old.getCreated_at());*/
                             interviewArrayList.add(interviews.get(i));
-                            postLocalInterviewsWasCreated(interviews.get(i));
+                            Log.d("LocalInterview", "Local" + interviews.get(i).getTitle() + "::" + interviews.get(i).getId());
+                            postLocalInterviewWasCreated(interviews.get(i));
                             //postLocalInterviewsWasCreated(new Interview(12514553,"sad","dddddd","","","","","",true));
                         }
                     }
+                    //postLocalInterviewsWasCreated();
                 }
             }
         });
@@ -155,8 +211,8 @@ public class WorkerFormsActivity extends AppCompatActivity {
     }
 
     private void postLocalAnswersWasCreated(PostAnswersList answer) {
-        postAnswerSystemViewModel.postAnswer(answer);
-        postAnswerSystemViewModel.postAnswerMutableLiveData.observe(this, new Observer<PostAnswersList>() {
+        formSystemViewModel.postAnswer(answer);
+        formSystemViewModel.postAnswerMutableLiveData.observe(this, new Observer<PostAnswersList>() {
             @SuppressLint("NotifyDataSetChanged")
             @Override
             public void onChanged(PostAnswersList response) {
@@ -167,15 +223,30 @@ public class WorkerFormsActivity extends AppCompatActivity {
         });
     }
 
-    private void postLocalInterviewsWasCreated(Interview interview) {
-        postInterviewSystemViewModel.postInterview(interview);
-        postInterviewSystemViewModel.postInterviewMutableLiveData.observe(this, new Observer<Interview>() {
+    private void postLocalInterviewsWasCreated() {
+        InterviewResults interviewResults = new InterviewResults(interviewArrayList);
+        formSystemViewModel.postInterviews(interviewResults);
+        formSystemViewModel.postInterviewsMutableLiveData.observe(this, new Observer<InterviewResults>() {
             @SuppressLint("NotifyDataSetChanged")
             @Override
-            public void onChanged(Interview interview) {
+            public void onChanged(InterviewResults interviews) {
                 try {
                     /* Success*/
-                    Log.d("interview.getInterview_id()", interview.getInterview_id());
+                    Log.d("interviewsPost", interviews.getSuccess());
+                } catch (Exception e) {
+                }
+            }
+        });
+    }
+    private void postLocalInterviewWasCreated(Interview interview) {
+        formSystemViewModel.postInterview(interview);
+        formSystemViewModel.postInterviewMutableLiveData.observe(this, new Observer<Interview>() {
+            @SuppressLint("NotifyDataSetChanged")
+            @Override
+            public void onChanged(Interview interviews) {
+                try {
+                    /* Success*/
+                    Log.d("interviewsPost", interviews.getInterview_id());
                 } catch (Exception e) {
                 }
             }
@@ -183,8 +254,8 @@ public class WorkerFormsActivity extends AppCompatActivity {
     }
 
     private void getUserDetailsNet() {
-        userSystemViewModel.getUser(token, userId);
-        userSystemViewModel.userMutableLiveData.observe(this, new Observer<UserResults>() {
+        formSystemViewModel.getUser(token, userId);
+        formSystemViewModel.userMutableLiveData.observe(this, new Observer<UserResults>() {
             @SuppressLint("NotifyDataSetChanged")
             @Override
             public void onChanged(UserResults userResults) {
@@ -224,9 +295,9 @@ public class WorkerFormsActivity extends AppCompatActivity {
 
     private void getFormsNet() {
         binding.loadingDataConstraint.setVisibility(View.VISIBLE);
-        workerFormsSystemViewModel.getAllWorkerForms(token, userId);
+        formSystemViewModel.getAllWorkerForms(token, userId);
         //getFormsRoom();
-        workerFormsSystemViewModel.workerFormsMutableLiveData.observe(this, new Observer<FormResults>() {
+        formSystemViewModel.workerFormsMutableLiveData.observe(this, new Observer<FormResults>() {
             @SuppressLint("NotifyDataSetChanged")
             @Override
             public void onChanged(FormResults formResults) {
