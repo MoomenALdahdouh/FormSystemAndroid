@@ -222,7 +222,7 @@ public class MakeInterviewActivity extends AppCompatActivity implements OnMapRea
                 @SuppressLint("SimpleDateFormat") SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                 Date currenTimeZone = (Date) calendar.getTime();
                 String created_at = sdf.format(currenTimeZone);
-                Interview interview = new Interview(id, formId, interviewTitle, interviewLocation, latitude + "", longitude + "", PreferenceUtils.getUserId(getApplicationContext()), created_at, isLocal);
+                Interview interview = new Interview(id, formId, interviewTitle, interviewLocation, latitude + "", longitude + "", PreferenceUtils.getUserId(getApplicationContext()), created_at, isLocal,false);
                 if (isNetworkAvailable())
                     postInterview(interview);
                 else {

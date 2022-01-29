@@ -12,6 +12,7 @@ import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
@@ -110,6 +111,7 @@ public class ViewActivitiesActivity extends AppCompatActivity {
     }
 
     private void getFormQuestions() {
+        isRunning = true;
         binding.loadingDataConstraint.setVisibility(View.VISIBLE);
         questionsSystemViewModel.getQuestions(token, formId);
         questionsSystemViewModel.questionsMutableLiveData.observe(this, new Observer<QuestionsResults>() {
@@ -124,6 +126,8 @@ public class ViewActivitiesActivity extends AppCompatActivity {
                         //Replace old data in room
                         if (newQuestionsForm.size() != questionsArrayList.size())
                             getFormQuestionsRoom();
+                        else
+                            isRunning = false;
                     } else
                         binding.constraintLayoutEmptyData.setVisibility(View.VISIBLE);
                 } catch (Exception e) {
@@ -144,16 +148,17 @@ public class ViewActivitiesActivity extends AppCompatActivity {
                     for (int i = 0; i < questionsArrayList.size(); i++) {
                         for (int j = 0; j < questionsRoom.size(); j++) {
                             //if (questionsRoom.get(j).getForm_fk_id().equals(formId)) {
-                                if (questionsRoom.get(j).getId() == questionsArrayList.get(i).getId()) {
-                                    //remove then insert again mean (update item)
-                                    questionsViewModel.delete(questionsRoom.get(j));
-                                }
+                            if (questionsRoom.get(j).getId() == questionsArrayList.get(i).getId()) {
+                                //remove then insert again mean (update item)
+                                questionsViewModel.delete(questionsRoom.get(j));
+                            }
                             //}
                         }
                         //insert
                         newQuestionsForm.add(questionsArrayList.get(i));
                         questionsViewModel.insert(questionsArrayList.get(i));
                     }
+                    isRunning = false;
                 }
             }
         });
@@ -215,30 +220,19 @@ public class ViewActivitiesActivity extends AppCompatActivity {
                         for (int j = 0; j < interviewsRoom.size(); j++) {
                             if (interviewsRoom.get(j).getForm_fk_id().equals(formId))
                                 interviewsViewModel.delete(interviewsRoom.get(j));
-                            /*if (interviewsRoom.get(j).getId() == interviewArrayList.get(i).getId()) {
-                                //remove then insert again mean (update item)
-                                interviewsViewModel.delete(interviewsRoom.get(j));
-                            } else {
-                                //Remove removed interviews from room (remove interview from room was deleted when connect internet)
-                                if (interviewsRoom.get(j).getForm_fk_id().equals(formId))
-                                    interviewsViewModel.delete(interviewsRoom.get(j));
-                            }*/
-
                         }
                         //insert
                         newInterviewsRoom.add(interviewArrayList.get(i));
                         interviewsViewModel.insert(interviewArrayList.get(i));
                     }
-                    /*for (int i = 0; i < newInterviewsRoom.size(); i++) {
-                        //Log.d("Item itemmmm ", "" + newInterviewsRoom.get(i).getId());
-                        interviewsViewModel.insert(newInterviewsRoom.get(i));
-                    }*/
+                    isRunning = false;
                 }
             }
         });
     }
 
     private void getInterviews(String formId, String worker_id) {
+        isRunning = true;
         binding.loadingDataConstraint.setVisibility(View.VISIBLE);
         interviewsSystemViewModel.getInterviews(token, formId, worker_id);
         interviewsSystemViewModel.interviewsMutableLiveData.observe(this, new Observer<InterviewResults>() {
@@ -257,6 +251,8 @@ public class ViewActivitiesActivity extends AppCompatActivity {
                         //Replace old data in room
                         if (newInterviewsRoom.size() != interviewArrayList.size())
                             getInterviewsRoom();
+                        else
+                            isRunning = false;
                     } else
                         binding.constraintLayoutEmptyData.setVisibility(View.VISIBLE);
                 } catch (Exception e) {
@@ -320,4 +316,34 @@ public class ViewActivitiesActivity extends AppCompatActivity {
         NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
         return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
+
+    private boolean isRunning = false;
+
+
+    @Override
+    public void onBackPressed() {
+        if (isNetworkAvailable()) {
+            if (!isRunning) {
+                Toast.makeText(getApplicationContext(), "Please Wait to Sync Data...", Toast.LENGTH_SHORT).show();
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(getApplicationContext(), "Done.", Toast.LENGTH_SHORT).show();
+                        finish();
+                    }
+                }, 3000);
+            } else
+                Toast.makeText(getApplicationContext(), "Please Wait to Sync Data...", Toast.LENGTH_SHORT).show();
+        }else
+            super.onBackPressed();
+
+    }
+    /*@Override
+    public void onBackPressed() {
+        if (!isRunning)
+            super.onBackPressed();
+        else
+            Toast.makeText(getApplicationContext(), "Please Wait to Sync Data...", Toast.LENGTH_LONG).show();
+    }*/
+
 }

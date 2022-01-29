@@ -1,6 +1,7 @@
 package com.example.formsystem.ui;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -27,6 +28,7 @@ import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -229,7 +231,7 @@ public class ViewInterviewActivity extends AppCompatActivity implements OnMapRea
             @Override
             public void onChanged(QuestionsResults questionsResults) {
                 try {
-                    binding.loadingDataConstraint.setVisibility(View.GONE);
+                    //binding.loadingDataConstraint.setVisibility(View.GONE);
                     questionsArrayList = questionsResults.getQuestions();
                     if (!questionsArrayList.isEmpty()) {
                         binding.constraintLayoutEmptyData.setVisibility(View.GONE);
@@ -250,7 +252,6 @@ public class ViewInterviewActivity extends AppCompatActivity implements OnMapRea
             public void onChanged(@Nullable List<Questions> questions) {
                 questionsArrayList = new ArrayList<>();
                 for (int i = 0; i < questions.size(); i++) {
-                    binding.loadingDataConstraint.setVisibility(View.GONE);
                     Log.d("formId", "::" + formId + "::" + questions.size());
                     if (questions.get(i).getForm_fk_id().equals(formId)) {
                         Questions question = questions.get(i);
@@ -259,11 +260,12 @@ public class ViewInterviewActivity extends AppCompatActivity implements OnMapRea
                 }
                 if (questionsArrayList.isEmpty())
                     binding.constraintLayoutEmptyData.setVisibility(View.VISIBLE);
-                else
+                else {
                     binding.constraintLayoutEmptyData.setVisibility(View.GONE);
+                    getInterviewsAnswersNoNet();
+                }
                 // questionsAdapter.setList(questionsArrayList);
                 // questionsAdapter.notifyDataSetChanged();
-                getInterviewsAnswersNoNet();
             }
         });
     }
@@ -408,12 +410,14 @@ public class ViewInterviewActivity extends AppCompatActivity implements OnMapRea
                     binding.textViewErrorLocation.setTextColor(getColor(R.color.danger));
                     return;
                 }
-                Interview interview = new Interview(Integer.parseInt(interviewId), formId, interviewTitle, interviewLocation, latitude + "", longitude + "", PreferenceUtils.getUserId(getApplicationContext()), interviewCreatedAt, false);
+                Interview interview = new Interview(Integer.parseInt(interviewId), formId, interviewTitle, interviewLocation, latitude + "", longitude + "", PreferenceUtils.getUserId(getApplicationContext()), interviewCreatedAt, false, false);
                 showDialog();
                 if (isNetworkAvailable())
                     postUpdateInterview(interview);
-                else
+                else {
+                    interview.setUpdate_in_local(true);
                     postUpdateInterviewNoNet(interview);
+                }
                 //updateAnswerInterview();
             }
         });
@@ -432,6 +436,7 @@ public class ViewInterviewActivity extends AppCompatActivity implements OnMapRea
                     answersArrayList.clear();
                     adapterQuestionAnswers(interview.getInterview_id());
                 } catch (Exception e) {
+
                 }
             }
         });
@@ -454,41 +459,70 @@ public class ViewInterviewActivity extends AppCompatActivity implements OnMapRea
 
     private void adapterQuestionAnswers(String interviewId) {
         questionAnswersArrayList = questionsAdapter.getAnswerArrayList();
-        for (int i = 0; i < questionAnswersArrayList.size(); i++) {
-            Questions questions = questionAnswersArrayList.get(i);
-            String questionsId = String.valueOf(questions.getId());
-            Answer answer = getObjectFromString(questions.getAnswer());
-            answer.setInterview_fk_id(interviewId);
-            /*Get image answer if not empty*/
-            for (int j = 0; j < imageAnswersList.size(); j++) {
-                String question_fk_id = imageAnswersList.get(j).getQuestions_fk_id();
-                if (question_fk_id.equals(questionsId)) {
-                    answer.setAnswer(imageAnswersList.get(j).getAnswer());
+        if (answersArrayList.size() != questionAnswersArrayList.size()) {
+            for (int i = 0; i < questionAnswersArrayList.size(); i++) {
+                Questions questions = questionAnswersArrayList.get(i);
+                String questionsId = String.valueOf(questions.getId());
+                Answer answer = getObjectFromString(questions.getAnswer());
+                answer.setInterview_fk_id(interviewId);
+                if (!isNetworkAvailable() && !answer.getType().equals("4"))
+                    answer.setUpdate_in_local(true);
+                /*Get image answer if not empty*/
+                for (int j = 0; j < imageAnswersList.size(); j++) {
+                    String question_fk_id = imageAnswersList.get(j).getQuestions_fk_id();
+                    if (question_fk_id.equals(questionsId)) {
+                        answer.setAnswer(imageAnswersList.get(j).getAnswer());
+                        answer.setUpdate_in_local(true);
+                    }
                 }
+                answersArrayList.add(answer);
             }
-            answersArrayList.add(answer);
+            PostAnswersList postAnswersList = new PostAnswersList(answersArrayList);
+            if (isNetworkAvailable())
+                postUpdateAnswer(postAnswersList);
+            else
+                postUpdateAnswerNoNet(answersArrayList);
         }
-        PostAnswersList postAnswersList = new PostAnswersList(answersArrayList);
-        if (isNetworkAvailable())
-            postUpdateAnswer(postAnswersList);
-        else
-            postUpdateAnswerNoNet(answersArrayList);
     }
 
+    private ArrayList<Answer> updatedAnswerList = new ArrayList<>();
+
     private void postUpdateAnswerNoNet(ArrayList<Answer> answersArrayList) {
-        for (int i = 0; i < answersArrayList.size(); i++) {
-            if (answersArrayList.get(i).isCreated_in_local())
-                answersViewModel.insert(answersArrayList.get(i));
-        }
-        imageView.setImageResource(R.drawable.success);
-        textView.setText(R.string.success_submit_interview);
-        new Handler().postDelayed(new Runnable() {
+        answersViewModel.getAllAnswers().observe(this, new Observer<List<Answer>>() {
+            @RequiresApi(api = Build.VERSION_CODES.N)
             @Override
-            public void run() {
-                //Toast.makeText(getApplicationContext(), "" + response.getSuccess(), Toast.LENGTH_SHORT).show();
-                finish();
+            public void onChanged(List<Answer> answers) {
+                if (updatedAnswerList.size() != answersArrayList.size()) {
+                    for (int i = 0; i < answersArrayList.size(); i++) {
+                        Log.d("a answer okkkk", answersArrayList.get(i).getAnswer());
+                        int currentId = answersArrayList.get(i).getId();
+                        answers.stream()
+                                .filter(answer -> currentId == answer.getId())
+                                .findAny().ifPresent(oldAnswer -> answersViewModel.delete(oldAnswer));
+                        answersViewModel.insert(answersArrayList.get(i));
+                        updatedAnswerList.add(answersArrayList.get(i));
+                    /*Answer oldAnswer = answers.stream()
+                            .filter(answer -> currentId == answer.getId())
+                            .findAny().orElse(null);
+                    if (oldAnswer != null) {
+                        answersViewModel.delete(oldAnswer);
+                    } else {
+                        answersViewModel.insert(answersArrayList.get(i));
+                    }*/
+                    }
+                } else {
+                    imageView.setImageResource(R.drawable.success);
+                    textView.setText(R.string.success_submit_interview);
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            //Toast.makeText(getApplicationContext(), "" + response.getSuccess(), Toast.LENGTH_SHORT).show();
+                            finish();
+                        }
+                    }, 1000);
+                }
             }
-        }, 1000);
+        });
     }
 
 
@@ -647,7 +681,10 @@ public class ViewInterviewActivity extends AppCompatActivity implements OnMapRea
         return jsonString;
     }
 
+    private boolean isRunning = false;
+
     private void getInterviewsAnswers() {
+        isRunning = true;
         questionsSystemViewModel.getAnswers(token, String.valueOf(interviewId));
         answersSystemViewModel.answersMutableLiveData.observe(this, new Observer<AnswersResults>() {
             @SuppressLint("NotifyDataSetChanged")
@@ -666,6 +703,7 @@ public class ViewInterviewActivity extends AppCompatActivity implements OnMapRea
                                 }
                             }
                         }
+                        binding.loadingDataConstraint.setVisibility(View.GONE);
                         questionsAdapter.setAnswersFromDbList(answersFromDbArrayList);
                         questionsAdapter.setList(questionsArrayList);
                         questionsAdapter.setLocal(false);
@@ -682,10 +720,14 @@ public class ViewInterviewActivity extends AppCompatActivity implements OnMapRea
     private ArrayList<Answer> newAnswersRoom = new ArrayList<>();
 
     private void getAnswersRoom() {
+        Log.d("getAnswersRoom1", "getAnswersRoom");
         answersViewModel.getAllAnswers().observe(this, new Observer<List<Answer>>() {
             @Override
             public void onChanged(List<Answer> answers) {
+                Log.d("getAnswersRoom2", "getAnswersRoom");
+                Log.d("getAnswersRoomSize", answers.size() + "");
                 if (newAnswersRoom.size() != answersFromDbArrayList.size()) {
+                    Log.d("getAnswersRoom3", "getAnswersRoom");
                     answersRoom = new ArrayList<>();
                     newAnswersRoom = new ArrayList<>();
                     answersRoom.addAll(answers);
@@ -697,7 +739,9 @@ public class ViewInterviewActivity extends AppCompatActivity implements OnMapRea
                         //insert
                         newAnswersRoom.add(answersFromDbArrayList.get(i));
                         answersViewModel.insert(answersFromDbArrayList.get(i));
+                        Log.d("answersViewModel.insert", "insert" + answersFromDbArrayList.get(i).getAnswer());
                     }
+                    isRunning = false;
                 }
             }
         });
@@ -712,8 +756,8 @@ public class ViewInterviewActivity extends AppCompatActivity implements OnMapRea
             @SuppressLint("NotifyDataSetChanged")
             @Override
             public void onChanged(@Nullable List<Answer> answers) {
-                binding.loadingDataConstraint.setVisibility(View.GONE);
                 assert answers != null;
+                Log.d("getAnswersRoomSizeNoNet", answers.size() + "");
                 if (!answers.isEmpty()) {
                     binding.constraintLayoutEmptyData.setVisibility(View.GONE);
                     answersFromDbArrayList = new ArrayList<>();
@@ -733,7 +777,7 @@ public class ViewInterviewActivity extends AppCompatActivity implements OnMapRea
                             }
                         }
                     }
-
+                    binding.loadingDataConstraint.setVisibility(View.GONE);
                     answersArrayListLocal = new ArrayList<>();
                     answersArrayListLocal.addAll(answersFromDbArrayList);
                     questionsAdapter.setAnswersFromDbList(answersFromDbArrayList);
@@ -1063,5 +1107,21 @@ public class ViewInterviewActivity extends AppCompatActivity implements OnMapRea
         return randomStringBuilder.toString();
     }
 
-
+    @Override
+    public void onBackPressed() {
+        if (isNetworkAvailable()) {
+            if (!isRunning) {
+                Toast.makeText(getApplicationContext(), "Please Wait to Sync Data...", Toast.LENGTH_SHORT).show();
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(getApplicationContext(), "Done.", Toast.LENGTH_SHORT).show();
+                        finish();
+                    }
+                }, 3000);
+            } else
+                Toast.makeText(getApplicationContext(), "Please Wait to Sync Data...", Toast.LENGTH_SHORT).show();
+        }else
+            super.onBackPressed();
+    }
 }

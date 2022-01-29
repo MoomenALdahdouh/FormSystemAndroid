@@ -75,6 +75,7 @@ public class WorkerFormsActivity extends AppCompatActivity {
     private ArrayList<Form> formsArrayList;
     private ArrayList<Interview> interviewArrayList;
     private ArrayList<Answer> answersArrayList;
+    private ArrayList<Answer> answersUpdatedArrayList;
     private ArrayList<Interview> interviewDeleted;
     private String token;
     private String userId;
@@ -109,6 +110,7 @@ public class WorkerFormsActivity extends AppCompatActivity {
         binding.constraintLayoutEmptyData.setVisibility(View.GONE);
         binding.loadingDataConstraint.setVisibility(View.GONE);
         if (isNetworkAvailable()) {
+            Toast.makeText(getApplicationContext(), "Sync data is Running...", Toast.LENGTH_SHORT).show();
             getUserDetailsNet();
             getFormsNet();
             getAnswersInRoomWasCreatedLocal();
@@ -165,32 +167,31 @@ public class WorkerFormsActivity extends AppCompatActivity {
 
     // private ArrayList<PostAnswersList> answersResultArrayList ;
     private void getInterviewInRoomWasCreatedLocal() {
+        binding.loadingDataConstraint.setVisibility(View.VISIBLE);
         interviewsViewModel.getAllInterviews().observe(this, new Observer<List<Interview>>() {
             @SuppressLint("NotifyDataSetChanged")
             @Override
             public void onChanged(@Nullable List<Interview> interviews) {
+                binding.loadingDataConstraint.setVisibility(View.GONE);
                 assert interviews != null;
                 interviewArrayList = new ArrayList<>();
                 if (!interviews.isEmpty()) {
                     for (int i = 0; i < interviews.size(); i++) {
                         if (interviews.get(i).isCreated_in_local()) {
-                            /*Interview old = interviews.get(i);
-                            Interview interview = new Interview(old.getId(), old.getForm_fk_id()
-                                    , old.getTitle(), old.getCustomer_location(), old.getLatitude()
-                                    , old.getLongitude(), old.getWorker_fk_id(), old.getCreated_at());*/
                             interviewArrayList.add(interviews.get(i));
                             Log.d("LocalInterview", "Local" + interviews.get(i).getTitle() + "::" + interviews.get(i).getId());
                             postLocalInterviewWasCreated(interviews.get(i));
-                            //postLocalInterviewsWasCreated(new Interview(12514553,"sad","dddddd","","","","","",true));
+                        } else if (interviews.get(i).isUpdate_in_local()) {
+                            postUpdateInterview(interviews.get(i));
                         }
                     }
-                    //postLocalInterviewsWasCreated();
                 }
             }
         });
     }
 
     private void getAnswersInRoomWasCreatedLocal() {
+        binding.loadingDataConstraint.setVisibility(View.VISIBLE);
         answersViewModel.getAllAnswers().observe(this, new Observer<List<Answer>>() {
             @SuppressLint("NotifyDataSetChanged")
             @Override
@@ -199,26 +200,43 @@ public class WorkerFormsActivity extends AppCompatActivity {
                 assert answers != null;
                 if (!answers.isEmpty()) {
                     answersArrayList = new ArrayList<>();
+                    answersUpdatedArrayList = new ArrayList<>();
                     for (int i = 0; i < answers.size(); i++) {
                         if (answers.get(i).isCreated_in_local())
                             answersArrayList.add(answers.get(i));
+                        else if (answers.get(i).isUpdate_in_local()) {
+                            answersUpdatedArrayList.add(answers.get(i));
+                        }
                     }
                     PostAnswersList postAnswersList = new PostAnswersList(answersArrayList);
+                    PostAnswersList postAnswersUpdateList = new PostAnswersList(answersUpdatedArrayList);
                     postLocalAnswersWasCreated(postAnswersList);
+                    postUpdateAnswer(postAnswersUpdateList);
                 }
             }
         });
     }
 
     private void postLocalAnswersWasCreated(PostAnswersList answer) {
+        binding.loadingDataConstraint.setVisibility(View.VISIBLE);
         formSystemViewModel.postAnswer(answer);
         formSystemViewModel.postAnswerMutableLiveData.observe(this, new Observer<PostAnswersList>() {
             @SuppressLint("NotifyDataSetChanged")
             @Override
             public void onChanged(PostAnswersList response) {
-                /*for (int i = 0; i < interviewArrayList.size(); i++) {
-                    postLocalInterviewsWasCreated(interviewArrayList.get(i));
-                }*/
+                binding.loadingDataConstraint.setVisibility(View.GONE);
+            }
+        });
+    }
+
+    private void postUpdateAnswer(PostAnswersList answer) {
+        binding.loadingDataConstraint.setVisibility(View.VISIBLE);
+        formSystemViewModel.updateAnswers(answer);
+        formSystemViewModel.updateAnswerMutableLiveData.observe(this, new Observer<PostAnswersList>() {
+            @SuppressLint("NotifyDataSetChanged")
+            @Override
+            public void onChanged(PostAnswersList response) {
+                binding.loadingDataConstraint.setVisibility(View.GONE);
             }
         });
     }
@@ -238,7 +256,9 @@ public class WorkerFormsActivity extends AppCompatActivity {
             }
         });
     }
+
     private void postLocalInterviewWasCreated(Interview interview) {
+        binding.loadingDataConstraint.setVisibility(View.VISIBLE);
         formSystemViewModel.postInterview(interview);
         formSystemViewModel.postInterviewMutableLiveData.observe(this, new Observer<Interview>() {
             @SuppressLint("NotifyDataSetChanged")
@@ -246,9 +266,22 @@ public class WorkerFormsActivity extends AppCompatActivity {
             public void onChanged(Interview interviews) {
                 try {
                     /* Success*/
+                    binding.loadingDataConstraint.setVisibility(View.GONE);
                     Log.d("interviewsPost", interviews.getInterview_id());
                 } catch (Exception e) {
                 }
+            }
+        });
+    }
+
+    private void postUpdateInterview(Interview interview) {
+        binding.loadingDataConstraint.setVisibility(View.VISIBLE);
+        formSystemViewModel.updateInterview(interview);
+        formSystemViewModel.updateInterviewMutableLiveData.observe(this, new Observer<Interview>() {
+            @SuppressLint("NotifyDataSetChanged")
+            @Override
+            public void onChanged(Interview interview) {
+                binding.loadingDataConstraint.setVisibility(View.GONE);
             }
         });
     }
@@ -301,7 +334,6 @@ public class WorkerFormsActivity extends AppCompatActivity {
             @SuppressLint("NotifyDataSetChanged")
             @Override
             public void onChanged(FormResults formResults) {
-                binding.loadingDataConstraint.setVisibility(View.GONE);
                 formsArrayList = formResults.getResults();
                 //Replace old data form in room
                 if (newFormsRoom.size() != formsArrayList.size()) {
@@ -319,6 +351,7 @@ public class WorkerFormsActivity extends AppCompatActivity {
                     formsAdapter.notifyDataSetChanged();
                 } else
                     binding.constraintLayoutEmptyData.setVisibility(View.VISIBLE);
+                binding.loadingDataConstraint.setVisibility(View.GONE);
             }
         });
     }

@@ -34,6 +34,8 @@ public class Interview {
     private String worker_fk_id;
     @SerializedName("created_in_local")
     private boolean created_in_local;
+    @SerializedName("update_in_local")
+    private boolean update_in_local;
 
     public Interview() {
     }
@@ -49,7 +51,7 @@ public class Interview {
     }
 
     public Interview(int id, String form_fk_id, String title, String customer_location, String latitude
-            , String longitude, String worker_fk_id, String created_at, boolean created_in_local) {
+            , String longitude, String worker_fk_id, String created_at, boolean created_in_local, boolean update_in_local) {
         this.id = id;
         this.form_fk_id = form_fk_id;
         this.title = title;
@@ -59,6 +61,7 @@ public class Interview {
         this.worker_fk_id = worker_fk_id;
         this.created_at = created_at;
         this.created_in_local = created_in_local;
+        this.update_in_local = update_in_local;
     }
 
     /*public Interview(int id, String form_fk_id, String title, String customer_location, String latitude
@@ -183,5 +186,13 @@ public class Interview {
 
     public void setCreated_in_local(boolean created_in_local) {
         this.created_in_local = created_in_local;
+    }
+
+    public boolean isUpdate_in_local() {
+        return update_in_local;
+    }
+
+    public void setUpdate_in_local(boolean update_in_local) {
+        this.update_in_local = update_in_local;
     }
 }

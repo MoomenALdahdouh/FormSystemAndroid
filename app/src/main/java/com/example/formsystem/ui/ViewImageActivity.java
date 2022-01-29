@@ -49,6 +49,7 @@ public class ViewImageActivity extends AppCompatActivity {
                     binding.imageView8.setImageBitmap(decodedByte);
                     binding.progressBar.setVisibility(View.GONE);
                 } else {
+                    Log.d("imageName222", imageName);
                     loadImage(imageName);
                 }
             }

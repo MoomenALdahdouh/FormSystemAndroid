@@ -171,7 +171,7 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.View
                                             else
                                                 id = (int) System.currentTimeMillis() * -1;
 
-                                            Answer answer = new Answer(id, String.valueOf(questions.getId()), "", selectedDate, questions.getType(), isLocal);
+                                            Answer answer = new Answer(id, String.valueOf(questions.getId()), "", selectedDate, questions.getType(), isLocal, false);
                                             answerArrayList.get(position).setAnswer(stringFromObject(answer));
                                             holder.editTextQuestion.setText(selectedDate);
                                         }
@@ -215,10 +215,10 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.View
                                     String old_id = String.valueOf(old_answer.getId());
                                     if (updateInterview && !old_id.equals("0")) {
                                         id = old_answer.getId();
-                                        answer = new Answer(id, String.valueOf(questions.getId()), "", old_answer.getAnswer(), questions.getType(), isLocal);
+                                        answer = new Answer(id, String.valueOf(questions.getId()), "", old_answer.getAnswer(), questions.getType(), isLocal, false);
                                     } else {
                                         id = (int) System.currentTimeMillis() * -1;
-                                        answer = new Answer(id, String.valueOf(questions.getId()), "", "UploadImage.jpg", questions.getType(), isLocal);
+                                        answer = new Answer(id, String.valueOf(questions.getId()), "", old_answer.getAnswer(), questions.getType(), isLocal, false);
                                     }
                                     answerArrayList.get(position).setAnswer(stringFromObject(answer));
                                     if (updateInterview) {
@@ -270,14 +270,19 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.View
                     String questionAnswer = holder.editTextQuestion.getText().toString();
                     if (updateInterview) {
                         Answer answer = getObjectFromString(questions.getAnswer());
-                        answer.setAnswer(questionAnswer);
+                        if (answer.getId() > 0 || !answer.getType().isEmpty()) {
+                            answer.setAnswer(questionAnswer);
+                        } else {
+                            int id = (int) System.currentTimeMillis() * -1;
+                            answer = new Answer(id, String.valueOf(questions.getId()), "", questionAnswer, questions.getType(), isLocal, false);
+                        }
                         answerArrayList.get(position).setAnswer(stringFromObject(answer));
                         /*Answer answer = getObjectFromString(questions.getAnswer());
                         answer.setAnswer(questionAnswer);
                         answerArrayList.get(position).setAnswer(stringFromObject(answer));*/
                     } else {
                         int id = (int) System.currentTimeMillis() * -1;
-                        Answer answer = new Answer(id, String.valueOf(questions.getId()), "", questionAnswer, questions.getType(), isLocal);
+                        Answer answer = new Answer(id, String.valueOf(questions.getId()), "", questionAnswer, questions.getType(), isLocal, false);
                         answerArrayList.get(position).setAnswer(stringFromObject(answer));
                     }
 
@@ -292,7 +297,7 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.View
             if (updateInterview) {
                 Answer answer = getObjectFromString(questions.getAnswer());
                 if (answer.getType().equals("4")) {
-                    if (isLocal) {
+                    if (isLocal && answer.getAnswer().length() > 30) {
                         int id = (int) System.currentTimeMillis() * -1;
                         holder.editTextQuestion.setText(id + ".jpg");
                     } else
