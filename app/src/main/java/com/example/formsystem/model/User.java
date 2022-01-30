@@ -4,48 +4,68 @@ import androidx.room.Entity;
 import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
+import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 @Entity(tableName = "user_table")
 public class User {
     @PrimaryKey(autoGenerate = false)
     @SerializedName("id")
+    @Expose
     private int id;
     @SerializedName("project_fk_id")
+    @Expose
     private String project_fk_id;
     @SerializedName("create_by_id")
+    @Expose
     private String create_by_id;
     @SerializedName("name")
+    @Expose
     private String name;
     @SerializedName("nickname")
+    @Expose
     private String nickname;
     @SerializedName("email")
+    @Expose
     private String email;
     @SerializedName("phone")
+    @Expose
     private String phone;
     @SerializedName("location")
+    @Expose
     private String location;
     @SerializedName("email_verified_at")
+    @Expose
     private String email_verified_at;
     @SerializedName("password")
+    @Expose
     private String password;
     @SerializedName("two_factor_secret")
+    @Expose
     private String two_factor_secret;
     @SerializedName("two_factor_recovery_codes")
+    @Expose
     private String two_factor_recovery_codes;
     @SerializedName("remember_token")
+    @Expose
     private String remember_token;
     @SerializedName("current_team_id")
+    @Expose
     private String current_team_id;
     @SerializedName("profile_photo_path")
+    @Expose
     private String profile_photo_path;
     @SerializedName("created_at")
+    @Expose
     private String created_at;
     @SerializedName("updated_at")
+    @Expose
     private String updated_at;
     @SerializedName("status")
+    @Expose
     private String status;
     @SerializedName("type")
+    @Expose
     private String type;
 
 

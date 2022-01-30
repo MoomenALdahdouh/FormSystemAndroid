@@ -320,7 +320,7 @@ public class ViewActivitiesActivity extends AppCompatActivity {
     private boolean isRunning = false;
 
 
-    @Override
+    /*@Override
     public void onBackPressed() {
         if (isNetworkAvailable()) {
             if (!isRunning) {
@@ -337,13 +337,5 @@ public class ViewActivitiesActivity extends AppCompatActivity {
         }else
             super.onBackPressed();
 
-    }
-    /*@Override
-    public void onBackPressed() {
-        if (!isRunning)
-            super.onBackPressed();
-        else
-            Toast.makeText(getApplicationContext(), "Please Wait to Sync Data...", Toast.LENGTH_LONG).show();
     }*/
-
 }

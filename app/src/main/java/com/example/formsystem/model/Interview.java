@@ -3,7 +3,9 @@ package com.example.formsystem.model;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
+import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+
 
 import java.util.ArrayList;
 
@@ -11,30 +13,43 @@ import java.util.ArrayList;
 public class Interview {
     @PrimaryKey(autoGenerate = true)
     @SerializedName("id")
+    @Expose
     private int id;
     @SerializedName("form_fk_id")
+    @Expose
     private String form_fk_id;
     @SerializedName("title")
+    @Expose
     private String title;
     @SerializedName("created_at")
+    @Expose
     private String created_at;
     @SerializedName("updated_at")
+    @Expose
     private String updated_at;
     @SerializedName("status")
+    @Expose
     private String status;
     @SerializedName("customer_location")
+    @Expose
     private String customer_location;
     @SerializedName("interview_id")
+    @Expose
     private String interview_id;
     @SerializedName("latitude")
+    @Expose
     private String latitude;
     @SerializedName("longitude")
+    @Expose
     private String longitude;
     @SerializedName("worker_fk_id")
+    @Expose
     private String worker_fk_id;
     @SerializedName("created_in_local")
+    @Expose
     private boolean created_in_local;
     @SerializedName("update_in_local")
+    @Expose
     private boolean update_in_local;
 
     public Interview() {

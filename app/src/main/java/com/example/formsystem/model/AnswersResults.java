@@ -1,12 +1,13 @@
 package com.example.formsystem.model;
 
+import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.ArrayList;
 
 public class AnswersResults {
     @SerializedName("answers")
-    //@Expose
+    @Expose
     private ArrayList<Answer> answers;
 
     public AnswersResults() {

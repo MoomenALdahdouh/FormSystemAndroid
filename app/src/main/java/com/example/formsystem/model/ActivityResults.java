@@ -7,7 +7,7 @@ import java.util.ArrayList;
 
 public class ActivityResults {
     @SerializedName("results")
-    //@Expose
+    @Expose
     private ArrayList<Activity> results;
 
     public ActivityResults() {

@@ -338,8 +338,9 @@ public class MakeInterviewActivity extends AppCompatActivity implements OnMapRea
                 try {
                     Log.d("onResponse", "Answer step 3 response : " + response);
                     if (response != null) {
-                        imageView.setImageResource(R.drawable.success);
-                        textView.setText(R.string.success_submit_interview);
+                        /*/*imageView.setImageResource(R.drawable.success);
+                        textView.setText(R.string.success_submit_interview);*/
+                        Toast.makeText(getApplicationContext(), "Successful", Toast.LENGTH_SHORT).show();
                         new Handler().postDelayed(new Runnable() {
                             @Override
                             public void run() {
@@ -609,6 +610,7 @@ public class MakeInterviewActivity extends AppCompatActivity implements OnMapRea
         LatLng latLng = new LatLng(latitude, longitude);
         googleMap.addMarker(new MarkerOptions().position(latLng).title(interviewLocation));
         googleMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+        googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng,14));
 
     }
 

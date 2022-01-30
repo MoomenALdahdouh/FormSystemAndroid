@@ -5,6 +5,7 @@ import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
 import com.google.gson.Gson;
+import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.ArrayList;
@@ -13,22 +14,30 @@ import java.util.ArrayList;
 public class Questions {
     @PrimaryKey(autoGenerate = false)
     @SerializedName("id")
+    @Expose
     private int id;
     @SerializedName("form_fk_id")
+    @Expose
     private String form_fk_id;
     @SerializedName("questions_key")
+    @Expose
     private String questions_key;
     @SerializedName("title")
+    @Expose
     private String title;
     @SerializedName("body")
+    @Expose
     private String body;
     @SerializedName("type")
+    @Expose
     private String type;
     @SerializedName("created_at")
+    @Expose
     private String created_at;
     /*User answer field to save question answer in adapter*/
     //@Ignore
     @SerializedName("answer")
+    @Expose
     private String answer = stringFromObject();
 
     public Questions() {

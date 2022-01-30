@@ -1,13 +1,16 @@
 package com.example.formsystem.model;
 
+import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.ArrayList;
 
 public class PostAnswersList {
     @SerializedName("answersList")
+    @Expose
     private ArrayList<Answer> answersList;
     @SerializedName("success")
+    @Expose
     private String success;
 
     public PostAnswersList() {

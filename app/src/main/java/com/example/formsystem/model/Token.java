@@ -1,11 +1,14 @@
 package com.example.formsystem.model;
 
+import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 public class Token {
     @SerializedName("token")
+    @Expose
     private String token;
     @SerializedName("user")
+    @Expose
     private User user;
 
     public String getToken() {

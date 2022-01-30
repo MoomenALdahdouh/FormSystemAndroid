@@ -3,26 +3,35 @@ package com.example.formsystem.model;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
+import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 @Entity(tableName = "answers_table")
 public class Answer {
     @PrimaryKey(autoGenerate = true)
     @SerializedName("id")
+    @Expose
     private int id;
     @SerializedName("questions_fk_id")
+    @Expose
     private String questions_fk_id;
     @SerializedName("interview_fk_id")
+    @Expose
     private String interview_fk_id;
     @SerializedName("answer")
+    @Expose
     private String answer;
     @SerializedName("type")
+    @Expose
     private String type;
     @SerializedName("created_at")
+    @Expose
     private String created_at;
     @SerializedName("created_in_local")
+    @Expose
     private boolean created_in_local;
     @SerializedName("update_in_local")
+    @Expose
     private boolean update_in_local;
 
 

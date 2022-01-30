@@ -246,14 +246,6 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.View
                             return false;
                         }
                     });
-                    /*holder.editTextQuestion.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            Answer answer = new Answer(questions.getId(), "", "Uploaded");
-                            answerArrayList.get(position).setAnswer(answer);
-                            holder.editTextQuestion.setText("Uploaded");
-                        }
-                    });*/
                     break;
             }
 
@@ -277,9 +269,6 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.View
                             answer = new Answer(id, String.valueOf(questions.getId()), "", questionAnswer, questions.getType(), isLocal, false);
                         }
                         answerArrayList.get(position).setAnswer(stringFromObject(answer));
-                        /*Answer answer = getObjectFromString(questions.getAnswer());
-                        answer.setAnswer(questionAnswer);
-                        answerArrayList.get(position).setAnswer(stringFromObject(answer));*/
                     } else {
                         int id = (int) System.currentTimeMillis() * -1;
                         Answer answer = new Answer(id, String.valueOf(questions.getId()), "", questionAnswer, questions.getType(), isLocal, false);

@@ -144,7 +144,6 @@ public class ViewInterviewActivity extends AppCompatActivity implements OnMapRea
         super.onCreate(savedInstanceState);
         binding = ActivityViewInterviewBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-
         locationRequest = LocationRequest.create();
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         locationRequest.setInterval(5000);
@@ -434,6 +433,7 @@ public class ViewInterviewActivity extends AppCompatActivity implements OnMapRea
                     Log.d("interview.getInterview_id()", interview.getInterview_id());
                     questionAnswersArrayList.clear();
                     answersArrayList.clear();
+                    postUpdateInterviewNoNetWithoutAnswers(interview);
                     adapterQuestionAnswers(interview.getInterview_id());
                 } catch (Exception e) {
 
@@ -451,6 +451,20 @@ public class ViewInterviewActivity extends AppCompatActivity implements OnMapRea
                         interviewsViewModel.delete(interviews.get(i));
                         interviewsViewModel.insert(interview);
                         adapterQuestionAnswers(interviewId);
+                    }
+                }
+            }
+        });
+    }
+
+    private void postUpdateInterviewNoNetWithoutAnswers(Interview interview) {
+        interviewsViewModel.getAllInterviews().observe(this, new Observer<List<Interview>>() {
+            @Override
+            public void onChanged(List<Interview> interviews) {
+                for (int i = 0; i < interviews.size(); i++) {
+                    if (interviewId.equals(interviews.get(i).getId() + "")) {
+                        interviewsViewModel.delete(interviews.get(i));
+                        interviewsViewModel.insert(interview);
                     }
                 }
             }
@@ -537,13 +551,13 @@ public class ViewInterviewActivity extends AppCompatActivity implements OnMapRea
                 try {
                     Log.d("onResponse", "Answer step 3 response : " + response);
                     if (response != null) {
-                        imageView.setImageResource(R.drawable.success);
-                        textView.setText(R.string.success_submit_interview);
+                        /*imageView.setImageResource(R.drawable.success);
+                        textView.setText(R.string.success_submit_interview);*/
+                        Toast.makeText(getApplicationContext(), "Successful", Toast.LENGTH_SHORT).show();
                         new Handler().postDelayed(new Runnable() {
                             @Override
                             public void run() {
-                                //Toast.makeText(getApplicationContext(), "" + response.getSuccess(), Toast.LENGTH_SHORT).show();
-                                finish();
+                                postUpdateAnswerNoNet(answer.getAnswersList());
                             }
                         }, 2000);
                     } else {
@@ -656,12 +670,12 @@ public class ViewInterviewActivity extends AppCompatActivity implements OnMapRea
             public void onChanged(PostAnswersList response) {
                 try {
                     if (response != null) {
-                        imageView.setImageResource(R.drawable.success);
-                        textView.setText(R.string.success_submit_interview);
+                        /*imageView.setImageResource(R.drawable.success);
+                        textView.setText(R.string.success_submit_interview);*/
+                        Toast.makeText(getApplicationContext(), "Successful", Toast.LENGTH_SHORT).show();
                         new Handler().postDelayed(new Runnable() {
                             @Override
                             public void run() {
-                                //Toast.makeText(getApplicationContext(), "" + response.getSuccess(), Toast.LENGTH_SHORT).show();
                                 finish();
                             }
                         }, 2000);
@@ -1011,6 +1025,7 @@ public class ViewInterviewActivity extends AppCompatActivity implements OnMapRea
         LatLng latLng = new LatLng(latitude, longitude);
         googleMap.addMarker(new MarkerOptions().position(latLng).title(interviewLocation));
         googleMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+        //googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng,14));
 
     }
 
@@ -1107,7 +1122,7 @@ public class ViewInterviewActivity extends AppCompatActivity implements OnMapRea
         return randomStringBuilder.toString();
     }
 
-    @Override
+   /* @Override
     public void onBackPressed() {
         if (isNetworkAvailable()) {
             if (!isRunning) {
@@ -1123,5 +1138,5 @@ public class ViewInterviewActivity extends AppCompatActivity implements OnMapRea
                 Toast.makeText(getApplicationContext(), "Please Wait to Sync Data...", Toast.LENGTH_SHORT).show();
         }else
             super.onBackPressed();
-    }
+    }*/
 }
