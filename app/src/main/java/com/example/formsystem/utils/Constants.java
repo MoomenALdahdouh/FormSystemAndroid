@@ -10,6 +10,7 @@ public class Constants {
     public static final String KEY_INTRO = "IS_INTRO";
     public static final String KEY_LANGUAGE = "KEY_LANGUAGE";
     public static final String KEY_IMAGE = "KEY_IMAGE";
+    public static final String LOCATION = "LOCATION";
     public static final String BASE_URL = "http://190.187.247.236/api/";
     public static final String IMAGES_STORAGE = "http://190.187.247.236/storage/answer_images/";
 }

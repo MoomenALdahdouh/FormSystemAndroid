@@ -23,6 +23,7 @@ import android.view.ViewGroup;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -194,10 +195,10 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.View
                     //holder.editTextQuestion.setEnabled(false);
                     holder.editTextQuestion.setClickable(true);
                     holder.editTextQuestion.setFocusable(false);
-                    if (updateInterview) {
-                        holder.editTextQuestion.setCompoundDrawablesWithIntrinsicBounds(ContextCompat.getDrawable(context, R.drawable.ic_baseline_preview_24), null, ContextCompat.getDrawable(context, R.drawable.ic_baseline_cloud_upload_24), null);
-                    } else
-                        holder.editTextQuestion.setCompoundDrawablesWithIntrinsicBounds(null, null, ContextCompat.getDrawable(context, R.drawable.ic_baseline_cloud_upload_24), null);
+                    // if (updateInterview) {
+                    holder.editTextQuestion.setCompoundDrawablesWithIntrinsicBounds(ContextCompat.getDrawable(context, R.drawable.ic_baseline_preview_24), null, ContextCompat.getDrawable(context, R.drawable.ic_baseline_cloud_upload_24), null);
+                    //} else
+                    //   holder.editTextQuestion.setCompoundDrawablesWithIntrinsicBounds(null, null, ContextCompat.getDrawable(context, R.drawable.ic_baseline_cloud_upload_24), null);
                     holder.editTextQuestion.setOnTouchListener(new View.OnTouchListener() {
                         @Override
                         public boolean onTouch(View v, MotionEvent event) {
@@ -223,24 +224,31 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.View
                                     answerArrayList.get(position).setAnswer(stringFromObject(answer));
                                     if (updateInterview) {
                                         ((ViewInterviewActivity) context).setQuestionId(String.valueOf(questions.getId()));
-                                    } else
+                                        ((ViewInterviewActivity) context).setPosition(position);
+                                    } else {
                                         ((MakeInterviewActivity) context).setQuestionId(String.valueOf(questions.getId()));
+                                        ((MakeInterviewActivity) context).setPosition(position);
+                                    }
                                     Log.d("postionQuestion", "postionQuestion" + position);
                                     cropImage();
                                     /**/
                                     return true;
                                 } else {
-                                    if (updateInterview)
-                                        if (event.getRawX() >= (holder.editTextQuestion.getLeft() + holder.editTextQuestion.getCompoundDrawables()[DRAWABLE_LEFT].getBounds().width())) {
-                                            //View Image
-                                            String answerString = questionsArrayList.get(position).getAnswer();
-                                            Answer answer = getObjectFromString(answerString);
+                                    //if (updateInterview)
+                                    if (event.getRawX() >= (holder.editTextQuestion.getLeft() + holder.editTextQuestion.getCompoundDrawables()[DRAWABLE_LEFT].getBounds().width())) {
+                                        //View Image
+                                        String answerString = questionsArrayList.get(position).getAnswer();
+                                        Answer answer = getObjectFromString(answerString);
+                                        Log.d("imageName", answer.getAnswer());
+                                        if (!answer.getAnswer().isEmpty()) {
                                             Intent intent = new Intent(context, ViewImageActivity.class);
                                             intent.putExtra(IMAGE_NAME, "image");
-                                            PreferenceUtils.saveImage(answer.getAnswer().toString(), context);
+                                            PreferenceUtils.saveImage(answer.getAnswer(), context);
                                             Log.d("imageName", PreferenceUtils.getImage(context));
                                             context.startActivity(intent);
-                                        }
+                                        } else
+                                            Toast.makeText(context, "Image not found!", Toast.LENGTH_SHORT).show();
+                                    }
                                 }
                             }
                             return false;
@@ -286,7 +294,7 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.View
             if (updateInterview) {
                 Answer answer = getObjectFromString(questions.getAnswer());
                 if (answer.getType().equals("4")) {
-                    if (isLocal && answer.getAnswer().length() > 30) {
+                    if (answer.getAnswer().length() > 30) {
                         int id = (int) System.currentTimeMillis() * -1;
                         holder.editTextQuestion.setText(id + ".jpg");
                     } else

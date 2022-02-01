@@ -524,6 +524,15 @@ public class ViewInterviewActivity extends AppCompatActivity implements OnMapRea
                         answersViewModel.insert(answersArrayList.get(i));
                     }*/
                     }
+                    imageView.setImageResource(R.drawable.success);
+                    textView.setText(R.string.success_submit_interview);
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            //Toast.makeText(getApplicationContext(), "" + response.getSuccess(), Toast.LENGTH_SHORT).show();
+                            finish();
+                        }
+                    }, 2000);
                 } else {
                     imageView.setImageResource(R.drawable.success);
                     textView.setText(R.string.success_submit_interview);
@@ -533,7 +542,7 @@ public class ViewInterviewActivity extends AppCompatActivity implements OnMapRea
                             //Toast.makeText(getApplicationContext(), "" + response.getSuccess(), Toast.LENGTH_SHORT).show();
                             finish();
                         }
-                    }, 1000);
+                    }, 2000);
                 }
             }
         });
@@ -554,12 +563,7 @@ public class ViewInterviewActivity extends AppCompatActivity implements OnMapRea
                         /*imageView.setImageResource(R.drawable.success);
                         textView.setText(R.string.success_submit_interview);*/
                         Toast.makeText(getApplicationContext(), "Successful", Toast.LENGTH_SHORT).show();
-                        new Handler().postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                postUpdateAnswerNoNet(answer.getAnswersList());
-                            }
-                        }, 2000);
+                        postUpdateAnswerNoNet(answer.getAnswersList());
                     } else {
                         imageView.setImageResource(R.drawable.ic_baseline_error_outline_24);
                         textView.setText(R.string.failed_save_answers);
@@ -1058,6 +1062,7 @@ public class ViewInterviewActivity extends AppCompatActivity implements OnMapRea
     }
     /*End Map */
 
+    public static final String IMAGE_NAME ="IMAGE_NAME" ;
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -1078,6 +1083,11 @@ public class ViewInterviewActivity extends AppCompatActivity implements OnMapRea
         this.questionId = questionId;
     }
 
+    public int position;
+    public void setPosition(int position) {
+        this.position = position;
+    }
+
     private void postImage() {
         if (imageUri != null) {
             compressAndNameImage(imageUri);
@@ -1087,11 +1097,14 @@ public class ViewInterviewActivity extends AppCompatActivity implements OnMapRea
             String imageAnswer = Base64.encodeToString(thumpData, Base64.DEFAULT);
             Answer answer = new Answer(questionId, "", imageAnswer, "4");
             imageAnswersList.add(answer);
-            Log.d("onResponse", "Answer step 1: " + answer.getAnswer());
-            Toast.makeText(getApplicationContext(), imageName, Toast.LENGTH_LONG).show();
-            //StorageReference filePath = storageReference.child("category_image/").child(imageName);
-            // UploadTask uploadTask = filePath.putBytes(thumpData);
-            /*Post*/
+            Toast.makeText(getApplicationContext(), "Image uploaded", Toast.LENGTH_SHORT).show();
+            questionsArrayList.get(position).setAnswer(stringFromObject(answer));
+            /*for (int i = 0; i < questionsArrayList.size(); i++) {
+                if (questionsArrayList.get(i).getId() == Integer.parseInt(questionId)) {
+                    questionsArrayList.get(i).setAnswer(stringFromObject(answer));
+                    //questionsAdapter.notifyDataSetChanged();
+                }
+            }*/
         }
     }
 

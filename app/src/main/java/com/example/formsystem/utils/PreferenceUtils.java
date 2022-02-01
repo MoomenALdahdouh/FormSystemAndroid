@@ -110,4 +110,17 @@ public class PreferenceUtils {
         return preferences.getString(Constants.KEY_IMAGE, "");
     }
 
+    public static boolean saveLocation(String location, Context context) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putString(Constants.LOCATION, location);
+        editor.apply();
+        return true;
+    }
+
+    public static String getLocation(Context context) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        return preferences.getString(Constants.LOCATION, "");
+    }
+
 }

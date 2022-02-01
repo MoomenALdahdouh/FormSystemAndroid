@@ -96,6 +96,7 @@ import io.reactivex.annotations.Nullable;
 
 public class MakeInterviewActivity extends AppCompatActivity implements OnMapReadyCallback {
 
+    public static final String IMAGE_NAME = "IMAGE_NAME";
     private ActivityMakeInterviewBinding binding;
     private String formId;
     private FormSystemViewModel questionsSystemViewModel;
@@ -197,7 +198,6 @@ public class MakeInterviewActivity extends AppCompatActivity implements OnMapRea
             @SuppressLint("ResourceAsColor")
             @Override
             public void onClick(View view) {
-                showDialog();
                 //checkInterviewTitle();
                 interviewTitle = binding.editTextInterviewTitle.getText().toString();
                 if (interviewTitle.isEmpty()) {
@@ -213,6 +213,7 @@ public class MakeInterviewActivity extends AppCompatActivity implements OnMapRea
                     binding.textViewErrorLocation.setTextColor(getColor(R.color.danger));
                     return;
                 }
+                showDialog();
                 int id = (int) System.currentTimeMillis() * -1;
                 Calendar calendar = Calendar.getInstance();
                 TimeZone tz = TimeZone.getDefault();
@@ -222,7 +223,7 @@ public class MakeInterviewActivity extends AppCompatActivity implements OnMapRea
                 @SuppressLint("SimpleDateFormat") SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                 Date currenTimeZone = (Date) calendar.getTime();
                 String created_at = sdf.format(currenTimeZone);
-                Interview interview = new Interview(id, formId, interviewTitle, interviewLocation, latitude + "", longitude + "", PreferenceUtils.getUserId(getApplicationContext()), created_at, isLocal,false);
+                Interview interview = new Interview(id, formId, interviewTitle, interviewLocation, latitude + "", longitude + "", PreferenceUtils.getUserId(getApplicationContext()), created_at, isLocal, false);
                 if (isNetworkAvailable())
                     postInterview(interview);
                 else {
@@ -474,7 +475,11 @@ public class MakeInterviewActivity extends AppCompatActivity implements OnMapRea
                                     }
                                     if (addresses.size() > 0) {
                                         interviewLocation = addresses.get(0).getAddressLine(0); // If any additional address line present than only, check with max available address lines by getMaxAddressLineIndex()
-                                    }
+                                        PreferenceUtils.saveLocation(interviewLocation, getApplicationContext());
+                                    } else
+                                        interviewLocation = PreferenceUtils.getLocation(getApplicationContext());
+
+
                                     String city = addresses.get(0).getLocality();
                                     String state = addresses.get(0).getAdminArea();
                                     String country = addresses.get(0).getCountryName();
@@ -610,7 +615,7 @@ public class MakeInterviewActivity extends AppCompatActivity implements OnMapRea
         LatLng latLng = new LatLng(latitude, longitude);
         googleMap.addMarker(new MarkerOptions().position(latLng).title(interviewLocation));
         googleMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-        googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng,14));
+        googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 14));
 
     }
 
@@ -630,7 +635,6 @@ public class MakeInterviewActivity extends AppCompatActivity implements OnMapRea
             if (resultCode == RESULT_OK) {
                 imageUri = result.getUri();
                 postImage();
-                //Toast.makeText(getApplicationContext(), imageUri + "", Toast.LENGTH_SHORT).show();
             } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
                 Exception error = result.getError();
             }
@@ -638,12 +642,18 @@ public class MakeInterviewActivity extends AppCompatActivity implements OnMapRea
     }
 
     public String questionId;
+    public int position;
     private ArrayList<Answer> imageAnswersList = new ArrayList<>();
 
     public void setQuestionId(String questionId) {
         this.questionId = questionId;
     }
 
+    public void setPosition(int position) {
+        this.position = position;
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
     private void postImage() {
         if (imageUri != null) {
             compressAndNameImage(imageUri);
@@ -653,12 +663,28 @@ public class MakeInterviewActivity extends AppCompatActivity implements OnMapRea
             String imageAnswer = Base64.encodeToString(thumpData, Base64.DEFAULT);
             Answer answer = new Answer(questionId, "", imageAnswer, "4");
             imageAnswersList.add(answer);
-            Log.d("onResponse", "Answer step 1: " + answer.getAnswer());
-            Toast.makeText(getApplicationContext(), imageName, Toast.LENGTH_LONG).show();
-            //StorageReference filePath = storageReference.child("category_image/").child(imageName);
-            // UploadTask uploadTask = filePath.putBytes(thumpData);
-            /*Post*/
+            Toast.makeText(getApplicationContext(), "Image uploaded", Toast.LENGTH_SHORT).show();
+            questionsArrayList.get(position).setAnswer(stringFromObject(answer));
+            /*for (int i = 0; i < questionsArrayList.size(); i++) {
+                if (questionsArrayList.get(i).getId() == Integer.parseInt(questionId)) {
+                    questionsArrayList.get(i).setAnswer(stringFromObject(answer));
+                    //questionsAdapter.notifyDataSetChanged();
+                }
+            }*/
+            //questionsAdapter.setList(questionsArrayList);
+            /*if (!answer.getAnswer().isEmpty() || answer.getAnswer() != null) {
+                Intent intent = new Intent(getApplicationContext(), ViewImageActivity.class);
+                intent.putExtra(IMAGE_NAME, "image");
+                PreferenceUtils.saveImage(imageAnswer, getApplicationContext());
+                Log.d("imageName", PreferenceUtils.getImage(getApplicationContext()));
+                startActivity(intent);
+            }*/
         }
+    }
+
+    public String stringFromObject(Answer answer) {
+        Gson gson = new Gson();
+        return gson.toJson(answer);
     }
 
     private void compressAndNameImage(Uri imageUri) {
@@ -719,7 +745,9 @@ public class MakeInterviewActivity extends AppCompatActivity implements OnMapRea
                 }
                 if (addresses.size() > 0) {
                     interviewLocation = addresses.get(0).getAddressLine(0); // If any additional address line present than only, check with max available address lines by getMaxAddressLineIndex()
-                }
+                    PreferenceUtils.saveLocation(interviewLocation, getApplicationContext());
+                } else
+                    interviewLocation = PreferenceUtils.getLocation(getApplicationContext());
                 binding.textViewErrorLocation.setVisibility(View.VISIBLE);
                 binding.textViewErrorLocation.setTextColor(getColor(R.color.teal_700));
                 binding.textViewErrorLocation.setText("Current Location: " + interviewLocation + ", " + latitude + ", " + longitude);

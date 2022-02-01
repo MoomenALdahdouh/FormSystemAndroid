@@ -26,6 +26,7 @@ import com.squareup.picasso.Picasso;
 public class ViewImageActivity extends AppCompatActivity {
 
     private ActivityViewImageBinding binding;
+    String imageName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,22 +39,23 @@ public class ViewImageActivity extends AppCompatActivity {
         Intent intent = getIntent();
         if (intent != null && intent.hasExtra(QuestionsAdapter.IMAGE_NAME)) {
             //String imageName = intent.getStringExtra(QuestionsAdapter.IMAGE_NAME);
-            String imageName = PreferenceUtils.getImage(ViewImageActivity.this);
-            if (isNetworkAvailable()) {
-                loadImage(imageName);
-            } else {
-                if (imageName.length() > 30) {
-                    Log.d("imageName222", imageName);
-                    byte[] decodedString = Base64.decode(imageName, Base64.DEFAULT);
-                    Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
-                    binding.imageView8.setImageBitmap(decodedByte);
-                    binding.progressBar.setVisibility(View.GONE);
-                } else {
-                    Log.d("imageName222", imageName);
-                    loadImage(imageName);
-                }
-            }
+            imageName = PreferenceUtils.getImage(ViewImageActivity.this);
+        } else if (intent != null && intent.hasExtra(ViewInterviewActivity.IMAGE_NAME)) {
+            imageName = PreferenceUtils.getImage(ViewImageActivity.this);
+        } else if (intent != null && intent.hasExtra(MakeInterviewActivity.IMAGE_NAME)) {
+            imageName = PreferenceUtils.getImage(ViewImageActivity.this);
         }
+        if (imageName.length() > 30) {
+            Log.d("imageName222", imageName);
+            byte[] decodedString = Base64.decode(imageName, Base64.DEFAULT);
+            Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+            binding.imageView8.setImageBitmap(decodedByte);
+            binding.progressBar.setVisibility(View.GONE);
+        } else {
+            Log.d("imageName222", imageName);
+            loadImage(imageName);
+        }
+
     }
 
     private void loadImage(String image) {
